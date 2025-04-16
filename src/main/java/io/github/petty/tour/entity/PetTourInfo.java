@@ -3,33 +3,49 @@ package io.github.petty.tour.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
-@Table(name = "Pet_Tour_Info")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Entity
+@Table(name = "Pet_Tour_Info")
 public class PetTourInfo {
-
     @Id
-    @Column(name = "contentid")
-    private Long id;
+    @Column(name = "contentid", nullable = false)
+    private Long contentId;
 
-    @OneToOne
-    @JoinColumn(name = "contentid")
-    @MapsId
-    private Content content;
 
-    @Column(columnDefinition = "TEXT")
-    private String rela_acmd_rstr_mtr;
+    @Lob
+    @Column(name = "rela_acdnt_risk_mtr")
+    private String relaAcdntRiskMtr;
 
-    private String acmpy_type;
-    private String rela_poss_cfrly;
-    private String rela_frmsh_prdlst;
-    private String etc_acmpy_info;
-    private String rela_purc_prdlst;
-    private String acmpy_psbl_cpm;
-    private String rela_mnl_prdlst;
-    private String acmpy_need_mtrl;
+    @Column(name = "acmpy_type_cd", length = 30)
+    private String acmpyTypeCd;
+
+    @Lob
+    @Column(name = "rela_poses_fclty")
+    private String relaPosesFclty;
+
+    @Lob
+    @Column(name = "rela_frnsh_prdlst")
+    private String relaFrnshPrdlst;
+
+    @Lob
+    @Column(name = "etc_acmpy_info")
+    private String etcAcmpyInfo;
+
+    @Lob
+    @Column(name = "rela_purc_prdlst")
+    private String relaPurcPrdlst;
+
+    @Lob
+    @Column(name = "acmpy_psbl_cpam")
+    private String acmpyPsblCpam;
+
+    @Lob
+    @Column(name = "rela_rntl_prdlst")
+    private String relaRntlPrdlst;
+
+    @Lob
+    @Column(name = "acmpy_need_mtr")
+    private String acmpyNeedMtr;
+
 }
