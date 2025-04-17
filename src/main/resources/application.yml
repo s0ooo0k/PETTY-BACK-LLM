@@ -1,14 +1,16 @@
 spring:
-  profiles:
-    active: secret
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+  application:
+    name: petty
 
   config:
     import: "optional:classpath:application-secret.yml"
+
+  profiles:
+    active: dev
+
+logging:
+  level:
+    io.github.petty: DEBUG
+    org.springframework.web: INFO
+    software.amazon.awssdk: INFO
+    com.google.cloud: INFO
