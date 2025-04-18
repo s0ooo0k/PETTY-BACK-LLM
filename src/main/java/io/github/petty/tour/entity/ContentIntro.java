@@ -2,32 +2,29 @@ package io.github.petty.tour.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-@Entity
-@Table(name = "Content_Intro")
+import java.util.Map;
+
 @Getter
 @Setter
+@Entity
+@Table(name = "content_intro")
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@ToString(exclude = "content")
 public class ContentIntro {
-
     @Id
-    private Long contentid;
+    @Column(name = "contentid", nullable = false)
+    private Long contentId;
 
-    @OneToOne
-    @JoinColumn(name = "contentid")
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
+    @JoinColumn(name = "contentid")
     private Content content;
 
-    private String chkPetYn;
-    private String infoCenter;
-    private String openDate;
-    private String parking;
-    private String restDate;
-    private String useSeason;
-    private String useTime;
-    private String accomCount;
-    private String petFacility;
-    private String petEtc;
+    @Column(name = "intro_details")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> introDetails;
+
 }

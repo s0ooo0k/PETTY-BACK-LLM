@@ -1,17 +1,19 @@
 package io.github.petty.tour.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 public class Content {
     @Id
     @Column(name = "contentid", nullable = false)
@@ -52,7 +54,7 @@ public class Content {
     @Column(name = "firstimage2", length = 2048)
     private String firstImage2;
 
-    @Column(name = "cpyrhtDivCd", length = 20)
+    @Column(name = "cpyrhtdivcd", length = 20)
     private String cpyrhtDivCd;
 
     @Column(name = "mapx", precision = 13, scale = 10)
@@ -81,19 +83,22 @@ public class Content {
     @Column(name = "zipcode", length = 10)
     private String zipcode;
 
-    @OneToMany(mappedBy = "contentId")
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ContentImage> contentImages = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "contentId")
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ContentInfo> contentInfos = new LinkedHashSet<>();
 
-    @OneToOne(mappedBy = "content")
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<RoomInfo> roomInfos = new LinkedHashSet<>();
+
+    // mappedBy 값은 자식 엔티티의 부모 참조 필드 이름 ('content')과 일치
+    @OneToOne(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private ContentIntro contentIntro;
 
-    @OneToOne(mappedBy = "content")
+    // mappedBy 값은 자식 엔티티의 부모 참조 필드 이름 ('content')과 일치
+    @OneToOne(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private PetTourInfo petTourInfo;
 
-    @OneToMany(mappedBy = "contentId")
-    private Set<RoomInfo> roomInfos = new LinkedHashSet<>();
 
 }

@@ -6,12 +6,19 @@ import lombok.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "Pet_Tour_Info")
+@Table(name = "pet_tour_info")
+@NoArgsConstructor
+@ToString(exclude = "content")
 public class PetTourInfo {
     @Id
     @Column(name = "contentid", nullable = false)
     private Long contentId;
 
+    // 양방향 연관관계를 위한 필드 추가
+    @OneToOne(fetch = FetchType.LAZY) // 필요에 따라 FetchType 변경 가능
+    @MapsId // PetTourInfo의 ID(@Id)가 Content의 ID를 사용하도록 매핑
+    @JoinColumn(name = "contentid") // DB 상의 외래 키 컬럼 지정 (기존 contentid 컬럼 활용)
+    private Content content; // 'content' 필드 추가
 
     @Lob
     @Column(name = "rela_acdnt_risk_mtr")
