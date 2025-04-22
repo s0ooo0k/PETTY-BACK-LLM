@@ -14,7 +14,7 @@ public class PromptGeneratorServiceImpl implements PromptGeneratorService {
         }
         return String.format("""
                 {
-                %s
+                %s,
                 "location": "%s"
                 }
                 """, extractedPetInfoJson, location);
