@@ -14,11 +14,6 @@ public class IndexController {
         return "index";
     }
 
-    @GetMapping("/vision/upload")
-    public String visionUploadPage() {
-        return "visionUpload";
-    }
-
     // 여행지 추천
     @GetMapping("/recommend")
     public String recommendForm() {
