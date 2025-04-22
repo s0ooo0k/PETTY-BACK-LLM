@@ -85,7 +85,8 @@ public class EmbeddingService {
 
         // areaCode (지역 관련 추가)
         metadata.put("areaCode", content.getAreaCode());
-
+        // sigunguCode (시군구 추가)
+        metadata.put("sigunguCode", content.getSigunguCode());
         // contentType (콘텐츠 관련 추가)
         metadata.put("contentType", content.getContentTypeId());
 
