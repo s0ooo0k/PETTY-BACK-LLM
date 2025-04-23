@@ -1,5 +1,8 @@
 package io.github.petty.pipeline.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.petty.llm.service.RecommendService;
 import io.github.petty.pipeline.support.TogetherPromptBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,12 +12,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Map;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 public class PipelineController {
 
     private final TogetherPromptBuilder togetherPromptBuilder;
+    private final RecommendService recommendService;
 
     @GetMapping("/pipeline")
     public String showPipelineForm() {
@@ -30,7 +36,13 @@ public class PipelineController {
             Model model
     ) {
         try {
-            String prompt = togetherPromptBuilder.buildPrompt(visionReport, location);
+//            String prompt = togetherPromptBuilder.buildPrompt(visionReport, location);
+            String jsonPrompt = togetherPromptBuilder.buildPrompt(visionReport, location);
+            log.info(jsonPrompt);
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, String> promptMapper = objectMapper.readValue(jsonPrompt, new TypeReference<>() {});
+            log.info(promptMapper.toString());
+            String prompt = recommendService.recommend(promptMapper);
             model.addAttribute("recommendation", prompt);
             return "pipeline";
 
