@@ -19,4 +19,9 @@ public class IndexController {
     public String recommendForm() {
         return "recommend";
     }
+
+    @GetMapping("/search")
+    public String searchPage() {
+        return "search";
+    }
 }
