@@ -1,6 +1,6 @@
 <!-- src/main/resources/templates/index.html -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>🐶 PETTY </title>
@@ -71,9 +71,15 @@
 
 <form id="recommendForm" th:action="@{/api/recommend}" method="post">
     <label>이름: <input type="text" name="name" /></label><br />
-    <label>종: <input type="text" name="type" /></label><br />
+    <label>종: <input type="text" name="species" /></label><br />
     <label>위치: <input type="text" name="location" /></label><br />
     <label>무게/크기: <input type="text" name="weight" /></label><br />
+    <label>맹견 여부:
+        <select name="is_danger">
+            <option value="false">소형견/중형견</option>
+            <option value="true">맹견</option>
+        </select>
+    </label><br />
     <label>여행 관련 정보: <input type="text" name="info" /></label><br />
     <button type="submit">추천 받기</button>
 </form>

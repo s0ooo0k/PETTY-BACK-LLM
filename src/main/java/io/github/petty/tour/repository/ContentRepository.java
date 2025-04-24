@@ -24,6 +24,6 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
      */
     long deleteAllByContentIdIn(List<Long> contentIds);
 
-    // 테스트용 10개 추출
-    List<Content> findTop10ByOrderByContentIdAsc();
+    // 테스트용 20개 추출
+    List<Content> findTop20ByOrderByContentIdAsc();
 }
