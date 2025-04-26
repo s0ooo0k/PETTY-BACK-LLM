@@ -19,4 +19,14 @@ public class IndexController {
     public String recommendForm() {
         return "recommend";
     }
+
+    @GetMapping("/search")
+    public String searchPage() {
+        return "search";
+    }
+
+    @GetMapping("/sync")
+    public String syncPage() {
+        return "syncTest";
+    }
 }
