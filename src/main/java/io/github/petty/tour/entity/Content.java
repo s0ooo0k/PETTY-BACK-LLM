@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.locationtech.jts.geom.Point;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -83,6 +84,9 @@ public class Content {
     @Column(name = "zipcode", length = 10)
     private String zipcode;
 
+    @Column(columnDefinition = "POINT SRID 4326") // DB 컬럼 타입 지정 및 NULL 허용
+    private Point location;
+
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ContentImage> contentImages = new LinkedHashSet<>();
 
@@ -92,7 +96,6 @@ public class Content {
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<RoomInfo> roomInfos = new LinkedHashSet<>();
 
-    // mappedBy 값은 자식 엔티티의 부모 참조 필드 이름 ('content')과 일치
     @OneToOne(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private ContentIntro contentIntro;
 
