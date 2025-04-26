@@ -53,7 +53,28 @@ public class EmailService {
         helper.setFrom("krpetty54@gmail.com");  // 보내는 사람 이메일 (본인의 실제 이메일 주소로 변경)
         helper.setTo(toEmail);
         helper.setSubject("[Petty] 이메일 인증 코드입니다.");
-        helper.setText(String.format("안녕하세요.\n\n요청하신 이메일 인증 코드는 다음과 같습니다.\n\n%s\n\n감사합니다.", code));
+
+        // HTML 형식의 이메일 본문
+        String htmlContent = "<div style='background-color:#ffffff;padding:40px;border-radius:8px;text-align:center;max-width:400px;width:100%;margin:0 auto'>" +
+                "<a href='https://github.com/PETTY-HUB' style='display:block;margin-bottom:20px;text-decoration:none;color:#000000;width:5.5rem;font-weight:bold' target='_blank'>" +
+                "<h3 style='color:#f39c12'>Petty</h3>" +
+                "</a>" +
+                "<div style='text-align:center'>" +
+                "<p style='color:#212529;font-size:18px;font-weight:600'>인증 번호</p>" +
+                "</div>" +
+                "<div style='background-color:#f1f3f5;padding:20px;border-radius:8px;margin-bottom:30px;text-align:center'>" +
+                "<p style='font-size:35px;font-weight:bold;line-height:1.5;color:black;margin:10px 0 0'>" + code + "</p>" +
+                "</div>" +
+                "<p style='display:inline-block;padding:15px 0;color:#888888;text-decoration:none;border-radius:8px;font-size:16px;word-break:keep-all;text-align:left'>" +
+                "Petty 서비스 가입을 위한 인증 번호입니다.<br>" +
+                "위 인증 번호를 입력하여 이메일 주소 인증을 완료해 주세요." +
+                "</p>" +
+                "<div style='margin-top:20px; font-size:14px; color:#888;'>" +
+                "이 메일은 5분간 유효합니다." +
+                "</div>" +
+                "</div>";
+
+        helper.setText(htmlContent, true);
 
         javaMailSender.send(mimeMessage);
         log.info("이메일 ({})로 인증 코드 ({})를 성공적으로 전송했습니다.", toEmail, code);
