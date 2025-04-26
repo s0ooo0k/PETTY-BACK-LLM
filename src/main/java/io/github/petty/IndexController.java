@@ -24,4 +24,9 @@ public class IndexController {
     public String searchPage() {
         return "search";
     }
+
+    @GetMapping("/sync")
+    public String syncPage() {
+        return "syncTest";
+    }
 }
