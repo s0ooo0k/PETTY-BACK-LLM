@@ -7,6 +7,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.vectorstore.*;
+import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.stereotype.Service;
 import io.github.petty.llm.dto.EmbeddingResult;
 import java.util.Arrays;
@@ -48,7 +49,7 @@ public class VectorStoreService {
     }
 
 //     필터 조건을 사용한 유사 콘텐츠 검색
-    public List<Document> findSimilarWithFilter(String query, int k, String filterExpression) {
+    public List<Document> findSimilarWithFilter(String query, int k, Filter.Expression filterExpression) {
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(query)
                 .topK(k)

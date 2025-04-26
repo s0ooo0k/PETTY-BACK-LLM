@@ -1,44 +1,55 @@
 package io.github.petty.llm.service;
 
+import groovy.util.logging.Log4j;
 import io.github.petty.llm.common.AreaCode;
+import io.github.petty.llm.dto.RecommendResponseDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
-import org.springframework.http.ResponseEntity;
+import org.springframework.ai.vectorstore.filter.Filter;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
+@Log4j
 @Service
 @RequiredArgsConstructor
 public class RecommendServiceImpl implements RecommendService {
     // RecommendController를 RecommendService로 분리
     private final VectorStoreService vectorStoreService;
-    private final ChatService chatService;
+    private final ContentService contentService;
+
     @Override
-    public String recommend(Map<String, String> promptMap) {
-        // 사용자 입력 기반 프롬프트 구성
-        String userPrompt = buildPrompt(promptMap);
-
-        // 지역 기반 필터 생성
-        String location = promptMap.get("location");
-        String filterExpression = buildRegion(location);
-
-        List<Document> docs = vectorStoreService.findSimilarWithFilter(userPrompt, 5, filterExpression);
-
-        // Gemini 연결
-
+    public RecommendResponseDTO recommend(Map<String, String> promptMap) {
         try {
-            String result = chatService.generateFromPrompt(userPrompt, docs);
-            return result;
+            // 사용자 입력 기반 프롬프트 구성
+            String userPrompt = buildPrompt(promptMap);
+
+            // 지역 기반 필터 생성
+            String location = promptMap.getOrDefault("location", "");
+            Filter.Expression filterExpression = buildRegion(location);
+
+            // 벡터 검색 실행
+            List<Document> docs = vectorStoreService.findSimilarWithFilter(userPrompt, 5, filterExpression);
+            if (docs.isEmpty()) {
+                log.warn("검색 결과가 없습니다: {}", userPrompt);
+                // 검색 결과가 없는 경우 처리 (빈 결과 반환 또는 기본값 등)
+                return new RecommendResponseDTO(new ArrayList<>());
+            }
+
+            // 결과로 바로 dto
+            return buildRecommendResponse(docs);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("추천 처리 중 오류 발생: {}", e.getMessage(), e);
+            throw new RuntimeException("추천 생성 실패: " + e.getMessage(), e);
         }
     }
 
-    // 사용자 입력 기반 프롬프트 생성
+            // 사용자 입력 기반 프롬프트 생성
     private String buildPrompt(Map<String, String> promptMap) {
         StringBuilder sb = new StringBuilder();
 
@@ -64,16 +75,52 @@ public class RecommendServiceImpl implements RecommendService {
         return sb.toString();
     }
 
+
     // 지역 필터 조건 생성
-    private String buildRegion(String location) {
-        // ETC (지역 없을 때 대비)
-        if (location == null || location.isBlank()) return "areaCode == 0";
+    private Filter.Expression buildRegion(String location) {
+        // String이 아닌 FilterExpression API를 이용해서 QureryDSL 그대로 반환
+        FilterExpressionBuilder b = new FilterExpressionBuilder();
+
+        if (location == null || location.isBlank())
+            return b.eq("areaCode", 0).build();
 
         String[] parts = location.trim().split(" ");
-        if (parts.length == 0) return "areaCode == 0";
+        if (parts.length == 0)
+            return b.eq("areaCode", 0).build();
 
         String areaName = parts[0];
         AreaCode areaCode = AreaCode.fromName(areaName);
-        return "areaCode == %d".formatted(areaCode.getCode());
+
+        // 기본 필터: areaCode
+        FilterExpressionBuilder.Op areaExpr = b.eq("areaCode", areaCode.getCode());
+
+        log.info(areaExpr.toString());
+        // 시군구까지 필터링
+        if (parts.length > 1) {
+            String sigungu = parts[1];
+            return b.and(areaExpr, b.eq("sigungu", sigungu)).build();
+        }
+        return areaExpr.build();
+    }
+
+
+    // 유사도 검색으로 dto 바로 생성
+    private RecommendResponseDTO buildRecommendResponse(List<Document> docs) {
+        List<RecommendResponseDTO.PlaceRecommend> recommends = new ArrayList<>();
+
+        for (Document doc : docs) {
+            String contentId = (String) doc.getMetadata().get("contentId");
+            String title = (String) doc.getMetadata().get("title");
+            String addr = (String) doc.getMetadata().get("address");
+            String description = doc.getText();
+//            String petInfo = (String) doc.getMetadata().getOrDefault("petTourInfo", "");
+            String imageUrl = contentService.getImageUrl(contentId);
+
+            recommends.add(new RecommendResponseDTO.PlaceRecommend(
+                    contentId, title, addr, description, imageUrl
+            ));
+        }
+
+        return new RecommendResponseDTO(recommends);
     }
 }

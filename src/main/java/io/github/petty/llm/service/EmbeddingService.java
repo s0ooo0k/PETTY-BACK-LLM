@@ -86,6 +86,14 @@ public class EmbeddingService {
         // areaCode (지역 관련 추가)
         metadata.put("areaCode", content.getAreaCode());
         // sigunguCode (시군구 추가)
+        String addr1 = content.getAddr1();
+        if (addr1 != null && !addr1.isBlank()) {
+            String[] sigunguparts = addr1.split(" ");
+            if (sigunguparts.length > 1) {
+                metadata.put("sigungu", sigunguparts[1]);
+            }
+        }
+        // sigunguCode 시군구 코드
         metadata.put("sigunguCode", content.getSigunguCode());
         // 지역 String 추가
         metadata.put("address", content.getAddr1());
