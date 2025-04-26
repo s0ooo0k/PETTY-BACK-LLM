@@ -2,6 +2,7 @@ package io.github.petty.config;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -62,13 +63,13 @@ public class SupabaseDataSourceConfig {
     public LocalContainerEntityManagerFactoryBean supabaseEntityManagerFactory(
             // datasource 2개 이상일 경우 명시
             @Qualifier("supabaseDataSource") DataSource dataSource,
-            EntityManagerFactoryBuilder builder
-    ) {
+            EntityManagerFactoryBuilder builder,
+            @Value("${spring.jpa.hibernate.ddl-auto}") String ddlAuto) { // ddl-auto 주입
         Map<String, Object> jpaProperties = new HashMap<>();
         jpaProperties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
 
         // ddl.auto
-        jpaProperties.put("hibernate.hbm2ddl.auto", "update");
+        jpaProperties.put("hibernate.hbm2ddl.auto", ddlAuto);
 
         return builder.dataSource(dataSource)
                 .packages(

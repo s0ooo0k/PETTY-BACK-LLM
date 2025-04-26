@@ -68,6 +68,8 @@ dependencies {
 	implementation 'software.amazon.awssdk:rekognition'
 	// ✅ SMTP
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	// ✅ Oauth2
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 	// SpringAI API
 	implementation 'io.grpc:grpc-xds:1.62.2'

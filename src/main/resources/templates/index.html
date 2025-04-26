@@ -63,7 +63,8 @@
             <a href="/join">회원가입</a>
         </span>
         <span id="userMenu" style="display: none;">
-            <a href="#" onclick="logout()">로그아웃</a>
+            <a onclick="goToProfileEdit()">프로필 수정</a>
+            <a onclick="logout(event)">로그아웃</a>
         </span>
     </div>
 </div>
@@ -76,21 +77,14 @@
     <p>권한: <span id="role"></span></p>
 </div>
 
-<script>
+<script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', async function() {
-        const token = localStorage.getItem('jwt');
-        if (!token) {
-            showLoginMenu();
-            return;
-        }
+        await checkLoginStatus();
+    });
 
+    async function checkLoginStatus() {
         try {
-            const response = await fetch('/api/users/me', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
+            const response = await fetch('/api/users/me'); // 쿠키는 자동으로 전송
             if (response.ok) {
                 const data = await response.json();
                 document.getElementById('userMenu').style.display = 'inline';
@@ -101,17 +95,14 @@
             } else {
                 showLoginMenu();
                 if (response.status === 401) {
-                    localStorage.removeItem('jwt');
-                    location.reload();  // 로그인 상태를 유지할 수 있도록 새로 고침
+                    // 쿠키가 만료되었거나 유효하지 않은 경우
                 }
             }
         } catch (error) {
             console.error('사용자 정보 조회 실패:', error);
             showLoginMenu();
-            localStorage.removeItem('jwt');
-            location.reload();  // 오류가 발생한 경우 새로 고침
         }
-    });
+    }
 
     function showLoginMenu() {
         document.getElementById('userMenu').style.display = 'none';
@@ -119,9 +110,26 @@
         document.getElementById('userInfo').style.display = 'none';
     }
 
-    function logout() {
-        localStorage.removeItem('jwt');
-        window.location.href = '/';
+    function goToProfileEdit() {
+        window.location.href = '/profile/edit'; // 브라우저가 쿠키를 자동으로 담아서 GET 요청을 보냄
+    }
+
+    async function logout(event) {
+        event.preventDefault();
+        try {
+            const response = await fetch('/logout', { // 서버에 로그아웃 요청
+                method: 'POST'
+            });
+            if (response.ok) {
+                alert('로그아웃 성공');
+                window.location.href = '/'; // 로그아웃 성공 시 메인 페이지로 이동
+            } else {
+                alert('로그아웃 실패');
+            }
+        } catch (error) {
+            console.error('로그아웃 에러:', error);
+            alert('로그아웃 중 오류가 발생했습니다.');
+        }
     }
 </script>
 
