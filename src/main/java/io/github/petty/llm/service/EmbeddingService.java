@@ -1,5 +1,6 @@
 package io.github.petty.llm.service;
 
+import io.github.petty.llm.common.AreaCode;
 import io.github.petty.llm.common.ContentType;
 import io.github.petty.llm.dto.EmbeddingResult;
 import io.github.petty.tour.entity.Content;
@@ -83,18 +84,34 @@ public class EmbeddingService {
         metadata.put("contentId", result.contentId());
         metadata.put("title", content.getTitle());
 
-        // areaCode (지역 관련 추가)
-        metadata.put("areaCode", content.getAreaCode());
-        // sigunguCode (시군구 추가)
-        String addr1 = content.getAddr1();
-        if (addr1 != null && !addr1.isBlank()) {
-            String[] sigunguparts = addr1.split(" ");
-            if (sigunguparts.length > 1) {
-                metadata.put("sigungu", sigunguparts[1]);
+        // 1. areaCode 처리
+        Integer areaCode = content.getAreaCode();
+        if (areaCode == null || areaCode == 0) {
+            String addr1 = content.getAddr1();
+            if (addr1 != null && !addr1.isBlank()) {
+                String[] parts = addr1.split(" ");
+                if (parts.length > 0) {
+                    areaCode = AreaCode.fromName(parts[0]).getCode();
+                }
             }
         }
-        // sigunguCode 시군구 코드
-        metadata.put("sigunguCode", content.getSigunguCode());
+        metadata.put("areaCode", areaCode);
+
+        // 2. sigunguCode 처리
+        Integer sigunguCode = content.getSigunguCode();
+        if (sigunguCode == null || sigunguCode == 0) {
+            String addr1 = content.getAddr1();
+            if (addr1 != null && !addr1.isBlank()) {
+                String[] parts = addr1.split(" ");
+                if (parts.length > 1) {
+                    // 간단히 두 번째 단어를 문자열 형태로 저장
+                    metadata.put("sigungu", parts[1]);
+                }
+            }
+        } else {
+            // 기존 sigunguCode가 있으면 그대로
+            metadata.put("sigunguCode", sigunguCode);
+        }
         // 지역 String 추가
         metadata.put("address", content.getAddr1());
         // contentType (콘텐츠 관련 추가)
@@ -118,6 +135,11 @@ public class EmbeddingService {
     // 텍스트 정제 -> 임베딩
     public EmbeddingResult embedContent(Content content) {
         String text = prepareContentText(content);
+        // text 비었을 때
+        if (text == null || text.isBlank()) {
+            throw new IllegalArgumentException("Embedding할 text가 비어있습니다: contentId=" + content.getContentId());
+        }
+        
         // 임베딩 벡터 생성
         EmbeddingResponse response = embeddingModel.embedForResponse(List.of(text));
         float[] output = response.getResults().get(0).getOutput();

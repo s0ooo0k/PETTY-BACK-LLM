@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Log4j
 @Service
 @RequiredArgsConstructor
 public class RecommendServiceImpl implements RecommendService {
@@ -34,7 +33,7 @@ public class RecommendServiceImpl implements RecommendService {
             Filter.Expression filterExpression = buildRegion(location);
 
             // 벡터 검색 실행
-            List<Document> docs = vectorStoreService.findSimilarWithFilter(userPrompt, 5, filterExpression);
+            List<Document> docs = vectorStoreService.findSimilarWithFilter(userPrompt, 10, filterExpression);
             if (docs.isEmpty()) {
                 log.warn("검색 결과가 없습니다: {}", userPrompt);
                 // 검색 결과가 없는 경우 처리 (빈 결과 반환 또는 기본값 등)
