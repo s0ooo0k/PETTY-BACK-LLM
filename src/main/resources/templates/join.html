@@ -224,7 +224,7 @@
                 <div class="form-group" id="verification-section" style="display: none;">
                     <label for="verification-code">이메일 인증코드</label>
                     <div class="verification-input-group">
-                        <input type="text" id="verification-code" name="verification-code" class="form-control" placeholder="인증코드 4자리 입력" maxlength="4" autocomplete="one-time-code">
+                        <input type="text" id="verification-code" name="verification-code" class="form-control" placeholder="인증코드 6자리 입력" maxlength="6" autocomplete="one-time-code">
                         <span class="timer" id="verification-timer">05:00</span>
                     </div>
                     <div class="verification-group">
@@ -430,8 +430,8 @@
             const email = document.getElementById('email').value;
             const code = document.getElementById('verification-code').value;
 
-            if (!code || code.length !== 4) {
-                document.getElementById('verification-error').textContent = '4자리 인증코드를 입력해주세요.';
+            if (!code || code.length !== 6) {
+                document.getElementById('verification-error').textContent = '6자리 인증코드를 입력해주세요.';
                 return;
             }
 

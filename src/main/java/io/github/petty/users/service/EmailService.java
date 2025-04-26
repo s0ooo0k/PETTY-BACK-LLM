@@ -43,7 +43,7 @@ public class EmailService {
 
     // 4자리 랜덤 코드 생성
     private String generateCode() {
-        return String.format("%04d", random.nextInt(10000)); // 0000 ~ 9999
+        return String.format("%06d", random.nextInt(1000000)); // 000000 ~ 999999
     }
 
     private void sendEmail(String toEmail, String code) throws MessagingException {
