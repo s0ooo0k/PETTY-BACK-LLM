@@ -41,9 +41,9 @@ public class UsersController {
     }
 
     @PostMapping("/join")
-        public String joinProcess(JoinDTO joinDTO, RedirectAttributes redirectAttributes) {
+        public String joinProcess(JoinDTO JoinDTO, RedirectAttributes redirectAttributes) {
 
-            Boolean joinResult = joinService.joinProcess(joinDTO);
+            Boolean joinResult = joinService.joinProcess(JoinDTO);
             if (!joinResult) {
                 redirectAttributes.addFlashAttribute("error", "이미 존재하는 계정입니다!");
                 return "redirect:/";
