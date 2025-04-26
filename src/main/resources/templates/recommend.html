@@ -43,18 +43,69 @@
             color: #f39c12;
             margin: 10px 0;
         }
+        #resultBox {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
         .recommend-card {
             background-color: #fff;
             padding: 15px;
-            margin: 20px 0;
             border-radius: 10px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
         }
         .recommend-card img {
             width: 100%;
             height: 180px;
             object-fit: cover;
             border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .recommend-card h2 {
+            font-size: 1.2em;
+            margin: 10px 0 5px;
+        }
+        .recommend-card p {
+            font-size: 0.9em;
+            margin: 3px 0;
+        }
+        #recommendForm {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+        #recommendForm label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        #recommendForm input, #recommendForm select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        #recommendForm button {
+            margin-top: 15px;
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1em;
+        }
+        #recommendForm button:hover {
+            background-color: #f1c40f;
         }
     </style>
 </head>
@@ -83,19 +134,30 @@
 </div>
 
 <form id="recommendForm" th:action="@{/api/recommend}" method="post">
-    <label>이름: <input type="text" name="name" required /></label><br />
-    <label>종: <input type="text" name="species" required /></label><br />
-    <label>위치: <input type="text" name="location" required /></label><br />
-    <label>무게/크기: <input type="text" name="weight" required /></label><br />
-    <label>맹견 여부:
+    <label>이름
+        <input type="text" name="name" required />
+    </label>
+    <label>종
+        <input type="text" name="species" required />
+    </label>
+    <label>위치
+        <input type="text" name="location" required />
+    </label>
+    <label>무게/크기
+        <input type="text" name="weight" required />
+    </label>
+    <label>맹견 여부
         <select name="is_danger">
             <option value="false">소형견/중형견</option>
             <option value="true">맹견</option>
         </select>
-    </label><br />
-    <label>여행 관련 정보: <input type="text" name="info" /></label><br />
+    </label>
+    <label>여행 관련 정보
+        <input type="text" name="info" />
+    </label>
     <button type="submit">추천 받기</button>
 </form>
+
 
 <div id="resultBox" style="margin-top: 20px;"></div>
 
@@ -128,9 +190,8 @@
             card.innerHTML = `
                 <img src="${place.imageUrl}" alt="${place.title}" />
                 <h2>${place.title}</h2>
+                <p><strong>주소:</strong>${place.addr}</p>
                 <p><strong>설명:</strong> ${place.description}</p>
-                <p><strong>주소</strong> ${place.addr}</p>
-<!--                <p><strong>반려동물 정보:</strong> ${place.petTourInfo}</p>-->
             `;
             resultBox.appendChild(card);
         });
