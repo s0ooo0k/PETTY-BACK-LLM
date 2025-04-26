@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/user").authenticated()
+                        .requestMatchers("/user", "/api/**").authenticated()
                         .requestMatchers("/login/**", "/oauth2/**").permitAll()
                         .anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
@@ -63,6 +63,13 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2SuccessHandler)
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // 클라이언트 측 로그아웃 요청 URL과 일치
+                        .logoutSuccessUrl("/") // 로그아웃 성공 후 리다이렉트 URL
+                        .deleteCookies("jwt") // 로그아웃 시 jwt 쿠키 삭제
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
                 )
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)

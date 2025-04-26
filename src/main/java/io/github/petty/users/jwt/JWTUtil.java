@@ -1,5 +1,6 @@
 package io.github.petty.users.jwt;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,14 @@ public class JWTUtil {
     }
 
     public Boolean isExpired(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        try {
+            return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true; // 토큰 만료됨
+        } catch (Exception e) {
+            // 다른 예외 처리 (토큰 형식 오류 등)
+            return false;
+        }
     }
 
     public String createJwt(String username, String role, Long expiredMs) {

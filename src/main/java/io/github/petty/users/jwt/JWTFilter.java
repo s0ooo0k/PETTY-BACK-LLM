@@ -60,6 +60,7 @@ public class JWTFilter extends OncePerRequestFilter {
         // 토큰 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
             logger.debug("Token expired");
+            SecurityContextHolder.clearContext(); // 인증정보 삭제
             // 토큰이 만료되었을 때 401 Unauthorized 응답을 반환
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 상태 코드
             response.getWriter().write("{\"error\": \"Token has expired\"}"); // 에러 메시지

@@ -111,14 +111,6 @@
 </div>
 
 <script>
-    // 페이지 로드 시 토큰 확인
-    document.addEventListener('DOMContentLoaded', function() {
-        const token = localStorage.getItem('jwt');
-        if (token) {
-            window.location.href = '/';
-        }
-    });
-
     // 로그인 함수
     async function login() {
         const username = document.getElementById('username').value;
