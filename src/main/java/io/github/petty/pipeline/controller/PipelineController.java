@@ -39,6 +39,7 @@ public class PipelineController {
             // 실제 VisionServiceImpl 에서 사용하는 요소
             @RequestParam("file") MultipartFile file,
             @RequestParam("petName") String pet,
+            @RequestParam("info") String info,
             Model model
 
     ) {
@@ -46,7 +47,7 @@ public class PipelineController {
 //            String prompt = togetherPromptBuilder.buildPrompt(visionReport, location);
             String visionReport = visionService.analyze(file, pet);
 
-            String jsonPrompt = togetherPromptBuilder.buildPrompt(visionReport, location);
+            String jsonPrompt = togetherPromptBuilder.buildPrompt(visionReport, location, info);
 
             log.info(jsonPrompt);
             ObjectMapper objectMapper = new ObjectMapper();

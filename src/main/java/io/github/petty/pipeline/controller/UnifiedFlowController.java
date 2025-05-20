@@ -36,6 +36,7 @@ public class UnifiedFlowController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("petName") String petName,
             @RequestParam("location") String location,
+            @RequestParam("info") String info,
             Model model
     ) {
         try {
@@ -48,7 +49,7 @@ public class UnifiedFlowController {
             log.info("📌 location = {}", location);
 
             // 3. 프롬프트 생성 및 추천 요청
-            String jsonPrompt = togetherPromptBuilder.buildPrompt(visionReport, location);
+            String jsonPrompt = togetherPromptBuilder.buildPrompt(visionReport, location, info);
             log.info("📌 location = {}", location);
             Map<String, String> promptMapper = new ObjectMapper().readValue(jsonPrompt, new TypeReference<>() {});
             String recommendation = recommendService.recommend(promptMapper);

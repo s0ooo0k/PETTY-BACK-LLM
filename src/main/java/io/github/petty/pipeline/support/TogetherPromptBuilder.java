@@ -15,7 +15,7 @@ public class TogetherPromptBuilder {
     private final TogetherService togetherService;
     private final PromptGeneratorService promptGeneratorService;
 
-    public String buildPrompt(String visionReport, String location) throws Exception {
+    public String buildPrompt(String visionReport, String location, String info) throws Exception {
         try {
             if (visionReport.isEmpty()) {
                 log.info("Vision API 에서 필수 정보를 받아오지 못했습니다.");
@@ -31,7 +31,7 @@ public class TogetherPromptBuilder {
                             "is_danger": "???"
                             """ + " -> 부가 설명이나 그 어떠한 텍스트 없이 양식의 빈 항목을 채워서 답변할 것."
             );
-            return promptGeneratorService.generatePrompt(extractedPetInfoJson, location);
+            return promptGeneratorService.generatePrompt(extractedPetInfoJson, location, info);
 
         } catch (RuntimeException e) {
             log.info("TogetherPromptBuilder 내부 오류.");
