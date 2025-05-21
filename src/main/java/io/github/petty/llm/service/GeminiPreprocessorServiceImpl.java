@@ -2,8 +2,7 @@ package io.github.petty.llm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import groovy.util.logging.Log4j;
-import groovy.util.logging.Slf4j;
+import lombok.extern.slf4j.Slf4j;
 import io.github.petty.llm.common.ContentType;
 import io.github.petty.llm.dto.GeminiRequestDTO;
 import io.github.petty.llm.dto.GeminiResponseDTO;
@@ -19,7 +18,6 @@ import java.net.http.HttpResponse;
 import java.util.List;
 
 
-@lombok.extern.slf4j.Slf4j
 @Slf4j
 @Service
 @RequiredArgsConstructor

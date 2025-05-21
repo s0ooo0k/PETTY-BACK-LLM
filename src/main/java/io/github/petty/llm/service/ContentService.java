@@ -1,6 +1,6 @@
 package io.github.petty.llm.service;
 
-import groovy.util.logging.Log4j;
+
 import io.github.petty.tour.dto.DetailPetDto;
 import io.github.petty.tour.entity.Content;
 import io.github.petty.tour.entity.ContentImage;
@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@Log4j
 @Service
 @RequiredArgsConstructor
 public class ContentService {

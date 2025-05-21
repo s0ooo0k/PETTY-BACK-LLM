@@ -1,8 +1,8 @@
 package io.github.petty.llm.service;
 
-import groovy.util.logging.Slf4j;
 import io.github.petty.tour.entity.Content;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingResponse;
@@ -10,11 +10,10 @@ import org.springframework.ai.vectorstore.*;
 import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.stereotype.Service;
 import io.github.petty.llm.dto.EmbeddingResult;
-
+import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@lombok.extern.slf4j.Slf4j
 @Slf4j
 @Service
 @RequiredArgsConstructor
