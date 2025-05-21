@@ -1,7 +1,7 @@
 package io.github.petty.llm.controller;
 
 import io.github.petty.llm.common.AreaCode;
-import io.github.petty.llm.service.ChatService;
+import io.github.petty.llm.dto.RecommendResponseDTO;
 import io.github.petty.llm.service.RecommendService;
 import io.github.petty.llm.service.VectorStoreService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +23,8 @@ public class RecommendController {
     private final RecommendService recommendService;
 
     @PostMapping
-    public ResponseEntity<String> recommend(@RequestBody Map<String, String> promptMap) {
-        String result = recommendService.recommend(promptMap);
+    public ResponseEntity<RecommendResponseDTO> recommend(@RequestBody Map<String, String> promptMap) {
+        RecommendResponseDTO result = recommendService.recommend(promptMap);
         return ResponseEntity.ok(result);
     }
     
