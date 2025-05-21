@@ -23,9 +23,9 @@ public class EmbeddingBatchController {
     }
     
     // 실패 ID 재저장
-    @PostMapping("/retry")
-    public String retryFailedEmbeddings(@RequestBody List<Long> failedContentIds) {
-        embeddingBatchService.retryFailedContents(failedContentIds);
-        return "재시도 완료!";
-    }
+//    @PostMapping("/retry")
+//    public String retryFailedEmbeddings(@RequestBody List<Long> failedContentIds) {
+//        embeddingBatchService.retryFailedContents(failedContentIds);
+//        return "재시도 완료!";
+//    }
 }

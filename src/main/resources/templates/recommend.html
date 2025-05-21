@@ -192,6 +192,9 @@
                 <h2>${place.title}</h2>
                 <p><strong>주소:</strong>${place.addr}</p>
                 <p><strong>설명:</strong> ${place.description}</p>
+                <p><strong>동반 유형:</strong> ${place.acmpyTypeCd || '정보 없음'}</p>
+                <p><strong>가능 동물:</strong> ${place.acmpyPsblCpam || '정보 없음'}</p>
+                <p><strong>준비물:</strong> ${place.acmpyNeedMtr || '정보 없음'}</p>
             `;
             resultBox.appendChild(card);
         });

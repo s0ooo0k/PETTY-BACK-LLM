@@ -44,7 +44,7 @@ public class VectorStoreService {
                         return embeddingService.toDocument(result, content);
                     } catch (IllegalArgumentException e) {
                         log.warn("Embedding 실패 - contentId: {}. 사유: {}", content.getContentId(), e.getMessage());
-                        return null; // 실패한 건 버린다
+                        return null; // 실패한 건 버림
                     }
                 })
                 .filter(Objects::nonNull) // null인 건 제외

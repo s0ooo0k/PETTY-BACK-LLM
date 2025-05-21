@@ -3,6 +3,7 @@ package io.github.petty.llm.service;
 import groovy.util.logging.Log4j;
 import io.github.petty.llm.common.AreaCode;
 import io.github.petty.llm.dto.RecommendResponseDTO;
+import io.github.petty.tour.dto.DetailPetDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -102,7 +104,6 @@ public class RecommendServiceImpl implements RecommendService {
         return areaExpr.build();
     }
 
-
     // 유사도 검색으로 dto 바로 생성
     private RecommendResponseDTO buildRecommendResponse(List<Document> docs) {
         List<RecommendResponseDTO.PlaceRecommend> recommends = new ArrayList<>();
@@ -115,8 +116,25 @@ public class RecommendServiceImpl implements RecommendService {
 //            String petInfo = (String) doc.getMetadata().getOrDefault("petTourInfo", "");
             String imageUrl = contentService.getImageUrl(contentId);
 
+            Optional<DetailPetDto> petInfoOpt = contentService.getPetInfo(contentId);
+
+            String acmpyTypeCd = "정보 없음";
+            String acmpyPsblCpam = "정보 없음";
+            String acmpyNeedMtr = "정보 없음";
+
+            if (petInfoOpt.isPresent()) {
+                var petInfo = petInfoOpt.get();
+                if (petInfo.getAcmpyTypeCd() != null && !petInfo.getAcmpyTypeCd().isBlank())
+                    acmpyTypeCd = petInfo.getAcmpyTypeCd();
+                if (petInfo.getAcmpyPsblCpam() != null && !petInfo.getAcmpyPsblCpam().isBlank())
+                    acmpyPsblCpam = petInfo.getAcmpyPsblCpam();
+                if (petInfo.getAcmpyNeedMtr() != null && !petInfo.getAcmpyNeedMtr().isBlank())
+                    acmpyNeedMtr = petInfo.getAcmpyNeedMtr();
+            }
+
             recommends.add(new RecommendResponseDTO.PlaceRecommend(
-                    contentId, title, addr, description, imageUrl
+                    contentId, title, addr, description, imageUrl,
+                    acmpyTypeCd, acmpyPsblCpam, acmpyNeedMtr
             ));
         }
 

@@ -1,6 +1,7 @@
 package io.github.petty.llm.service;
 
 import groovy.util.logging.Log4j;
+import io.github.petty.tour.dto.DetailPetDto;
 import io.github.petty.tour.entity.Content;
 import io.github.petty.tour.entity.ContentImage;
 import io.github.petty.tour.repository.ContentImageRepository;
@@ -34,6 +35,9 @@ public class ContentService {
         }
     }
 
+
+
+
     public String getImageUrl(String contentId){
         try {
             Long id = Long.parseLong(contentId);
@@ -63,6 +67,44 @@ public class ContentService {
         } catch (NumberFormatException e) {
             log.error("Invalid contentId format: {}", contentId, e);
             return DEFAULT_IMAGE_URL;
+        }
+    }
+
+
+    /*
+        if (pet != null) {
+            sb.append("반려 동물 정보: ");
+            if (pet.getAcmpyTypeCd() != null)
+                sb.append("동반 유형은 ").append(pet.getAcmpyTypeCd()).append(", ");
+            if (pet.getEtcAcmpyInfo() != null)
+                sb.append("가능 동물: ").append(pet.getEtcAcmpyInfo()).append(", ");
+            if (pet.getAcmpyPsblCpam() != null)
+                sb.append("추가 정보: ").append(pet.getAcmpyPsblCpam()).append(", ");
+            if (pet.getAcmpyNeedMtr() != null)
+                sb.append("준비물: ").append(pet.getAcmpyNeedMtr()).append(". ");
+            sb.append("\n");
+        }
+ */
+    public Optional<DetailPetDto> getPetInfo(String contentId) {
+        try {
+            Long id = Long.parseLong(contentId);
+            Optional<Content> contentOpt = contentRepository.findById(id);
+
+            if (contentOpt.isPresent()) {
+                Content content = contentOpt.get();
+                if (content.getPetTourInfo() != null) {
+                    DetailPetDto dto = new DetailPetDto();
+                    dto.setContentId(id);
+                    dto.setAcmpyTypeCd(content.getPetTourInfo().getAcmpyTypeCd());
+                    dto.setAcmpyPsblCpam(content.getPetTourInfo().getAcmpyPsblCpam());
+                    dto.setAcmpyNeedMtr(content.getPetTourInfo().getAcmpyNeedMtr());
+                    return Optional.of(dto);
+                }
+            }
+            return Optional.empty();
+        } catch (NumberFormatException e) {
+            log.error("반려동물 정보 관련 오류: {}", contentId, e);
+            return Optional.empty();
         }
     }
 }
