@@ -5,6 +5,8 @@ import io.github.petty.users.jwt.JWTUtil;
 import io.github.petty.users.jwt.LoginFilter;
 import io.github.petty.users.oauth2.CustomOAuth2UserService;
 import io.github.petty.users.oauth2.OAuth2SuccessHandler;
+import io.github.petty.users.repository.UsersRepository;
+import io.github.petty.users.service.RefreshTokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,16 +26,22 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final RefreshTokenService refreshTokenService;
+    private final UsersRepository usersRepository;
 
     public SecurityConfig(
             AuthenticationConfiguration authenticationConfiguration,
             JWTUtil jwtUtil,
             CustomOAuth2UserService customOAuth2UserService,
-            OAuth2SuccessHandler oAuth2SuccessHandler) {
+            OAuth2SuccessHandler oAuth2SuccessHandler,
+            RefreshTokenService refreshTokenService,
+            UsersRepository usersRepository) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.customOAuth2UserService = customOAuth2UserService;
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        this.refreshTokenService = refreshTokenService;
+        this.usersRepository = usersRepository;
     }
 
     @Bean
@@ -55,7 +63,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/user").authenticated()
-                        .requestMatchers("/login/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/login/**", "/oauth2/**", "/api/auth/refresh").permitAll()
                         .anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
@@ -67,12 +75,12 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout") // 클라이언트 측 로그아웃 요청 URL과 일치
                         .logoutSuccessUrl("/") // 로그아웃 성공 후 리다이렉트 URL
-                        .deleteCookies("jwt") // 로그아웃 시 jwt 쿠키 삭제
+                        .deleteCookies("JSESSIONID", "jwt") // 로그아웃 시 jwt 쿠키 삭제
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                 )
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenService, usersRepository), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
