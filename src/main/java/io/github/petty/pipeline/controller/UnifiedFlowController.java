@@ -13,11 +13,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 
 @Slf4j
 @Controller
-@RequestMapping("/flow") // 기존 controller들과 충돌 방지
+@RequestMapping("/flow")
 @RequiredArgsConstructor
 public class UnifiedFlowController {
 
@@ -35,35 +36,51 @@ public class UnifiedFlowController {
     public String analyze(
             @RequestParam("file") MultipartFile file,
             @RequestParam("petName") String petName,
-            @RequestParam("location") String location,
-            @RequestParam("info") String info,
-            Model model
+            Model model,
+            HttpSession session
     ) {
         try {
-            // 1. 중간 종 추론 결과
             String interim = visionUseCase.interim(file.getBytes(), petName);
-
-            // 2. Vision 보고서 생성
             String visionReport = visionService.analyze(file, petName);
-            log.info("📄 Vision Report: {}", visionReport);
-            log.info("📌 location = {}", location);
 
-            // 3. 프롬프트 생성 및 추천 요청
+            model.addAttribute("interim", interim);
+            model.addAttribute("visionReport", visionReport);
+            model.addAttribute("petName", petName);
+
+            session.setAttribute("visionReport", visionReport);
+        } catch (Exception e) {
+            log.error("❌ interim 분석 중 오류", e);
+            model.addAttribute("error", "중간 분석 중 오류 발생");
+        }
+        return "unifiedFlow";
+    }
+
+    @PostMapping("/report")
+    public String report(
+            @RequestParam("petName") String petName,
+            @RequestParam("location") String location,
+            @RequestParam("info") String info,
+            Model model,
+            HttpSession session
+    ) {
+        try {
+            String visionReport = (String) session.getAttribute("visionReport");
+            if (visionReport == null) {
+                model.addAttribute("error", "세션에 Vision 보고서가 없습니다. 다시 분석을 시작해 주세요.");
+                return "unifiedFlow";
+            }
+
             String jsonPrompt = togetherPromptBuilder.buildPrompt(visionReport, location, info);
-            log.info("📌 location = {}", location);
             Map<String, String> promptMapper = new ObjectMapper().readValue(jsonPrompt, new TypeReference<>() {});
             String recommendation = recommendService.recommend(promptMapper);
 
-            // 4. 화면에 전달
-            model.addAttribute("interim", interim);
-            model.addAttribute("visionReport", visionReport);
+            model.addAttribute("visionReport", visionReport); // 다시 보여주기 위해 필요
             model.addAttribute("recommendation", recommendation);
-
+            model.addAttribute("petName", petName);
         } catch (Exception e) {
-            log.error("❌ 분석 중 오류 발생", e);
-            model.addAttribute("error", "분석 및 추천 중 오류가 발생했습니다.");
+            log.error("❌ 추천 생성 중 오류", e);
+            model.addAttribute("error", "추천 생성 중 오류 발생");
         }
-
         return "unifiedFlow";
     }
 }
