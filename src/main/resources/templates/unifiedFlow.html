@@ -7,18 +7,16 @@
     body { font-family: Arial; margin: 40px; background: #f4f4f4; }
     form, .result-block { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; }
     input[type=text], input[type=file] { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; }
-    input[type=submit] { padding: 10px 20px; background: #007BFF; color: #fff; border-radius: 5px; cursor: pointer; border: none; }
-    input[type=submit]:hover { background: #0056b3; }
+    input[type=submit], button { padding: 10px 20px; background: #007BFF; color: #fff; border-radius: 5px; cursor: pointer; border: none; }
+    input[type=submit]:hover, button:hover { background: #0056b3; }
     pre { background: #eee; padding: 10px; border-radius: 5px; overflow-x: auto; }
-    .dropdown { position: relative; }
-    .dropdown-list { display: none; position: absolute; top: 100%; width: 100%; max-height: 200px; overflow-y: auto; background: #fff; border: 1px solid #ccc; z-index: 100; }
-    .dropdown-list li { padding: 8px; cursor: pointer; }
     .dropdown-list li:hover { background-color: #f0f0f0; }
   </style>
 </head>
 <body>
 <h1>🐾 반려동물 여행지 추천</h1>
 
+<!-- 분석 시작 폼 -->
 <form th:action="@{/flow/analyze}" method="post" enctype="multipart/form-data">
   <label for="petName">반려동물 이름</label>
   <input type="text" name="petName" id="petName" required />
@@ -26,30 +24,41 @@
   <label for="file">반려동물 이미지</label>
   <input type="file" name="file" id="file" accept="image/*" required />
 
-  <label for="locationInput">여행 희망 지역</label>
-  <div class="dropdown">
-    <input type="text" name="location" id="locationInput" placeholder="지역 키워드 검색" autocomplete="off" required />
-    <ul id="dropdownList" class="dropdown-list"></ul>
-  </div>
-
-  <input type="submit" value="여행지 추천받기" />
+  <input type="submit" value="내 반려동물 분석하기" />
 </form>
 
-<div class="result-block" th:if="${interim}">
+<!-- interim 결과 -->
+<div class="result-block" th:if="${interim}" id="interimBlock">
   <h2>중간 분석 결과</h2>
   <pre th:text="${interim}"></pre>
 </div>
 
-<div class="result-block" th:if="${visionReport}">
+<!-- Vision 보고서 -->
+<div class="result-block" th:if="${visionReport}" id="visionBlock">
   <h2>최종 Vision 분석 보고서</h2>
   <pre th:text="${visionReport}"></pre>
+  <form th:action="@{/flow/report}" method="post">
+    <input type="hidden" name="petName" th:value="${petName}" />
+
+    <label for="location">여행 희망 지역</label>
+    <div style="position: relative;">
+      <input type="text" name="location" id="location" placeholder="지역 키워드 검색" required />
+    </div>
+
+    <label for="info">추가 요청 사항</label>
+    <input type="text" name="info" id="info" />
+
+    <input type="submit" value="여행지 추천받기" />
+  </form>
 </div>
 
-<div class="result-block" th:if="${recommendation}">
+<!-- 여행지 추천 -->
+<div class="result-block" th:if="${recommendation}" id="recommendBlock">
   <h2>추천 여행지</h2>
   <pre th:text="${recommendation}"></pre>
 </div>
 
+<!-- 오류 -->
 <div class="result-block" th:if="${error}">
   <h2>오류 발생</h2>
   <p th:text="${error}" style="color: red;"></p>
@@ -57,8 +66,18 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const locationInput = document.getElementById('locationInput');
-    const dropdownList = document.getElementById('dropdownList');
+    const locationInput = document.getElementById('location');
+    const dropdownList = document.createElement('ul');
+    dropdownList.className = 'dropdown-list';
+    dropdownList.style.position = 'absolute';
+    dropdownList.style.width = '100%';
+    dropdownList.style.maxHeight = '200px';
+    dropdownList.style.overflowY = 'auto';
+    dropdownList.style.backgroundColor = '#fff';
+    dropdownList.style.border = '1px solid #ccc';
+    dropdownList.style.zIndex = 100;
+    dropdownList.style.display = 'none';
+    locationInput.parentElement.appendChild(dropdownList);
 
     const regions = [
       // 서울특별시 (25구)
@@ -133,14 +152,22 @@
     locationInput.addEventListener('input', function () {
       const query = this.value.trim().toLowerCase();
       dropdownList.innerHTML = '';
-      if (!query) return dropdownList.style.display = 'none';
+      if (!query) {
+        dropdownList.style.display = 'none';
+        return;
+      }
 
       const filtered = regions.filter(region => region.toLowerCase().includes(query));
-      if (filtered.length === 0) return dropdownList.style.display = 'none';
+      if (filtered.length === 0) {
+        dropdownList.style.display = 'none';
+        return;
+      }
 
       filtered.forEach(region => {
         const li = document.createElement('li');
         li.textContent = region;
+        li.style.padding = '8px';
+        li.style.cursor = 'pointer';
         li.addEventListener('click', () => {
           locationInput.value = region;
           dropdownList.style.display = 'none';
@@ -152,7 +179,7 @@
     });
 
     document.addEventListener('click', function (e) {
-      if (!document.querySelector('.dropdown').contains(e.target)) {
+      if (!locationInput.contains(e.target) && !dropdownList.contains(e.target)) {
         dropdownList.style.display = 'none';
       }
     });
