@@ -2,6 +2,7 @@ package io.github.petty.pipeline.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.petty.llm.dto.RecommendResponseDTO;
 import io.github.petty.llm.service.RecommendService;
 import io.github.petty.pipeline.support.TogetherPromptBuilder;
 import io.github.petty.vision.port.in.VisionUseCase;
@@ -72,7 +73,7 @@ public class UnifiedFlowController {
 
             String jsonPrompt = togetherPromptBuilder.buildPrompt(visionReport, location, info);
             Map<String, String> promptMapper = new ObjectMapper().readValue(jsonPrompt, new TypeReference<>() {});
-            String recommendation = recommendService.recommend(promptMapper);
+            RecommendResponseDTO recommendation = recommendService.recommend(promptMapper);
 
             model.addAttribute("visionReport", visionReport); // 다시 보여주기 위해 필요
             model.addAttribute("recommendation", recommendation);

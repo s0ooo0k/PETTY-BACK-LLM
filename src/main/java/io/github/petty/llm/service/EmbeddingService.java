@@ -1,5 +1,6 @@
 package io.github.petty.llm.service;
 
+import io.github.petty.llm.common.AreaCode;
 import io.github.petty.llm.common.ContentType;
 import io.github.petty.llm.dto.EmbeddingResult;
 import io.github.petty.tour.entity.Content;
@@ -19,6 +20,7 @@ public class EmbeddingService {
     private final ContentRepository contentRepository;
     // OpenAI 임베딩 모델
     private final EmbeddingModel embeddingModel;
+    private final GeminiPreprocessorService geminiPreprocessorService;
 
     /**
      * 콘텐츠 객체를 기반으로 자연스러운 문장 텍스트를 생성합니다.
@@ -30,39 +32,31 @@ public class EmbeddingService {
      */
     // 1. 텍스트 전처리 : 장소 설명들 다 모아서 문장으로 만들기
     public String prepareContentText(Content content) {
-        StringBuilder sb = new StringBuilder();
-
-        // 유사도 검색을 위하여 자연스러운 문장으로 재생성
-        // 가독성 위한 변수 분리
-        String title = content.getTitle();
-        String addr1 = content.getAddr1() != null ? content.getAddr1() : "";
-        String addr2 = content.getAddr2() != null ? content.getAddr2() : "";
-        String ContentTypeName = ContentType.fromCode(content.getContentTypeId()).getName();
-
-
-        // 유사도 검색을 높이기 위한 자연스러운 텍스트로 변경
-        sb.append("%s은/는 %s %s에 위치한 %s 장소입니다.\n"
-                .formatted(title, addr1, addr2, ContentTypeName));
-
-        if (content.getOverview() != null) {
-            sb.append("이곳의 설명은 ").append(content.getOverview()).append("\n");
-        }
-
         PetTourInfo pet = content.getPetTourInfo();
-        if (pet != null) {
-            sb.append("반려 동물 정보: ");
-            if (pet.getAcmpyTypeCd() != null)
-                sb.append("동반 유형은 ").append(pet.getAcmpyTypeCd()).append(", ");
-            if (pet.getEtcAcmpyInfo() != null)
-                sb.append("가능 동물: ").append(pet.getEtcAcmpyInfo()).append(", ");
-            if (pet.getAcmpyPsblCpam() != null)
-                sb.append("추가 정보: ").append(pet.getAcmpyPsblCpam()).append(", ");
-            if (pet.getAcmpyNeedMtr() != null)
-                sb.append("준비물: ").append(pet.getAcmpyNeedMtr()).append(". ");
-            sb.append("\n");
+        if (pet != null && "불가능".equals(pet.getAcmpyTypeCd())) {
+            // 반려동물 동반 불가능이면 아예 텍스트 생성 안 함
+            return null;
         }
-        return sb.toString();
+        
+        // 동반 가능할 때 생성
+//        StringBuilder sb = new StringBuilder();
+
+        // 유사도 검색용 자연어 생성
+//        String title = content.getTitle();
+//        String addr1 = content.getAddr1() != null ? content.getAddr1() : "";
+//        String addr2 = content.getAddr2() != null ? content.getAddr2() : "";
+//        String ContentTypeName = ContentType.fromCode(content.getContentTypeId()).getName();
+//
+//        sb.append("%s은/는 %s %s에 위치한 %s 장소입니다.\n"
+//                .formatted(title, addr1, addr2, ContentTypeName));
+//
+//        if (content.getOverview() != null) {
+//            sb.append("이곳의 설명은 ").append(content.getOverview()).append("\n");
+//        }
+        String preprocessedText = geminiPreprocessorService.preprocessContent(content);
+        return preprocessedText;
     }
+
 
     /**
      * 주어진 EmbeddingResult와 Content를 Document 객체로 변환합니다.
@@ -83,10 +77,34 @@ public class EmbeddingService {
         metadata.put("contentId", result.contentId());
         metadata.put("title", content.getTitle());
 
-        // areaCode (지역 관련 추가)
-        metadata.put("areaCode", content.getAreaCode());
-        // sigunguCode (시군구 추가)
-        metadata.put("sigunguCode", content.getSigunguCode());
+        // 1. areaCode 처리
+        Integer areaCode = content.getAreaCode();
+        if (areaCode == null || areaCode == 0) {
+            String addr1 = content.getAddr1();
+            if (addr1 != null && !addr1.isBlank()) {
+                String[] parts = addr1.split(" ");
+                if (parts.length > 0) {
+                    areaCode = AreaCode.fromName(parts[0]).getCode();
+                }
+            }
+        }
+        metadata.put("areaCode", areaCode);
+
+        // 2. sigunguCode 처리
+        Integer sigunguCode = content.getSigunguCode();
+        if (sigunguCode == null || sigunguCode == 0) {
+            String addr1 = content.getAddr1();
+            if (addr1 != null && !addr1.isBlank()) {
+                String[] parts = addr1.split(" ");
+                if (parts.length > 1) {
+                    // 간단히 두 번째 단어를 문자열 형태로 저장
+                    metadata.put("sigungu", parts[1]);
+                }
+            }
+        } else {
+            // 기존 sigunguCode가 있으면 그대로
+            metadata.put("sigunguCode", sigunguCode);
+        }
         // 지역 String 추가
         metadata.put("address", content.getAddr1());
         // contentType (콘텐츠 관련 추가)
@@ -110,6 +128,11 @@ public class EmbeddingService {
     // 텍스트 정제 -> 임베딩
     public EmbeddingResult embedContent(Content content) {
         String text = prepareContentText(content);
+        // text 비었을 때
+        if (text == null || text.isBlank()) {
+            throw new IllegalArgumentException("Embedding할 text가 비어있습니다: contentId=" + content.getContentId());
+        }
+        
         // 임베딩 벡터 생성
         EmbeddingResponse response = embeddingModel.embedForResponse(List.of(text));
         float[] output = response.getResults().get(0).getOutput();

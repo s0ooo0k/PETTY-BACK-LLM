@@ -2,6 +2,7 @@ package io.github.petty.pipeline.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.petty.llm.dto.RecommendResponseDTO;
 import io.github.petty.llm.service.RecommendService;
 import io.github.petty.pipeline.support.TogetherPromptBuilder;
 import io.github.petty.vision.service.VisionServiceImpl;
@@ -53,7 +54,7 @@ public class PipelineController {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, String> promptMapper = objectMapper.readValue(jsonPrompt, new TypeReference<>() {});
             log.info(promptMapper.toString());
-            String prompt = recommendService.recommend(promptMapper);
+            RecommendResponseDTO prompt = recommendService.recommend(promptMapper);
             model.addAttribute("recommendation", prompt);
             return "pipeline";
 
