@@ -1,4 +1,4 @@
-/*plugins {
+plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.4'
 	id 'io.spring.dependency-management' version '1.1.7'
@@ -76,107 +76,6 @@ dependencies {
 	implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
 	implementation "org.springframework.ai:spring-ai-starter-model-openai"
 	implementation "org.springframework.ai:spring-ai-starter-vector-store-qdrant"
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
-}*/
-
-/*LimPark996 특화 버전 build.gradle*/
-plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.4.4'
-	id 'io.spring.dependency-management' version '1.1.7'
-}
-
-group = 'io.github'
-version = '0.0.1-SNAPSHOT'
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-
-repositories {
-	mavenCentral()
-	// SpringAI 관련 maven 설정
-	maven { url 'https://repo.spring.io/milestone' }
-	maven { url 'https://repo.spring.io/snapshot' }
-	maven {
-		name = 'Central Portal Snapshots'
-		url = 'https://central.sonatype.com/repository/maven-snapshots/'
-	}
-}
-
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
-	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
-	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
-	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	runtimeOnly 'org.postgresql:postgresql'
-
-	// Adds MapStruct, Lombok, and lombok-mapstruct-binding for DTO mapping integration
-	implementation 'org.mapstruct:mapstruct:1.6.3'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-	annotationProcessor 'org.projectlombok:lombok'
-
-	// Adds JTS Core and Hibernate Spatial for handling spatial data types and queries
-	implementation 'org.locationtech.jts:jts-core:1.20.0'
-	implementation 'org.hibernate.orm:hibernate-spatial:6.6.13.Final'
-
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	// ✅ Google Cloud Vision
-	implementation 'com.google.cloud:google-cloud-vision:3.33.0'
-	// ✅ AWS SDK v2 - Rekognition
-	implementation platform('software.amazon.awssdk:bom:2.25.19')
-	implementation 'software.amazon.awssdk:rekognition'
-	// ✅ SMTP
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	// ✅ Oauth2
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-
-	// SpringAI API - XDS 모듈 제외하여 호환성 문제 해결
-	implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
-	implementation "org.springframework.ai:spring-ai-starter-model-openai"
-	implementation("org.springframework.ai:spring-ai-starter-vector-store-qdrant") {
-		exclude group: 'io.grpc', module: 'grpc-xds'
-	}
-
-	// Google Cloud Vision에서도 XDS 제거
-	implementation('com.google.cloud:google-cloud-vision:3.33.0') {
-		exclude group: 'io.grpc', module: 'grpc-xds'
-	}
-
-	// Protobuf 의존성 명시적 추가 (XDS 제거로 인한 누락 보완)
-	implementation 'com.google.protobuf:protobuf-java:3.25.3'
-	implementation 'com.google.protobuf:protobuf-java-util:3.25.3'
-
-	// 전역적으로 XDS 제거 (강력한 방법)
-	configurations.all {
-		exclude group: 'io.grpc', module: 'grpc-xds'
-	}
-
 }
 
 tasks.named('test') {
