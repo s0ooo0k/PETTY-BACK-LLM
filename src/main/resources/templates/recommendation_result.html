@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>PETTY - 추천 여행지</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/navbar.css}" />
+</head>
+<body onclick="closeMenuOnClickOutside(event)">
+
+<div th:replace="fragments/header :: mainHeader"></div>
+<div th:replace="fragments/navbar :: sideMenuContent"></div>
+
+<main>
+    <h1>🐾 추천 여행지</h1>
+
+    <div class="result-block">
+        <h2>추천 여행지</h2>
+        <pre th:text="${recommendation}"></pre>
+    </div>
+
+    <div class="result-block" th:if="${error}">
+        <h2>오류 발생</h2>
+        <p th:text="${error}" style="color: red;"></p>
+    </div>
+</main>
+
+<footer>
+    <span class="paw">🐶</span> 반려동물과 함께하는 행복한 여정, PETTY <span class="paw">🐱</span><br>
+    &copy; 2025 PETTY. All rights reserved.
+</footer>
+
+<script th:src="@{/js/flow.js}"></script> </body>
+</html>
