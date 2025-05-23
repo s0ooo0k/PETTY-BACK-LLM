@@ -83,8 +83,8 @@ public class VectorStoreService {
         log.info("유사 콘텐츠 검색 결과");
         for (int i = 0; i < results.size(); i++) {
             Document doc = results.get(i);
-            log.info("▶ 결과 {}: ID={}, Metadata={}, Content={}",
-                    i + 1, doc.getId(), doc.getMetadata(), doc.getText());
+            log.info("▶ 결과 {}: ID={}, Metadata={}",
+                    i + 1, doc.getId(), doc.getMetadata());
         }
         return results;
     }
