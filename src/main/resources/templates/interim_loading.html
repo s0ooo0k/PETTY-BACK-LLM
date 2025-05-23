@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>PETTY - 분석 중...</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/navbar.css}" />
+    <link rel="stylesheet" th:href="@{/css/loading.css}" /> </head>
+<body onclick="closeMenuOnClickOutside(event)">
+
+<div th:replace="fragments/header :: mainHeader"></div>
+<div th:replace="fragments/navbar :: sideMenuContent"></div>
+
+<main class="loading-container">
+    <div class="spinner"></div>
+    <div class="loading-text">반려동물 분석 결과를 생성하고 있습니다...</div>
+
+    <div class="result-block" style="margin-top: 30px;">
+        <h2>중간 분석 결과</h2>
+        <pre id="interimText"></pre>
+    </div>
+</main>
+
+<footer>
+    <span class="paw">🐶</span> 반려동물과 함께하는 행복한 여정, PETTY <span class="paw">🐱</span><br>
+    &copy; 2025 PETTY. All rights reserved.
+</footer>
+
+<script th:src="@{/js/flow.js}"></script> <script th:inline="javascript">
+    /*<![CDATA[*/
+    const interimResult = [[${interim}]]; // 서버에서 전달받은 중간 분석 결과
+    const interimElement = document.getElementById('interimText');
+    const speed = 50; // 타이핑 속도 (ms)
+    let i = 0;
+
+    function typeWriter() {
+        if (i < interimResult.length) {
+            interimElement.textContent += interimResult.charAt(i);
+            i++;
+            setTimeout(typeWriter, speed);
+        } else {
+            // 타이핑 완료 후 2초 뒤 최종 Vision 보고서 페이지로 이동 (실제로는 서버 응답 완료 시 이동)
+            setTimeout(() => {
+                window.location.href = '/flow/showVisionReport'; // 백엔드 컨트롤러 경로
+            }, 2000);
+        }
+    }
+
+    // 페이지 로드 시 타이핑 시작
+    window.onload = typeWriter;
+    /*]]>*/
+</script>
+</body>
+</html>
