@@ -3,6 +3,10 @@ package io.github.petty.users.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.petty.users.dto.CustomUserDetails;
 import io.github.petty.users.dto.LoginDTO;
+import io.github.petty.users.entity.Users;
+import io.github.petty.users.repository.UsersRepository;
+import io.github.petty.users.service.RefreshTokenService;
+import io.github.petty.users.util.CookieUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,20 +23,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.UUID;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
+    private final UsersRepository usersRepository;
 
     // expirationTime 주입
     @Value("${jwt.expiration-time}")
     private long expirationTime;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
-
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshTokenService refreshTokenService, UsersRepository usersRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-
+        this.refreshTokenService = refreshTokenService;
+        this.usersRepository = usersRepository;
     }
 
     @Override
@@ -61,26 +68,24 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-
         String username = customUserDetails.getUsername();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
-
         String role = auth.getAuthority();
+
+        // 액세스 토큰 생성
         String token = jwtUtil.createJwt(username, role, 3600000L); // expirationTime
 
-        // JWT 토큰을 쿠키에 저장
-        Cookie jwtCookie = new Cookie("jwt", token);
-        jwtCookie.setHttpOnly(true); // JavaScript 접근 방지 (XSS 방어)
-        jwtCookie.setPath("/"); // 쿠키의 유효 경로
-        // jwtCookie.setSecure(true); // HTTPS 환경에서만 전송 (로컬호스트에서는 생략)
-        int maxAgeSeconds = (int) (3600000L / 1000); // 만료 시간을 초 단위로 변환
-        jwtCookie.setMaxAge(maxAgeSeconds); // 쿠키의 만료 시간 설정
-        response.addCookie(jwtCookie);
+        // 사용자 조회
+        Users user = usersRepository.findByUsername(username);
 
-//      response.addHeader("Authorization", "Bearer " + token);
+        // 리프레시 토큰 생성
+        UUID refreshToken = refreshTokenService.createRefreshToken(user);
+
+        // 쿠키 설정 코드
+        CookieUtils.setTokenCookies(response, token, refreshToken);
     }
 
     //로그인 실패시
