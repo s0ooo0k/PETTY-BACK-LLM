@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>PETTY 게시글 상세</title>
+    <style>
+        /* 전체 디자인 시스템에서 공통 스타일 가져옴 */
+        :root {
+            /* 컬러 팔레트 */
+            --primary: #FF9933;      /* 주 브랜드 색상: 밝은 오렌지 */
+            --secondary: #66CCFF;    /* 보조 색상: 하늘색 */
+            --accent: #FF6666;       /* 강조 색상: 연한 빨강 */
+            --text-dark: #333333;    /* 어두운 텍스트 */
+            --text-medium: #666666;  /* 중간 텍스트 */
+            --text-light: #999999;   /* 밝은 텍스트 */
+            --bg-light: #F9F9F9;     /* 배경 밝은 색 */
+            --bg-white: #FFFFFF;     /* 흰색 배경 */
+            --shadow: rgba(0, 0, 0, 0.1); /* 그림자 색상 */
+
+            /* 동물 타입 색상 */
+            --dog: #4dabf7;          /* 강아지: 파란색 */
+            --cat: #69db7c;          /* 고양이: 연두색 */
+            --bird: #ff8787;         /* 새: 분홍색 */
+            --rabbit: #ffd43b;       /* 토끼: 노란색 */
+            --hamster: #b197fc;      /* 햄스터: 보라색 */
+            --reptile: #63e6be;      /* 파충류: 민트색 */
+            --other: #ffa94d;        /* 기타: 주황색 */
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .post-card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            box-shadow: 0 4px 16px var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .post-header {
+            padding: 25px 30px 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .post-type {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .post-type[data-type="DOG"],
+        .post-type[data-type="강아지"] { background: var(--dog); }
+        .post-type[data-type="CAT"],
+        .post-type[data-type="고양이"] { background: var(--cat); }
+        .post-type[data-type="HAMSTER"],
+        .post-type[data-type="햄스터"] { background: var(--hamster); }
+        .post-type[data-type="PARROT"],
+        .post-type[data-type="앵무새"] { background: var(--bird); }
+        .post-type[data-type="RABBIT"],
+        .post-type[data-type="토끼"] { background: var(--rabbit); }
+        .post-type[data-type="REPTILE"],
+        .post-type[data-type="파충류"] { background: var(--reptile); }
+        .post-type[data-type="OTHER"],
+        .post-type[data-type="기타"] { background: var(--other); }
+
+        .post-title {
+            margin: 0 0 15px 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .post-meta > span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .post-meta svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .post-content {
+            padding: 30px;
+        }
+
+        .post-content p {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-medium);
+        }
+
+        .post-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .post-images img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .post-images img:hover {
+            transform: scale(1.03);
+        }
+
+        .single-image {
+            grid-column: 1 / -1;
+            max-height: 500px;
+            object-fit: contain;
+        }
+
+        .post-info {
+            margin-top: 25px;
+            background: rgba(102, 204, 255, 0.1);
+            padding: 15px 20px;
+            border-radius: 12px;
+        }
+
+        .post-info p {
+            margin: 8px 0;
+            font-size: 15px;
+            color: var(--text-medium);
+        }
+
+        .post-info p strong {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-right: 5px;
+        }
+
+        .post-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .post-status.resolved {
+            background-color: rgba(105, 219, 124, 0.2);
+            color: #2b8a3e;
+        }
+
+        .post-status.unsolved {
+            background-color: rgba(255, 107, 107, 0.2);
+            color: #e03131;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+        }
+
+        .action-buttons .left-buttons,
+        .action-buttons .right-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #e67e00;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: var(--text-medium);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #fa5252;
+            transform: translateY(-2px);
+        }
+
+        .btn-like {
+            background-color: #fee0e0;
+            color: #e03131;
+        }
+
+        .btn-like:hover {
+            background-color: #ffc9c9;
+        }
+
+        .comment-section {
+            background: var(--bg-white);
+            border-radius: 16px;
+            box-shadow: 0 4px 16px var(--shadow);
+            padding: 25px 30px;
+            margin-bottom: 50px;
+        }
+
+        .comment-section h3 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comment-section h3 svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .comment-form {
+            margin-bottom: 30px;
+        }
+
+        .comment-form textarea {
+            width: 100%;
+            height: 100px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            resize: none;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease;
+        }
+
+        .comment-form textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .comment-form button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            float: right;
+            transition: all 0.2s ease;
+        }
+
+        .comment-form button:hover {
+            background-color: #e67e00;
+            transform: translateY(-2px);
+        }
+
+        .comment-list {
+            margin-top: 20px;
+        }
+
+        .comment {
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .comment:last-child {
+            border-bottom: none;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .comment-date {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .comment-content {
+            color: var(--text-medium);
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .comment-actions button {
+            background: none;
+            border: none;
+            font-size: 13px;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .comment-actions button:hover {
+            color: var(--primary);
+        }
+
+        .comment-edit-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .comment-edit-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .comment-edit-actions button {
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .comment-edit-actions .btn-save {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .comment-edit-actions .btn-cancel {
+            background-color: #f0f0f0;
+            color: var(--text-medium);
+            border: none;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-medium);
+            font-size: 14px;
+            text-decoration: none;
+            margin-bottom: 15px;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 반응형 처리 */
+        @media (max-width: 768px) {
+            .post-header, .post-content {
+                padding: 20px;
+            }
+
+            .post-images {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .action-buttons .right-buttons {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .post-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .post-images {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="javascript:history.back()" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        목록으로 돌아가기
+    </a>
+
+    <main>
+        <div id="postDetail">
+            <!-- 게시글 내용이 AJAX로 로드됩니다 -->
+            <div class="post-card">
+                <div class="post-header">
+                    <span class="post-type" data-type="loading...">로딩 중...</span>
+                    <h1 class="post-title">게시글을 불러오는 중입니다...</h1>
+                    <div class="post-meta">
+                            <span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M5.33788 18.3206C5.99897 16.5269 7.77368 15.3111 9.76328 15.6223L11 15.8093C11.6432 15.9331 12.3568 15.9331 13 15.8093L14.2367 15.6223C16.2263 15.3111 18.001 16.5269 18.6621 18.3206C19.0127 19.2521 19.4593 20.4217 19.6682 21.1328C19.8155 21.6127 19.4317 22 18.9222 22H5.07778C4.56833 22 4.18448 21.6127 4.33181 21.1328C4.54065 20.4217 4.98733 19.2521 5.33788 18.3206Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                로딩 중...
+                            </span>
+                        <span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11.997 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 11.997 2C6.47429 2 2 6.47715 2 12C2 17.5228 6.47429 22 11.997 22Z" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                로딩 중...
+                            </span>
+                        <span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                                </svg>
+                                <span id="likeCount">0</span>
+                            </span>
+                        <span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20.9955 6.00223C21.0109 6.01746 21.0261 6.0328 21.0411 6.04825L12.8481 12L21.0411 17.9517C21.0261 17.9672 21.0109 17.9825 20.9955 17.9978C20.8955 18.0978 20.7877 18.1469 20.6739 18.1469H3.33268C3.00186 18.1469 2.73438 17.8831 2.73438 17.5565V6.44348C2.73438 6.11686 3.00186 5.85312 3.33268 5.85312H20.6739C20.7877 5.85312 20.8955 5.90224 20.9955 6.00223Z" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                0
+                            </span>
+                    </div>
+                </div>
+
+                <div class="post-content">
+                    <div class="post-images">
+                        <!-- 이미지가 AJAX로 로드됩니다 -->
+                        <img src="/api/placeholder/400/320" alt="placeholder" class="loading-placeholder">
+                    </div>
+
+                    <p>게시글 내용을 불러오는 중입니다...</p>
+
+                    <div class="post-info">
+                        <!-- 추가 정보가 AJAX로 로드됩니다 -->
+                    </div>
+
+                    <div class="action-buttons">
+                        <div class="left-buttons">
+                            <button class="btn btn-like" id="likeBtn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                                </svg>
+                                좋아요
+                            </button>
+                        </div>
+
+                        <div class="right-buttons">
+                            <button class="btn btn-secondary" onclick="goToEditPage()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15 5L18 8M13 7L5 15V18H8L16 10M13 7L16 4L18 6L15 9L13 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                수정하기
+                            </button>
+                            <button class="btn btn-danger" onclick="deletePost()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                삭제하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comment-section">
+            <h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.9955 6.00223C21.0109 6.01746 21.0261 6.0328 21.0411 6.04825L12.8481 12L21.0411 17.9517C21.0261 17.9672 21.0109 17.9825 20.9955 17.9978C20.8955 18.0978 20.7877 18.1469 20.6739 18.1469H3.33268C3.00186 18.1469 2.73438 17.8831 2.73438 17.5565V6.44348C2.73438 6.11686 3.00186 5.85312 3.33268 5.85312H20.6739C20.7877 5.85312 20.8955 5.90224 20.9955 6.00223Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                댓글
+            </h3>
+
+            <form id="commentForm" class="comment-form">
+                <textarea id="commentContent" placeholder="댓글을 입력해주세요"></textarea>
+                <button type="submit">등록</button>
+                <div style="clear: both;"></div>
+            </form>
+
+            <div id="commentList" class="comment-list">
+                <!-- 댓글이 AJAX로 로드됩니다 -->
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const postId = new URLSearchParams(location.search).get("id");
+
+    async function fetchPostDetail() {
+        try {
+            const res = await fetch(`/api/posts/${postId}`);
+            if (!res.ok) throw new Error("게시글 조회 실패");
+
+            const post = await res.json();
+            const container = document.getElementById("postDetail");
+            const isLoggedIn = !!localStorage.getItem("jwt");
+
+            let petTypeLabel = '';
+
+            // PetType 영문 값을 한글로 변환 (백엔드 응답에 따라 조정 필요)
+            switch(post.petType) {
+                case 'DOG': petTypeLabel = '강아지'; break;
+                case 'CAT': petTypeLabel = '고양이'; break;
+                case 'RABBIT': petTypeLabel = '토끼'; break;
+                case 'HAMSTER': petTypeLabel = '햄스터'; break;
+                case 'PARROT': petTypeLabel = '앵무새'; break;
+                case 'REPTILE': petTypeLabel = '파충류'; break;
+                case 'OTHER': petTypeLabel = '기타'; break;
+                default: petTypeLabel = post.petType;
+            }
+
+            // 이미지 HTML 생성
+            const imageHtml = Array.isArray(post.images) && post.images.length > 0
+                ? `<div class="post-images ${post.images.length === 1 ? 'single-image-container' : ''}">
+                    ${post.images
+                        .sort((a, b) => a.ordering - b.ordering) // 순서 보장
+                        .map(img => `<img src="${img.imageUrl}" alt="이미지" class="${post.images.length === 1 ? 'single-image' : ''}">`)
+                        .join('')}
+                   </div>`
+                : '';
+
+            // 좋아요 버튼 HTML 생성
+            const likeButtonHtml = isLoggedIn
+                ? `<button id="likeBtn" class="btn btn-like">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                    </svg>
+                    좋아요
+                  </button>`
+                : '';
+
+            // 게시글 추가 정보 HTML 생성
+            let infoHtml = '';
+
+            if (post.region || post.petName || (post.postType === "QNA" && post.isResolved !== undefined)) {
+                infoHtml = `<div class="post-info">`;
+
+                if (post.region) {
+                    infoHtml += `<p><strong>여행 장소:</strong> ${post.region}</p>`;
+                }
+
+                if (post.petName) {
+                    infoHtml += `<p><strong>반려동물 이름:</strong> ${post.petName}</p>`;
+                }
+
+                if (post.postType === "QNA" && post.isResolved !== undefined) {
+                    infoHtml += `<p>
+                        <strong>질문 상태:</strong>
+                        <span class="post-status ${post.isResolved ? 'resolved' : 'unsolved'}">
+                            ${post.isResolved ? '해결됨' : '미해결'}
+                        </span>
+                    </p>`;
+                }
+
+                infoHtml += `</div>`;
+            }
+
+            // 수정/삭제 버튼 HTML
+            const actionButtonsHtml = isLoggedIn
+                ? `<div class="action-buttons">
+                    <div class="left-buttons">
+                        ${likeButtonHtml}
+                    </div>
+                    <div class="right-buttons">
+                        <button class="btn btn-secondary" onclick="goToEditPage('${post.postType}', ${postId})">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 5L18 8M13 7L5 15V18H8L16 10M13 7L16 4L18 6L15 9L13 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            수정하기
+                        </button>
+                        <button class="btn btn-danger" onclick="deletePost()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            삭제하기
+                        </button>
+                    </div>
+                  </div>`
+                : '';
+
+            // 최종 게시글 HTML 구성
+            container.innerHTML = `
+                <div class="post-card">
+                    <div class="post-header">
+                        <span class="post-type" data-type="${post.petType}">${petTypeLabel}</span>
+                        <h1 class="post-title">${post.title}</h1>
+                        <div class="post-meta">
+                            <span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M5.33788 18.3206C5.99897 16.5269 7.77368 15.3111 9.76328 15.6223L11 15.8093C11.6432 15.9331 12.3568 15.9331 13 15.8093L14.2367 15.6223C16.2263 15.3111 18.001 16.5269 18.6621 18.3206C19.0127 19.2521 19.4593 20.4217 19.6682 21.1328C19.8155 21.6127 19.4317 22 18.9222 22H5.07778C4.56833 22 4.18448 21.6127 4.33181 21.1328C4.54065 20.4217 4.98733 19.2521 5.33788 18.3206Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                ${post.writer}
+                            </span>
+                            <span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11.997 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 11.997 2C6.47429 2 2 6.47715 2 12C2 17.5228 6.47429 22 11.997 22Z" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                ${new Date(post.createdAt).toLocaleDateString()}
+                            </span>
+                            <span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                                </svg>
+                                <span id="likeCount">${post.likeCount || 0}</span>
+                            </span>
+                            <span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20.9955 6.00223C21.0109 6.01746 21.0261 6.0328 21.0411 6.04825L12.8481 12L21.0411 17.9517C21.0261 17.9672 21.0109 17.9825 20.9955 17.9978C20.8955 18.0978 20.7877 18.1469 20.6739 18.1469H3.33268C3.00186 18.1469 2.73438 17.8831 2.73438 17.5565V6.44348C2.73438 6.11686 3.00186 5.85312 3.33268 5.85312H20.6739C20.7877 5.85312 20.8955 5.90224 20.9955 6.00223Z" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                ${post.commentCount || 0}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="post-content">
+                        ${imageHtml}
+                        <p>${post.content?.replaceAll('\n', '<br>')}</p>
+                        ${infoHtml}
+                        ${actionButtonsHtml}
+                    </div>
+                </div>
+            `;
+
+            // 좋아요 버튼 이벤트 처리
+            if (isLoggedIn) {
+                const likeBtn = document.getElementById("likeBtn");
+                likeBtn?.addEventListener("click", async () => {
+                    try {
+                        const res = await fetch(`/api/posts/${postId}/like`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+                            }
+                        });
+
+                        if (!res.ok) throw new Error("좋아요 실패");
+
+                        const result = await res.json();
+                        document.getElementById("likeCount").innerText = result.likeCount;
+                    } catch (err) {
+                        alert("좋아요 처리에 실패했습니다.");
+                        console.error(err);
+                    }
+                });
+            }
+
+            bindCommentForm();
+            await loadComments();
+        } catch (err) {
+            console.error(err);
+            alert("게시글을 불러오는 데 실패했습니다.");
+        }
+    }
+
+    function goToEditPage(postType, postId) {
+        const lowerType = postType.toLowerCase(); // QNA → qna
+        location.href = `/posts/${lowerType}/edit?id=${postId}`;
+    }
+
+    function bindCommentForm() {
+        const form = document.getElementById("commentForm");
+        form?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const content = document.getElementById("commentContent").value;
+
+            try {
+                const res = await fetch(`/api/posts/${postId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (!res.ok) throw new Error("댓글 등록 실패");
+
+                document.getElementById("commentContent").value = "";
+                loadComments();
+            } catch (err) {
+                alert("댓글 등록에 실패했습니다. 로그인 상태를 확인해주세요.");
+            }
+        });
+    }
+
+    async function loadComments() {
+        try {
+            const res = await fetch(`/api/posts/${postId}/comments`);
+            if (!res.ok) throw new Error("댓글 불러오기 실패");
+
+            const comments = await res.json();
+            if (!Array.isArray(comments)) return;
+
+            const commentList = document.getElementById("commentList");
+            commentList.innerHTML = "";
+
+            comments.forEach(comment => {
+                const div = document.createElement("div");
+                div.className = "comment";
+
+                const isLoggedIn = !!localStorage.getItem("jwt");
+                const commentActionsHtml = isLoggedIn ? `
+                    <div class="comment-actions">
+                        <button onclick="editComment(${comment.id}, '${comment.content.replace(/'/g, "\\'")}')">수정</button>
+                        <button onclick="deleteComment(${comment.id})">삭제</button>
+                    </div>
+                ` : '';
+
+                div.innerHTML = `
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.writer}</span>
+                        <span class="comment-date">${new Date(comment.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div id="content-${comment.id}" class="comment-content">${comment.content}</div>
+                    ${commentActionsHtml}
+                `;
+                commentList.appendChild(div);
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function editComment(commentId, oldContent) {
+        const contentElement = document.getElementById(`content-${commentId}`);
+        contentElement.innerHTML = `
+            <div class="comment-edit-form">
+                <textarea id="edit-input-${commentId}" rows="3">${oldContent}</textarea>
+                <div class="comment-edit-actions">
+                    <button class="btn-save" onclick="submitEdit(${commentId})">완료</button>
+                    <button class="btn-cancel" onclick="loadComments()">취소</button>
+                </div>
+            </div>
+        `;
+
+        // 댓글 내의 기존 수정/삭제 버튼 숨기기
+        const commentDiv = contentElement.closest(".comment");
+        const actions = commentDiv.querySelector(".comment-actions");
+        if (actions) actions.style.display = "none";
+    }
+
+    async function submitEdit(commentId) {
+        const newContent = document.getElementById(`edit-input-${commentId}`).value;
+
+        if (!newContent) {
+            alert("댓글 내용을 입력해주세요.");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/comments/${commentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+                },
+                body: JSON.stringify({ content: newContent })
+            });
+
+            if (!res.ok) {
+                const text = await res.text();
+                console.error("수정 실패 응답:", text);
+                alert("수정 실패. 본인 댓글만 수정할 수 있습니다.");
+                return;
+            }
+
+            await loadComments();
+        } catch (err) {
+            alert("댓글 수정 중 오류 발생");
+        }
+    }
+
+    async function deletePost() {
+        if (!confirm("이 게시글을 삭제하시겠습니까?")) return;
+
+        const res = await fetch(`/api/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+            }
+        });
+
+        if (res.ok) {
+            alert("게시글이 삭제되었습니다.");
+            location.href = "/";
+        } else {
+            alert("삭제 실패. 권한이 없습니다.");
+        }
+    }
+
+    async function deleteComment(commentId) {
+        if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+        const res = await fetch(`/api/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("jwt")
+            }
+        });
+
+        if (res.ok) {
+            loadComments();
+        } else {
+            alert("삭제 실패. 본인 댓글만 삭제할 수 있습니다.");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        await fetchPostDetail();
+        await loadComments();
+    });
+</script>
+</body>
+</html>
