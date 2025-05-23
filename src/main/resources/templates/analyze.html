@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>PETTY - 반려동물 분석</title>
     <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <!-- src\main\resources\static\css\common.css -->
     <link rel="stylesheet" th:href="@{/css/header.css}" />
     <link rel="stylesheet" th:href="@{/css/navbar.css}" />
     <style>
@@ -60,12 +61,9 @@
     </div>
 </main>
 
-<footer>
-    <span class="paw">🐶</span> 반려동물과 함께하는 행복한 여정, PETTY <span class="paw">🐱</span><br>
-    &copy; 2025 PETTY. All rights reserved.
-</footer>
+<div th:replace="fragments/_footer :: mainFooter"></div>
 
-<script th:src="@{/js/main.js}"></script> <script>
+<script th:src="@{/js/flow.js}"></script> <script>
     // 이미지 프리뷰 기능
     document.addEventListener('DOMContentLoaded', function() {
         const fileInput = document.getElementById('file');
