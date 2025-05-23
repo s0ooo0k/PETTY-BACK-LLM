@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PETTY - 여행이 즐거워요! 후기 게시판</title>
+    <style>
+        /* 전체 디자인 시스템에서 공통 스타일 가져옴 */
+        :root {
+            /* 컬러 팔레트 */
+            --primary: #FF9933;      /* 주 브랜드 색상: 밝은 오렌지 */
+            --secondary: #66CCFF;    /* 보조 색상: 하늘색 */
+            --accent: #FF6666;       /* 강조 색상: 연한 빨강 */
+            --text-dark: #333333;    /* 어두운 텍스트 */
+            --text-medium: #666666;  /* 중간 텍스트 */
+            --text-light: #999999;   /* 밝은 텍스트 */
+            --bg-light: #F9F9F9;     /* 배경 밝은 색 */
+            --bg-white: #FFFFFF;     /* 흰색 배경 */
+            --shadow: rgba(0, 0, 0, 0.1); /* 그림자 색상 */
+
+            /* 동물 타입 색상 */
+            --dog: #4dabf7;          /* 강아지: 파란색 */
+            --cat: #69db7c;          /* 고양이: 연두색 */
+            --bird: #ff8787;         /* 새: 분홍색 */
+            --rabbit: #ffd43b;       /* 토끼: 노란색 */
+            --hamster: #b197fc;      /* 햄스터: 보라색 */
+            --reptile: #63e6be;      /* 파충류: 민트색 */
+            --other: #ffa94d;        /* 기타: 주황색 */
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .header .write-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .header .write-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+        }
+
+        /* 레이아웃 */
+        .layout {
+            display: flex;
+            gap: 30px;
+        }
+
+        .sidebar {
+            width: 200px;
+            flex-shrink: 0;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        .nav-menu {
+            background: var(--bg-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px var(--shadow);
+        }
+
+        .nav-menu h2 {
+            font-size: 16px;
+            margin: 0;
+            padding: 15px;
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-menu li a {
+            display: block;
+            padding: 14px 15px;
+            text-decoration: none;
+            color: var(--text-dark);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+
+        .nav-menu li a:hover {
+            background-color: rgba(255, 153, 51, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-menu li a.active {
+            background-color: rgba(255, 153, 51, 0.2);
+            color: var(--primary);
+            font-weight: 600;
+            border-left: 3px solid var(--primary);
+        }
+
+        /* 후기 게시판 스타일 */
+        .board {
+            background: var(--bg-white);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px var(--shadow);
+            overflow: hidden;
+        }
+
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .review-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+        }
+
+        .review-card .card-image {
+            position: relative;
+            height: 160px;
+            overflow: hidden;
+        }
+
+        .review-card .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .review-card:hover .card-image img {
+            transform: scale(1.1);
+        }
+
+        .review-card .pet-type {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            z-index: 1;
+        }
+
+        .review-card .pet-type[data-type="강아지"] { background: var(--dog); }
+        .review-card .pet-type[data-type="고양이"] { background: var(--cat); }
+        .review-card .pet-type[data-type="햄스터"] { background: var(--hamster); }
+        .review-card .pet-type[data-type="앵무새"] { background: var(--bird); }
+        .review-card .pet-type[data-type="토끼"] { background: var(--rabbit); }
+        .review-card .pet-type[data-type="파충류"] { background: var(--reptile); }
+        .review-card .pet-type[data-type="기타"] { background: var(--other); }
+
+        .review-card .card-content {
+            padding: 15px;
+        }
+
+        .review-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .review-card h3 a {
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .review-card h3 a:hover {
+            color: var(--primary);
+        }
+
+        .review-card .pet-info {
+            font-size: 13px;
+            color: var(--text-medium);
+            margin-bottom: 12px;
+        }
+
+        .review-card .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .review-card .meta > span {
+            display: flex;
+            align-items: center;
+        }
+
+        .review-card .meta svg {
+            width: 14px;
+            height: 14px;
+            margin-right: 3px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 8px;
+        }
+
+        .pagination button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination button:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination button[disabled] {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            cursor: default;
+        }
+
+        /* 미디어 쿼리 */
+        @media (max-width: 1024px) {
+            .review-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .review-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .review-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>여행이 즐거워요! 후기를 보여주세요</h1>
+        <a href="/posts/review/new">
+            <button class="write-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 5L18 8M13 7L5 15V18H8L16 10M13 7L16 4L18 6L15 9L13 7Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                글쓰기
+            </button>
+        </a>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar">
+            <div class="nav-menu">
+                <h2>커뮤니티</h2>
+                <ul>
+                    <li><a href="/posts/qna">궁금해요!</a></li>
+                    <li><a href="/posts/review" class="active">여행이 즐거워요!</a></li>
+                    <li><a href="/posts/showoff">우리 아이 자랑해요</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="board">
+                <div class="review-grid" id="reviewList">
+                    <!-- JavaScript로 내용이 채워집니다 -->
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination">
+                <!-- JavaScript로 페이지네이션이 채워집니다 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPage = 0;
+    const pageSize = 8; // 4열 레이아웃에서는 8개씩 보여주는 것이 적절함
+
+    async function fetchReviewPosts() {
+        const res = await fetch(`/api/posts?type=REVIEW&page=${currentPage}&size=${pageSize}`);
+        const page = await res.json();
+        const posts = page.content;
+
+        const list = document.getElementById('reviewList');
+        list.innerHTML = '';
+
+        posts.forEach(post => {
+            const card = document.createElement('div');
+            card.className = 'review-card';
+
+            const petType = document.createElement('span');
+            petType.className = 'pet-type';
+            petType.dataset.type = post.petType;
+            petType.textContent = post.petType;
+            card.appendChild(petType);
+
+            const cardImage = document.createElement('div');
+            cardImage.className = 'card-image';
+
+            const img = document.createElement('img');
+            img.src = post.imageUrl || '/assets/noimg.png';
+            img.alt = post.title;
+            img.onerror = function() {
+                this.src = '/assets/noimg.png';
+            };
+            cardImage.appendChild(img);
+            card.appendChild(cardImage);
+
+            const cardContent = document.createElement('div');
+            cardContent.className = 'card-content';
+
+            const title = document.createElement('h3');
+            const titleLink = document.createElement('a');
+            titleLink.href = `/posts/detail?id=${post.id}`;
+            titleLink.textContent = post.title;
+            title.appendChild(titleLink);
+            cardContent.appendChild(title);
+
+            const petInfo = document.createElement('p');
+            petInfo.className = 'pet-info';
+            petInfo.textContent = `${post.petName || ''} ${post.petName && post.region ? '|' : ''} ${post.region || ''}`;
+            cardContent.appendChild(petInfo);
+
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+
+            const writer = document.createElement('span');
+            writer.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33788 18.3206C5.99897 16.5269 7.77368 15.3111 9.76328 15.6223L11 15.8093C11.6432 15.9331 12.3568 15.9331 13 15.8093L14.2367 15.6223C16.2263 15.3111 18.001 16.5269 18.6621 18.3206C19.0127 19.2521 19.4593 20.4217 19.6682 21.1328C19.8155 21.6127 19.4317 22 18.9222 22H5.07778C4.56833 22 4.18448 21.6127 4.33181 21.1328C4.54065 20.4217 4.98733 19.2521 5.33788 18.3206Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                ${post.writer}
+            `;
+
+            const likesComments = document.createElement('div');
+            likesComments.style.display = 'flex';
+            likesComments.style.gap = '10px';
+
+            const likes = document.createElement('span');
+            likes.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                </svg>
+                ${post.likeCount || 0}
+            `;
+
+            const comments = document.createElement('span');
+            comments.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.9955 6.00223C21.0109 6.01746 21.0261 6.0328 21.0411 6.04825L12.8481 12L21.0411 17.9517C21.0261 17.9672 21.0109 17.9825 20.9955 17.9978C20.8955 18.0978 20.7877 18.1469 20.6739 18.1469H3.33268C3.00186 18.1469 2.73438 17.8831 2.73438 17.5565V6.44348C2.73438 6.11686 3.00186 5.85312 3.33268 5.85312H20.6739C20.7877 5.85312 20.8955 5.90224 20.9955 6.00223Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                ${post.commentCount || 0}
+            `;
+
+            likesComments.appendChild(likes);
+            likesComments.appendChild(comments);
+
+            meta.appendChild(writer);
+            meta.appendChild(likesComments);
+
+            cardContent.appendChild(meta);
+            card.appendChild(cardContent);
+
+            list.appendChild(card);
+        });
+
+        renderPagination(page.totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+
+        for (let i = 0; i < totalPages; i++) {
+            const button = document.createElement('button');
+            button.textContent = i + 1;
+            button.disabled = i === currentPage;
+            button.addEventListener('click', () => {
+                currentPage = i;
+                fetchReviewPosts();
+                window.scrollTo(0, 0);
+            });
+            pagination.appendChild(button);
+        }
+    }
+
+    // 페이지 로드시 데이터 가져오기
+    document.addEventListener('DOMContentLoaded', fetchReviewPosts);
+</script>
+</body>
+</html>

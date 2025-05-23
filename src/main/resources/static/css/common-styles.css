@@ -1,0 +1,406 @@
+/* PETTY - 공통 CSS 스타일 */
+
+:root {
+    /* 컬러 팔레트 */
+    --primary: #FF9933;      /* 주 브랜드 색상: 밝은 오렌지 */
+    --secondary: #66CCFF;    /* 보조 색상: 하늘색 */
+    --accent: #FF6666;       /* 강조 색상: 연한 빨강 */
+    --text-dark: #333333;    /* 어두운 텍스트 */
+    --text-medium: #666666;  /* 중간 텍스트 */
+    --text-light: #999999;   /* 밝은 텍스트 */
+    --bg-light: #F9F9F9;     /* 배경 밝은 색 */
+    --bg-white: #FFFFFF;     /* 흰색 배경 */
+    --shadow: rgba(0, 0, 0, 0.1); /* 그림자 색상 */
+
+    /* 동물 타입 색상 */
+    --dog: #4dabf7;          /* 강아지: 파란색 */
+    --cat: #69db7c;          /* 고양이: 연두색 */
+    --bird: #ff8787;         /* 새: 분홍색 */
+    --rabbit: #ffd43b;       /* 토끼: 노란색 */
+    --hamster: #b197fc;      /* 햄스터: 보라색 */
+    --reptile: #63e6be;      /* 파충류: 민트색 */
+    --other: #ffa94d;        /* 기타: 주황색 */
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+}
+
+/* 폼 컨테이너 스타일 */
+.container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.form-card {
+    background: var(--bg-white);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px var(--shadow);
+    padding: 40px;
+    overflow: hidden;
+    position: relative;
+}
+
+.form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--primary);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-medium);
+    font-size: 14px;
+    text-decoration: none;
+    margin-bottom: 15px;
+}
+
+.back-link:hover {
+    color: var(--primary);
+}
+
+.back-link svg {
+    width: 16px;
+    height: 16px;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 30px 0;
+    color: var(--text-dark);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+/* 라벨 스타일 */
+label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+/* 인풋 필드 스타일 */
+.input-field {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 15px;
+    color: var(--text-dark);
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.input-field:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 153, 51, 0.2);
+}
+
+.input-field::placeholder {
+    color: #adb5bd;
+}
+
+/* 텍스트 에어리어 스타일 */
+textarea.input-field {
+    min-height: 180px;
+    resize: vertical;
+}
+
+/* 셀렉트 필드 스타일 */
+select.input-field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23adb5bd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* 라디오 버튼 그룹 스타일 */
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.radio-item {
+    position: relative;
+}
+
+.radio-item input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-item label {
+    margin: 0;
+    display: block;
+    padding: 10px 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-medium);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.radio-item input[type="radio"]:checked + label {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.radio-item label:hover {
+    border-color: #ced4da;
+}
+
+/* 체크박스 스타일 */
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+}
+
+.checkbox label {
+    margin: 0;
+    font-weight: normal;
+    font-size: 14px;
+}
+
+/* 이미지 업로드 영역 스타일 */
+.upload-area {
+    border: 2px dashed #ced4da;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+}
+
+.upload-area:hover {
+    border-color: var(--primary);
+    background-color: rgba(255, 153, 51, 0.05);
+}
+
+.upload-area .icon {
+    font-size: 30px;
+    color: #adb5bd;
+    margin-bottom: 10px;
+}
+
+.upload-area .title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-medium);
+    margin-bottom: 5px;
+}
+
+.upload-area .browse {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: #f1f3f5;
+    border-radius: 30px;
+    font-size: 14px;
+    color: var(--text-medium);
+    font-weight: 500;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.upload-area .browse:hover {
+    background-color: #e9ecef;
+}
+
+.upload-area input[type="file"] {
+    display: none;
+}
+
+.upload-area .formats {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+/* 이미지 미리보기 영역 */
+.image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.preview-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-item .remove {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preview-item .remove:hover {
+    background-color: rgba(0,0,0,0.7);
+}
+
+/* 액션 버튼 스타일 */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 35px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #e67e00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+}
+
+.btn-secondary {
+    background-color: #f1f3f5;
+    color: var(--text-medium);
+}
+
+.btn-secondary:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+}
+
+/* 상태 표시 스타일 */
+.status-group {
+    margin-top: 10px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e9ecef;
+    transition: .4s;
+    border-radius: 30px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #69db7c;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(30px);
+}
+
+.toggle-label {
+    margin-left: 10px;
+    font-size: 14px;
+    color: var(--text-medium);
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .form-card {
+        padding: 30px 20px;
+    }
+
+    .radio-group {
+        gap: 10px;
+    }
+
+    .radio-item label {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}

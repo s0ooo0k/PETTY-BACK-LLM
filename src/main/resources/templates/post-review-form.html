@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PETTY - 여행 후기 작성하기</title>
+    <link rel="stylesheet" href="/css/common-styles.css">
+</head>
+<body>
+<div class="container">
+    <a href="javascript:history.back()" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        돌아가기
+    </a>
+
+    <div class="form-card">
+        <h2>여행이 즐거워요! 후기 작성하기</h2>
+
+        <form id="reviewForm">
+            <div class="form-group">
+                <label for="review-title">제목</label>
+                <input type="text" class="input-field" id="review-title" placeholder="후기 제목을 입력해주세요" maxlength="50">
+            </div>
+
+            <div class="form-group">
+                <label for="petName">반려동물 이름</label>
+                <input type="text" class="input-field" id="petName" placeholder="반려동물 이름을 입력해주세요">
+            </div>
+
+            <div class="form-group">
+                <label for="region">여행 장소</label>
+                <input type="text" class="input-field" id="region" placeholder="여행 장소를 입력해주세요">
+            </div>
+
+            <div class="form-group">
+                <label>반려동물 종류</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="review-pet-dog" name="review-petType" value="DOG">
+                        <label for="review-pet-dog">강아지</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="review-pet-cat" name="review-petType" value="CAT">
+                        <label for="review-pet-cat">고양이</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="review-pet-rabbit" name="review-petType" value="RABBIT">
+                        <label for="review-pet-rabbit">토끼</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="review-pet-hamster" name="review-petType" value="HAMSTER">
+                        <label for="review-pet-hamster">햄스터</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="review-pet-bird" name="review-petType" value="PARROT">
+                        <label for="review-pet-bird">앵무새</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="review-pet-reptile" name="review-petType" value="REPTILE">
+                        <label for="review-pet-reptile">파충류</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="review-pet-other" name="review-petType" value="OTHER">
+                        <label for="review-pet-other">기타</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="review-content">후기 내용</label>
+                <textarea class="input-field" id="review-content" placeholder="여행 경험을 자유롭게 작성해주세요" maxlength="2000"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="review-imageFiles">이미지 첨부</label>
+                <label for="review-imageFiles" class="upload-area" id="review-uploadArea">
+                    <div class="icon">📷</div>
+                    <div class="title">이미지를 여기에 드래그하거나</div>
+                    <div class="browse">파일 선택하기</div>
+                    <div class="formats">PNG, JPG, GIF 최대 5MB (최대 5장)</div>
+                    <input type="file" id="review-imageFiles" multiple accept="image/png, image/jpeg, image/gif">
+                </label>
+                <div class="image-preview" id="review-imagePreview">
+                    <!-- 기존 이미지와 새로 업로드한 이미지 미리보기가 여기에 표시됩니다 -->
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+                <button type="submit" class="btn btn-primary">등록하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/js/common/form.js"></script>
+</body>
+</html>

@@ -28,6 +28,13 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        // 리프레시 엔드포인트는 JWTFilter 검증 Skip
+        if (request.getRequestURI().equals("/api/auth/refresh")) {
+            filterChain.doFilter(request, response);  // 바로 다음 필터/컨트롤러로
+            return;
+        }
+
         String token = null;
 
         // 1. 쿠키에서 토큰 확인
