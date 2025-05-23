@@ -61,14 +61,17 @@ public class RefreshTokenService {
 
         // 토큰 만료 체크
         if (refreshToken.isExpired()) {
-            refreshTokenRepository.invalidateAllUserTokens(refreshToken.getUser());
+            List<RefreshToken> userTokens = refreshTokenRepository.findActiveTokensByUser(
+                    refreshToken.getUser(), LocalDateTime.now());
+            refreshTokenRepository.deleteAll(userTokens);
+
             logger.warn("만료된 리프레시 토큰: 사용자={}", refreshToken.getUser().getUsername());
             throw new RuntimeException("만료된 리프레시 토큰입니다.");
         }
 
-        // 토큰 사용 처리 (RTR 핵심)
+        // 토큰 사용 처리
         refreshToken.markUsed();
-        refreshTokenRepository.markAsUsed(refreshToken.getId());
+        refreshTokenRepository.save(refreshToken); // 즉시 저장
 
         // 새 액세스 토큰 생성
         Users user = refreshToken.getUser();
@@ -87,7 +90,10 @@ public class RefreshTokenService {
     // 사용자의 모든 리프레시 토큰 무효화
     @Transactional
     public void invalidateUserTokens(Users user) {
-        refreshTokenRepository.invalidateAllUserTokens(user);
+        List<RefreshToken> activeTokens = refreshTokenRepository.findActiveTokensByUser(
+                user, LocalDateTime.now());
+        refreshTokenRepository.deleteAll(activeTokens);
+
         logger.debug("사용자 토큰 전체 무효화: 사용자={}", user.getUsername());
     }
 }

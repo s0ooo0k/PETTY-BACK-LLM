@@ -20,25 +20,10 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     @Query("SELECT r FROM RefreshToken r WHERE r.user.provider = :provider AND r.user.username = :username AND r.used = false ORDER BY r.createdAt DESC")
     List<RefreshToken> findActiveTokensByProviderAndUsername(@Param("provider") String provider, @Param("username") String username);
 
-    // 사용자의 모든 활성 토큰 무효화
-    @Modifying
-    @Query("UPDATE RefreshToken r SET r.used = true WHERE r.user = :user AND r.used = false")
-    void invalidateAllUserTokens(@Param("user") Users user);
-
-    // 토큰을 사용됨으로 표시
-    @Modifying
-    @Query("UPDATE RefreshToken r SET r.used = true WHERE r.id = :id")
-    void markAsUsed(@Param("id") UUID id);
-
     // 사용자의 유효한 활성 토큰 조회
     @Query("SELECT r FROM RefreshToken r WHERE r.user = :user AND r.used = false AND r.expiredAt > :now ORDER BY r.createdAt ASC")
     List<RefreshToken> findActiveTokensByUser(@Param("user") Users user, @Param("now") LocalDateTime now);
 
     // ID로 사용되지 않은 토큰 조회
     Optional<RefreshToken> findByIdAndUsedIsFalse(UUID id);
-
-    // 만료된 토큰이나 사용된 토큰 정리
-    @Modifying
-    @Query("DELETE FROM RefreshToken r WHERE r.used = true OR r.expiredAt < :now")
-    void deleteExpiredOrUsedTokens(@Param("now") LocalDateTime now);
 }

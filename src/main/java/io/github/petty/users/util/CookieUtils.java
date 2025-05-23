@@ -24,7 +24,7 @@ public class CookieUtils {
         // 리프레시 토큰을 쿠키에 저장
         Cookie refreshCookie = new Cookie("refresh_token", refreshToken.toString());
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setPath("/api/auth/refresh");
+        refreshCookie.setPath("/");
         refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
         response.addCookie(refreshCookie);
     }

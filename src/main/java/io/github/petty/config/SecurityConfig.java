@@ -75,7 +75,7 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout") // 클라이언트 측 로그아웃 요청 URL과 일치
                         .logoutSuccessUrl("/") // 로그아웃 성공 후 리다이렉트 URL
-                        .deleteCookies("JSESSIONID", "jwt") // 로그아웃 시 jwt 쿠키 삭제
+                        .deleteCookies("JSESSIONID", "jwt", "refresh_token") // 로그아웃 시 jwt 쿠키 삭제
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                 )
