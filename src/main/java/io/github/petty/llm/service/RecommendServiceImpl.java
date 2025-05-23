@@ -1,5 +1,7 @@
 package io.github.petty.llm.service;
 
+import io.github.petty.llm.dto.GeminiRerankRequestDTO;
+import io.github.petty.llm.dto.GeminiRerankResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import io.github.petty.llm.common.AreaCode;
 import io.github.petty.llm.dto.RecommendResponseDTO;
@@ -10,10 +12,8 @@ import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,6 +22,7 @@ public class RecommendServiceImpl implements RecommendService {
     // RecommendController를 RecommendService로 분리
     private final VectorStoreService vectorStoreService;
     private final ContentService contentService;
+    private final GeminiRerankingService geminiRerankingService;
 
     @Override
     public RecommendResponseDTO recommend(Map<String, String> promptMap) {
@@ -41,8 +42,16 @@ public class RecommendServiceImpl implements RecommendService {
                 return new RecommendResponseDTO(new ArrayList<>());
             }
 
+            List<RecommendResponseDTO.PlaceRecommend> recommendations = buildRecommendResponse(docs);
+
+            // Gemini 리랭킹
+            GeminiRerankResponseDTO rerank = geminiRerankingService.rerankGemini(userPrompt, recommendations);
+
+            List<RecommendResponseDTO.PlaceRecommend> finalRecommendations = applyRerankingResults(recommendations, rerank);
+            return new RecommendResponseDTO(finalRecommendations);
+
             // 결과로 바로 dto
-            return buildRecommendResponse(docs);
+            // return buildRecommendResponse(docs);
         } catch (Exception e) {
             log.error("추천 처리 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("추천 생성 실패: " + e.getMessage(), e);
@@ -103,12 +112,21 @@ public class RecommendServiceImpl implements RecommendService {
         return areaExpr.build();
     }
 
-    // 유사도 검색으로 dto 바로 생성
-    private RecommendResponseDTO buildRecommendResponse(List<Document> docs) {
+    // 유사도 검색
+    private List<RecommendResponseDTO.PlaceRecommend> buildRecommendResponse(List<Document> docs) {
         List<RecommendResponseDTO.PlaceRecommend> recommends = new ArrayList<>();
+        Set<String> checkId = new HashSet<>();
 
         for (Document doc : docs) {
             String contentId = (String) doc.getMetadata().get("contentId");
+
+            // 중복체크
+            if (checkId.contains(contentId)) {
+                log.debug("중복된 contentId 발견하여 건너뜀: {}", contentId);
+                continue;
+            }
+            checkId.add(contentId);
+
             String title = (String) doc.getMetadata().get("title");
             String addr = (String) doc.getMetadata().get("address");
             String description = doc.getText();
@@ -133,10 +151,49 @@ public class RecommendServiceImpl implements RecommendService {
 
             recommends.add(new RecommendResponseDTO.PlaceRecommend(
                     contentId, title, addr, description, imageUrl,
-                    acmpyTypeCd, acmpyPsblCpam, acmpyNeedMtr
+                    acmpyTypeCd, acmpyPsblCpam, acmpyNeedMtr, null
             ));
         }
-
-        return new RecommendResponseDTO(recommends);
+        return recommends;
     }
+
+
+    /**
+     * 리랭킹 결과를 원본 추천 리스트에 적용
+     */
+    private List<RecommendResponseDTO.PlaceRecommend> applyRerankingResults(
+            List<RecommendResponseDTO.PlaceRecommend> initialRecommends,
+            GeminiRerankResponseDTO rerankResult) {
+
+        // contentId를 키로 하는 맵 생성
+        Map<String, RecommendResponseDTO.PlaceRecommend> recommendMap = initialRecommends.stream()
+                .collect(Collectors.toMap(
+                        RecommendResponseDTO.PlaceRecommend::contentId,
+                        recommend -> recommend
+                ));
+
+        // 리랭킹 결과를 점수순으로 정렬하고 상위 10개만 선택
+        return rerankResult.rankedPlaces().stream()
+                .map(ranked -> {
+                    RecommendResponseDTO.PlaceRecommend original = recommendMap.get(ranked.contentId());
+                    if (original != null) {
+                        // 추천 이유와 점수를 포함한 새로운 객체 생성
+                        return new RecommendResponseDTO.PlaceRecommend(
+                                original.contentId(),
+                                original.title(),
+                                original.addr(),
+                                original.description(),
+                                original.imageUrl(),
+                                original.acmpyTypeCd(),
+                                original.acmpyPsblCpam(),
+                                original.acmpyNeedMtr(),
+                                ranked.recommendReason()
+                        );
+                    }
+                    return null;
+                })
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
 }
