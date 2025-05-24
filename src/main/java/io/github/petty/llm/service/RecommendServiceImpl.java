@@ -131,27 +131,32 @@ public class RecommendServiceImpl implements RecommendService {
             String addr = (String) doc.getMetadata().get("address");
             String description = doc.getText();
 //            String petInfo = (String) doc.getMetadata().getOrDefault("petTourInfo", "");
-            String imageUrl = contentService.getImageUrl(contentId);
+//            String imageUrl = contentService.getImageUrl(contentId);
 
             Optional<DetailPetDto> petInfoOpt = contentService.getPetInfo(contentId);
 
-            String acmpyTypeCd = "정보 없음";
-            String acmpyPsblCpam = "정보 없음";
-            String acmpyNeedMtr = "정보 없음";
+//            String acmpyTypeCd = "정보 없음";
+//            String acmpyPsblCpam = "정보 없음";
+//            String acmpyNeedMtr = "정보 없음";
+//
+//            if (petInfoOpt.isPresent()) {
+//                var petInfo = petInfoOpt.get();
+//                if (petInfo.getAcmpyTypeCd() != null && !petInfo.getAcmpyTypeCd().isBlank())
+//                    acmpyTypeCd = petInfo.getAcmpyTypeCd();
+//                if (petInfo.getAcmpyPsblCpam() != null && !petInfo.getAcmpyPsblCpam().isBlank())
+//                    acmpyPsblCpam = petInfo.getAcmpyPsblCpam();
+//                if (petInfo.getAcmpyNeedMtr() != null && !petInfo.getAcmpyNeedMtr().isBlank())
+//                    acmpyNeedMtr = petInfo.getAcmpyNeedMtr();
+//            }
 
-            if (petInfoOpt.isPresent()) {
-                var petInfo = petInfoOpt.get();
-                if (petInfo.getAcmpyTypeCd() != null && !petInfo.getAcmpyTypeCd().isBlank())
-                    acmpyTypeCd = petInfo.getAcmpyTypeCd();
-                if (petInfo.getAcmpyPsblCpam() != null && !petInfo.getAcmpyPsblCpam().isBlank())
-                    acmpyPsblCpam = petInfo.getAcmpyPsblCpam();
-                if (petInfo.getAcmpyNeedMtr() != null && !petInfo.getAcmpyNeedMtr().isBlank())
-                    acmpyNeedMtr = petInfo.getAcmpyNeedMtr();
-            }
+//            recommends.add(new RecommendResponseDTO.PlaceRecommend(
+//                    contentId, title, addr, description,
+//                    acmpyTypeCd, acmpyPsblCpam, acmpyNeedMtr, null
+//            ));
 
             recommends.add(new RecommendResponseDTO.PlaceRecommend(
-                    contentId, title, addr, description, imageUrl,
-                    acmpyTypeCd, acmpyPsblCpam, acmpyNeedMtr, null
+                    contentId, title, addr, description,
+                    null
             ));
         }
         return recommends;
@@ -183,10 +188,10 @@ public class RecommendServiceImpl implements RecommendService {
                                 original.title(),
                                 original.addr(),
                                 original.description(),
-                                original.imageUrl(),
-                                original.acmpyTypeCd(),
-                                original.acmpyPsblCpam(),
-                                original.acmpyNeedMtr(),
+//                                original.imageUrl(),
+//                                original.acmpyTypeCd(),
+//                                original.acmpyPsblCpam(),
+//                                original.acmpyNeedMtr(),
                                 ranked.recommendReason()
                         );
                     }

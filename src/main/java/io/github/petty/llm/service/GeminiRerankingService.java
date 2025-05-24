@@ -54,9 +54,9 @@ public class GeminiRerankingService {
             sb.append(String.format("%d. %s\n", i + 1, place.title()));
             sb.append(String.format("   - 주소: %s\n", place.addr()));
             sb.append(String.format("   - 설명: %s\n", place.description()));
-            sb.append(String.format("   - 동반 유형: %s\n", place.acmpyTypeCd()));
-            sb.append(String.format("   - 동반 가능: %s\n", place.acmpyPsblCpam()));
-            sb.append(String.format("   - 준비사항: %s\n", place.acmpyNeedMtr()));
+//            sb.append(String.format("   - 동반 유형: %s\n", place.acmpyTypeCd()));
+//            sb.append(String.format("   - 동반 가능: %s\n", place.acmpyPsblCpam()));
+//            sb.append(String.format("   - 준비사항: %s\n", place.acmpyNeedMtr()));
             sb.append(String.format("   - contentId: %s\n\n", place.contentId()));
         }
 
