@@ -1,9 +1,15 @@
 package io.github.petty.users.controller;
 
 import io.github.petty.users.dto.EmailVerificationRequest;
+import io.github.petty.users.dto.RefreshTokenResponseDTO;
 import io.github.petty.users.dto.VerifyCodeRequest;
 import io.github.petty.users.jwt.JWTUtil;
 import io.github.petty.users.service.EmailService;
+import io.github.petty.users.service.RefreshTokenService;
+import io.github.petty.users.util.CookieUtils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -13,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -20,10 +27,13 @@ public class UsersApiController {
 
     private final JWTUtil jwtUtil;
     private final EmailService emailService;
+    private final RefreshTokenService refreshTokenService;
 
-    public UsersApiController(JWTUtil jwtUtil, EmailService emailService) {
+
+    public UsersApiController(JWTUtil jwtUtil, EmailService emailService, RefreshTokenService refreshTokenService) {
         this.jwtUtil = jwtUtil;
         this.emailService = emailService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @GetMapping("/users/me")
@@ -61,5 +71,35 @@ public class UsersApiController {
         response.put("success", isValid);
 
         return ResponseEntity.ok(response);
+    }
+
+    // 리프레시 토큰 엔드포인트 추가
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<?> refreshToken(
+            @CookieValue(value = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response) {
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "리프레시 토큰이 없습니다."));
+        }
+
+        try {
+            UUID refreshTokenId = UUID.fromString(refreshToken);
+            RefreshTokenResponseDTO tokenResponse = refreshTokenService.refreshAccessToken(refreshTokenId);
+
+            // 쿠키 설정 코드
+            CookieUtils.setTokenCookies(response,
+                    tokenResponse.getAccessToken(),
+                    UUID.fromString(tokenResponse.getRefreshToken()));
+
+            return ResponseEntity.ok(Map.of("message", "토큰이 갱신되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "유효하지 않은 토큰 형식입니다."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 }

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="mainHeader">
+    <div class="menu-icon" onclick="toggleMenu(event)">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="logo-container">
+        <img src="/assets/logo.png" alt="PETTY Logo">
+        <h1>PETTY</h1>
+    </div>
+    <div style="display: flex; gap: 15px;">
+        <a th:href="@{/login}">로그인</a>
+        <a th:href="@{/signup}">회원가입</a>
+    </div>
+</header>
+</body>
+</html>

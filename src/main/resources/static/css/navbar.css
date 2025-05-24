@@ -1,0 +1,41 @@
+/* Side Menu Styles */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -250px; /* 초기에는 숨김 */
+    width: 220px;
+    height: 100%;
+    background-color: var(--point-color);
+    padding-top: 80px; /* 헤더 아래로 시작 */
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease;
+    z-index: 999;
+    border-top-right-radius: var(--border-radius-lg);
+    border-bottom-right-radius: var(--border-radius-lg);
+    box-sizing: border-box;
+}
+
+.side-menu.open {
+    left: 0; /* 메뉴 열릴 때 */
+}
+
+.side-menu nav {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.side-menu a {
+    color: white; /* 사이드 메뉴 텍스트는 흰색으로 고정 */
+    text-decoration: none;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.3s ease;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.side-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}

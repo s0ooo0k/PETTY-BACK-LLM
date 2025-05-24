@@ -1,0 +1,110 @@
+/* Header Styles */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background-color: var(--card-bg-color);
+    box-shadow: var(--box-shadow-light);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom-left-radius: var(--border-radius-lg);
+    border-bottom-right-radius: var(--border-radius-lg);
+    position: relative;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.logo-container img {
+    height: 40px;
+    width: auto;
+    vertical-align: middle;
+}
+
+header h1 {
+    color: var(--accent-color);
+    font-size: 1.8em;
+    margin: 0;
+}
+
+header a {
+    text-decoration: none;
+    color: var(--secondary-text-color);
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+header a:hover {
+    background-color: var(--point-color);
+    color: white;
+}
+
+/* Menu Icon (Hamburger) Styles */
+.menu-icon {
+    width: 30px;
+    height: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    z-index: 1001;
+    position: relative;
+}
+
+.menu-icon span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: var(--text-color);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* Responsive Design for Header */
+@media (max-width: 768px) {
+    header {
+        padding: 15px 20px;
+    }
+
+    .logo-container {
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .logo-container img {
+        height: 35px;
+    }
+
+    header h1 {
+        font-size: 1.5em;
+    }
+
+    header div[style] { /* 로그인/회원가입 메뉴 숨김 */
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 10px 15px;
+    }
+
+    .logo-container img {
+        height: 30px;
+    }
+
+    header h1 {
+        font-size: 1.3em;
+    }
+}

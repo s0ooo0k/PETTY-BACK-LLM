@@ -1,0 +1,64 @@
+/* 로딩 스핀과 메시지 스타일 */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 120px); /* 헤더와 푸터 높이 고려 */
+    text-align: center;
+    padding: 20px;
+}
+
+.spinner {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid var(--accent-color); /* Pink */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 1.8em;
+    color: var(--point-color);
+    margin-top: 10px;
+}
+
+.result-block {
+    background: var(--card-bg-color);
+    padding: 25px;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow-light);
+    margin-bottom: 30px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 80%; /* 로딩 페이지에 맞게 넓이 조정 */
+    max-width: 600px;
+}
+
+.result-block h2 {
+    color: var(--point-color);
+    font-size: 1.8em;
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.result-block pre {
+    background: var(--background-color);
+    padding: 15px;
+    border-radius: var(--border-radius-sm);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border: 1px solid var(--input-border-color);
+    color: var(--text-color);
+    font-family: monospace;
+    font-size: 0.95em;
+    min-height: 150px; /* 타이핑 텍스트가 들어갈 최소 높이 */
+}
