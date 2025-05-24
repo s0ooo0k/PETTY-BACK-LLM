@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE$ | PETTY"></title>
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/navbar.css}" />
+    <link rel="stylesheet" th:href="@{/css/loading.css}" />
+
+    <th:block layout:fragment="css"></th:block>
+</head>
+<body onclick="closeMenuOnClickOutside(event)">
+
+<div th:replace="fragments/header :: mainHeader"></div>
+
+<div th:replace="fragments/navbar :: sideMenuContent"></div>
+
+<main layout:fragment="content">
+</main>
+
+<div th:replace="fragments/footer :: mainFooter"></div>
+
+<script th:src="@{/js/flow.js}"></script>
+
+<th:block layout:fragment="script"></th:block>
+
+</body>
+</html>
