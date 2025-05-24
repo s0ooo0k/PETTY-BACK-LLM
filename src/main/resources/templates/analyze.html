@@ -48,7 +48,7 @@
         <input type="file" name="file" id="file" accept="image/*" required />
 
         <div class="image-preview-container" id="imagePreviewContainer">
-            <img id="imagePreview" src="#" alt="Image Preview" />
+            <img id="imagePreview" src="" alt="미리보기 이미지" style="display:none;" />
             <p>선택된 이미지</p>
         </div>
 
@@ -61,7 +61,7 @@
     </div>
 </main>
 
-<div th:replace="fragments/_footer :: mainFooter"></div>
+<div th:replace="fragments/footer :: mainFooter"></div>
 
 <script th:src="@{/js/flow.js}"></script> <script>
     // 이미지 프리뷰 기능
