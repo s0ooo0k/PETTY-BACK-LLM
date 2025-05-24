@@ -2,6 +2,7 @@ package io.github.petty.llm.service;
 
 import io.github.petty.llm.dto.GeminiRerankRequestDTO;
 import io.github.petty.llm.dto.GeminiRerankResponseDTO;
+import io.qdrant.client.grpc.PointsInternalService;
 import lombok.extern.slf4j.Slf4j;
 import io.github.petty.llm.common.AreaCode;
 import io.github.petty.llm.dto.RecommendResponseDTO;
@@ -42,12 +43,11 @@ public class RecommendServiceImpl implements RecommendService {
                 return new RecommendResponseDTO(new ArrayList<>());
             }
 
-            List<RecommendResponseDTO.PlaceRecommend> recommendations = buildRecommendResponse(docs);
+            // List<RecommendResponseDTO.PlaceRecommend> recommendations = buildRecommendResponse(docs);
 
             // Gemini 리랭킹
-            GeminiRerankResponseDTO rerank = geminiRerankingService.rerankGemini(userPrompt, recommendations);
-
-            List<RecommendResponseDTO.PlaceRecommend> finalRecommendations = applyRerankingResults(recommendations, rerank);
+            GeminiRerankResponseDTO rerank = geminiRerankingService.rerankGemini(userPrompt, docs);
+            List<RecommendResponseDTO.PlaceRecommend> finalRecommendations = buildRecommendResponse(docs, rerank);
             return new RecommendResponseDTO(finalRecommendations);
 
             // 결과로 바로 dto
@@ -58,7 +58,7 @@ public class RecommendServiceImpl implements RecommendService {
         }
     }
 
-            // 사용자 입력 기반 프롬프트 생성
+    // 사용자 입력 기반 프롬프트 생성
     private String buildPrompt(Map<String, String> promptMap) {
         StringBuilder sb = new StringBuilder();
 
@@ -69,7 +69,7 @@ public class RecommendServiceImpl implements RecommendService {
 
         sb.append(String.format("%s 정도의 몸무게를 가진 %s 종이에요.\n", weight, species));
 
-        if(isDanger.equals("true")) {
+        if (isDanger.equals("true")) {
             sb.append("맹견이에요\n");
         } else {
             sb.append("소형견, 중형견이에요\n");
@@ -78,7 +78,7 @@ public class RecommendServiceImpl implements RecommendService {
         sb.append(String.format("위치는 %s 근처이고, \n", location));
 
         String info = promptMap.get("info");
-        if(info != null) {
+        if (info != null) {
             sb.append("추가로 이 장소의 설명은: ").append(info).append("\n");
         }
         return sb.toString();
@@ -113,87 +113,40 @@ public class RecommendServiceImpl implements RecommendService {
     }
 
     // 유사도 검색
-    private List<RecommendResponseDTO.PlaceRecommend> buildRecommendResponse(List<Document> docs) {
-        List<RecommendResponseDTO.PlaceRecommend> recommends = new ArrayList<>();
-        Set<String> checkId = new HashSet<>();
+    private List<RecommendResponseDTO.PlaceRecommend> buildRecommendResponse(List<Document> docs, GeminiRerankResponseDTO rerankResult) {
 
-        for (Document doc : docs) {
-            String contentId = (String) doc.getMetadata().get("contentId");
-
-            // 중복체크
-            if (checkId.contains(contentId)) {
-                log.debug("중복된 contentId 발견하여 건너뜀: {}", contentId);
-                continue;
-            }
-            checkId.add(contentId);
-
-            String title = (String) doc.getMetadata().get("title");
-            String addr = (String) doc.getMetadata().get("address");
-            String description = doc.getText();
-//            String petInfo = (String) doc.getMetadata().getOrDefault("petTourInfo", "");
-            String imageUrl = contentService.getImageUrl(contentId);
-
-            Optional<DetailPetDto> petInfoOpt = contentService.getPetInfo(contentId);
-
-            String acmpyTypeCd = "정보 없음";
-            String acmpyPsblCpam = "정보 없음";
-            String acmpyNeedMtr = "정보 없음";
-
-            if (petInfoOpt.isPresent()) {
-                var petInfo = petInfoOpt.get();
-                if (petInfo.getAcmpyTypeCd() != null && !petInfo.getAcmpyTypeCd().isBlank())
-                    acmpyTypeCd = petInfo.getAcmpyTypeCd();
-                if (petInfo.getAcmpyPsblCpam() != null && !petInfo.getAcmpyPsblCpam().isBlank())
-                    acmpyPsblCpam = petInfo.getAcmpyPsblCpam();
-                if (petInfo.getAcmpyNeedMtr() != null && !petInfo.getAcmpyNeedMtr().isBlank())
-                    acmpyNeedMtr = petInfo.getAcmpyNeedMtr();
-            }
-
-            recommends.add(new RecommendResponseDTO.PlaceRecommend(
-                    contentId, title, addr, description, imageUrl,
-                    acmpyTypeCd, acmpyPsblCpam, acmpyNeedMtr, null
-            ));
-        }
-        return recommends;
-    }
-
-
-    /**
-     * 리랭킹 결과를 원본 추천 리스트에 적용
-     */
-    private List<RecommendResponseDTO.PlaceRecommend> applyRerankingResults(
-            List<RecommendResponseDTO.PlaceRecommend> initialRecommends,
-            GeminiRerankResponseDTO rerankResult) {
-
-        // contentId를 키로 하는 맵 생성
-        Map<String, RecommendResponseDTO.PlaceRecommend> recommendMap = initialRecommends.stream()
+        // contentId를 키로 하는 Document 맵 생성
+        Map<String, Document> docMap = docs.stream()
                 .collect(Collectors.toMap(
-                        RecommendResponseDTO.PlaceRecommend::contentId,
-                        recommend -> recommend
+                        doc -> (String) doc.getMetadata().get("contentId"),
+                        doc -> doc,
+                        (existing, replacement) -> existing // 중복 시 첫 번째 것 유지
                 ));
 
-        // 리랭킹 결과를 점수순으로 정렬하고 상위 10개만 선택
+
+        // 리랭킹 결과 순서대로 최종 응답 생성
         return rerankResult.rankedPlaces().stream()
                 .map(ranked -> {
-                    RecommendResponseDTO.PlaceRecommend original = recommendMap.get(ranked.contentId());
-                    if (original != null) {
-                        // 추천 이유와 점수를 포함한 새로운 객체 생성
+                    Document doc = docMap.get(ranked.contentId());
+                    String contentId = ranked.contentId();
+
+                    if (doc != null) {
+
+                        String title = (String) doc.getMetadata().get("title");
+                        String addr = (String) doc.getMetadata().get("address");
+                        String description = doc.getText();
+
                         return new RecommendResponseDTO.PlaceRecommend(
-                                original.contentId(),
-                                original.title(),
-                                original.addr(),
-                                original.description(),
-                                original.imageUrl(),
-                                original.acmpyTypeCd(),
-                                original.acmpyPsblCpam(),
-                                original.acmpyNeedMtr(),
+                                contentId,
+                                title,
+                                addr,
+                                description,
                                 ranked.recommendReason()
                         );
                     }
                     return null;
                 })
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
-
 }
