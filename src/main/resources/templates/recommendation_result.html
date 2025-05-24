@@ -21,14 +21,16 @@
 <!--        <pre th:text="${recommendation}"></pre>-->
         <div class="recommend-grid">
             <div th:each="place : ${recommendation.recommend}" class="recommend-card">
-                <img th:src="${place.imageUrl != null} ? ${place.imageUrl} : '/assets/noimg.jpg'"
-                     onerror="this.onerror=null; this.src='/assets/noimg.jpg';" alt="추천 이미지"/>
-                <h2 th:text="${place.title}"></h2>
-                <p><strong>주소:</strong> <span th:text="${place.addr}"></span></p>
-                <p><strong>추천 이유:</strong> <span th:text="${place.recommendReason}"></span></p>
-                <p><strong>가능 동물:</strong> <span th:text="${place.acmpyPsblCpam ?: '정보 없음'}"></span></p>
-                <p><strong>동반 유형:</strong> <span th:text="${place.acmpyTypeCd ?: '정보 없음'}"></span></p>
-                <p><strong>준비물:</strong> <span th:text="${place.acmpyNeedMtr ?: '정보 없음'}"></span></p>
+                <a href="@{'/recommend/detail' + ${place.contentId}}" >
+                    <img th:src="${place.imageUrl != null} ? ${place.imageUrl} : '/assets/noimg.jpg'"
+                         onerror="this.onerror=null; this.src='/assets/noimg.jpg';" alt="추천 이미지"/>
+                    <h2 th:text="${place.title}"></h2>
+                    <p><strong>주소:</strong> <span th:text="${place.addr}"></span></p>
+                    <p><strong>추천 이유:</strong> <span th:text="${place.recommendReason}"></span></p>
+                    <p><strong>가능 동물:</strong> <span th:text="${place.acmpyPsblCpam ?: '정보 없음'}"></span></p>
+                    <p><strong>동반 유형:</strong> <span th:text="${place.acmpyTypeCd ?: '정보 없음'}"></span></p>
+                    <p><strong>준비물:</strong> <span th:text="${place.acmpyNeedMtr ?: '정보 없음'}"></span></p>
+                </a>
             </div>
         </div>
 
