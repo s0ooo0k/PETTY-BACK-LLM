@@ -27,5 +27,4 @@ public class RecommendController {
         RecommendResponseDTO result = recommendService.recommend(promptMap);
         return ResponseEntity.ok(result);
     }
-    
 }

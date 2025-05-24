@@ -11,10 +11,10 @@ public record RecommendResponseDTO(
             String title,
             String addr,
             String description,
-           /* String imageUrl,
+            String imageUrl,
             String acmpyTypeCd,
             String acmpyPsblCpam,
-            String acmpyNeedMtr, */
+            String acmpyNeedMtr,
             String recommendReason
     ) {
     }
