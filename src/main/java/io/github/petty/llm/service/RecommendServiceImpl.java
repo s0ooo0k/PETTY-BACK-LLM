@@ -12,6 +12,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Service;
+import io.github.petty.tour.entity.Content;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class RecommendServiceImpl implements RecommendService {
     private final VectorStoreService vectorStoreService;
     private final ContentService contentService;
     private final GeminiRerankingService geminiRerankingService;
+
 
     @Override
     public RecommendResponseDTO recommend(Map<String, String> promptMap) {
@@ -43,15 +45,11 @@ public class RecommendServiceImpl implements RecommendService {
                 return new RecommendResponseDTO(new ArrayList<>());
             }
 
-            // List<RecommendResponseDTO.PlaceRecommend> recommendations = buildRecommendResponse(docs);
-
             // Gemini 리랭킹
             GeminiRerankResponseDTO rerank = geminiRerankingService.rerankGemini(userPrompt, docs);
-            List<RecommendResponseDTO.PlaceRecommend> finalRecommendations = buildRecommendResponse(docs, rerank);
+            List<RecommendResponseDTO.PlaceRecommend> finalRecommendations = buildRecommendResponse(rerank);
             return new RecommendResponseDTO(finalRecommendations);
 
-            // 결과로 바로 dto
-            // return buildRecommendResponse(docs);
         } catch (Exception e) {
             log.error("추천 처리 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("추천 생성 실패: " + e.getMessage(), e);
@@ -113,40 +111,54 @@ public class RecommendServiceImpl implements RecommendService {
     }
 
     // 유사도 검색
-    private List<RecommendResponseDTO.PlaceRecommend> buildRecommendResponse(List<Document> docs, GeminiRerankResponseDTO rerankResult) {
+    private List<RecommendResponseDTO.PlaceRecommend> buildRecommendResponse(GeminiRerankResponseDTO rerankResult) {
+        Set<String> seenIds = new HashSet<>();
 
-        // contentId를 키로 하는 Document 맵 생성
-        Map<String, Document> docMap = docs.stream()
-                .collect(Collectors.toMap(
-                        doc -> (String) doc.getMetadata().get("contentId"),
-                        doc -> doc,
-                        (existing, replacement) -> existing // 중복 시 첫 번째 것 유지
-                ));
-
-
-        // 리랭킹 결과 순서대로 최종 응답 생성
-        return rerankResult.rankedPlaces().stream()
+        List<RecommendResponseDTO.PlaceRecommend> resultList = rerankResult.rankedPlaces().stream()
                 .map(ranked -> {
-                    Document doc = docMap.get(ranked.contentId());
                     String contentId = ranked.contentId();
 
-                    if (doc != null) {
-
-                        String title = (String) doc.getMetadata().get("title");
-                        String addr = (String) doc.getMetadata().get("address");
-                        String description = doc.getText();
-
-                        return new RecommendResponseDTO.PlaceRecommend(
-                                contentId,
-                                title,
-                                addr,
-                                description,
-                                ranked.recommendReason()
-                        );
+                    // contentId 중복 검사
+                    if (!seenIds.add(contentId)) {
+                        return null;
                     }
+
+                    try {
+                        Optional<Content> contentOpt = contentService.findByContentId(contentId);
+                        if (contentOpt.isPresent()) {
+                            Content content = contentOpt.get();
+                            String imageUrl = contentService.getImageUrl(contentId);
+
+                            String acmpyTypeCd = "";
+                            String acmpyPsblCpam = "";
+                            String acmpyNeedMtr = "";
+
+                            if (content.getPetTourInfo() != null) {
+                                acmpyTypeCd = Optional.ofNullable(content.getPetTourInfo().getAcmpyTypeCd()).orElse("");
+                                acmpyPsblCpam = Optional.ofNullable(content.getPetTourInfo().getAcmpyPsblCpam()).orElse("");
+                                acmpyNeedMtr = Optional.ofNullable(content.getPetTourInfo().getAcmpyNeedMtr()).orElse("");
+                            }
+
+                            return new RecommendResponseDTO.PlaceRecommend(
+                                    contentId,
+                                    Optional.ofNullable(content.getTitle()).orElse(""),
+                                    Optional.ofNullable(content.getAddr1()).orElse(""),
+                                    Optional.ofNullable(content.getOverview()).orElse(""),
+                                    imageUrl,
+                                    acmpyTypeCd,
+                                    acmpyPsblCpam,
+                                    acmpyNeedMtr,
+                                    ranked.recommendReason()
+                            );
+                        }
+                    } catch (Exception e) {
+                        log.error("contentId {}에 대한 정보 조회 중 오류 발생: {}", contentId, e.getMessage());
+                    }
+
                     return null;
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+        return resultList;
     }
 }
