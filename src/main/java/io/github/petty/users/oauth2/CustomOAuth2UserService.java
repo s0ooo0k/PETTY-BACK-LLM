@@ -27,17 +27,17 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
-        // OAuth2 서비스 ID (github, google, naver 등)
+        // OAuth2 서비스 ID (github, kakao, google 등)
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
         // OAuth2 로그인 진행 시 키가 되는 필드 값(PK)
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
-        // Github 유저 정보 추출
+        // 유저 정보 추출
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        // GitHub 이메일 및 ID 추출
+        // 이메일 및 ID 추출
         String email = extractEmail(registrationId, attributes);
         String providerId = attributes.get(userNameAttributeName).toString();
 
@@ -61,6 +61,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             }
             // 이메일이 null인 경우 대체 로직 (GitHub ID + @github.com)
             return attributes.get("login") + "@github.com";
+        }   else if ("kakao".equals(registrationId)) {
+            Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+            if (kakaoAccount != null && kakaoAccount.containsKey("email") && kakaoAccount.get("email") != null) {
+                return (String) kakaoAccount.get("email");
+            }
+            // 이메일 권한이 없는 경우 대체 로직 (닉네임 + @kakao.com)
+            Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
+            String nickname = (String) properties.get("nickname");
+            return nickname + "@kakao.com";
         }
         return null; // 다른 OAuth2 제공자 추가 시 확장
     }
@@ -78,15 +87,23 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             user.setPassword(UUID.randomUUID().toString()); // 임의의 패스워드 설정
             user.setRole(Role.ROLE_USER.name());
 
-            // GitHub 사용자명을 displayName으로 사용
-            if (attributes.containsKey("name") && attributes.get("name") != null) {
-                user.setDisplayName((String) attributes.get("name"));
-            } else if (attributes.containsKey("login")) {
-                user.setDisplayName((String) attributes.get("login"));
-            } else {
-                user.setDisplayName(email.split("@")[0]);
+            // Provider 사용자명을 displayName으로 사용
+            if ("github".equals(provider)) {
+                if (attributes.containsKey("name") && attributes.get("name") != null) {
+                    user.setDisplayName((String) attributes.get("name"));
+                } else if (attributes.containsKey("login")) {
+                    user.setDisplayName((String) attributes.get("login"));
+                } else {
+                    user.setDisplayName(email.split("@")[0]);
+                }
+            } else if ("kakao".equals(provider)) {
+                Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
+                if (properties != null && properties.containsKey("nickname")) {
+                    user.setDisplayName((String) properties.get("nickname"));
+                } else {
+                    user.setDisplayName(email.split("@")[0]);
+                }
             }
-
             return usersRepository.save(user);
         }
 
