@@ -1,45 +1,170 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8" />
-    <title>PETTY - Vision 보고서</title>
-    <link rel="stylesheet" th:href="@{/css/common.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/navbar.css}" />
+    <title>Vision 보고서</title> <th:block layout:fragment="css">
+    <style>
+        /* 이미지 및 이름 표시를 위한 스타일 */
+        .pet-info-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            background-color: var(--card-bg-color);
+            padding: 20px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-light);
+        }
+        .pet-info-header img {
+            width: 150px; /* 적절한 크기로 조절 */
+            height: 150px; /* 적절한 크기로 조절 */
+            border-radius: 50%; /* 원형 이미지 */
+            object-fit: cover; /* 이미지 비율 유지 */
+            border: 4px solid var(--accent-color); /* 테두리 추가 */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+        .pet-info-header h2 {
+            font-size: 2em;
+            color: var(--accent-color);
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+        .pet-info-header p {
+            font-size: 1.2em;
+            color: var(--secondary-text-color);
+            margin: 0;
+        }
+
+        /* Marked.js가 생성하는 HTML 요소에 적용될 스타일 */
+        .report-content-display h1, .report-content-display h2, .report-content-display h3, .report-content-display h4, .report-content-display h5, .report-content-display h6 {
+            color: #343a40; /* 어두운 헤딩 색상 */
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        .report-content-display p {
+            color: #495057; /* 본문 텍스트 색상 */
+            margin-bottom: 1em;
+        }
+        .report-content-display a {
+            color: #007bff; /* 링크 색상 */
+            text-decoration: none;
+        }
+        .report-content-display a:hover {
+            text-decoration: underline;
+        }
+        .report-content-display pre {
+            background-color: #272822; /* 코드 블록 배경 (Prism.js 테마와 어울리게) */
+            color: #f8f8f2; /* 코드 블록 텍스트 색상 */
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto; /* 내용이 길면 가로 스크롤바 */
+            font-size: 0.9em;
+            margin-bottom: 1em;
+        }
+        .report-content-display code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; /* 코드 폰트 */
+        }
+        .report-content-display table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+        .report-content-display th, .report-content-display td {
+            border: 1px solid #dee2e6; /* 테이블 선 */
+            padding: 8px;
+            text-align: left;
+        }
+        .report-content-display th {
+            background-color: #e9ecef; /* 테이블 헤더 배경 */
+            color: #495057;
+        }
+        .report-content-display ul, .report-content-display ol {
+            margin-left: 20px;
+            margin-bottom: 1em;
+        }
+        .report-content-display blockquote {
+            border-left: 4px solid #ced4da; /* 인용구 왼쪽 선 */
+            padding-left: 15px;
+            color: #6c757d;
+            margin: 1em 0;
+        }
+    </style>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+</th:block>
 </head>
-<body onclick="closeMenuOnClickOutside(event)">
+<body>
+<th:block layout:fragment="content">
+    <main>
+        <h1>🐾 분석 결과</h1>
 
-<div th:replace="fragments/header :: mainHeader"></div>
-<div th:replace="fragments/navbar :: sideMenuContent"></div>
+        <div class="pet-info-header" th:if="${petImageUrl}">
+            <img th:src="${petImageUrl}" alt="반려동물 이미지" />
+            <h2 th:text="${petName}"></h2>
+            <p>님을 위한 보고서</p>
+        </div>
 
-<main>
-    <h1>🐾 최종 Vision 분석 보고서</h1>
+        <div class="result-block">
+            <div id="visionReportOutput" class="report-content-display"></div>
 
-    <div class="result-block">
-        <h2>최종 Vision 분석 보고서</h2>
-        <pre th:text="${visionReport}"></pre>
-        <form th:action="@{/flow/report}" method="post">
-            <input type="hidden" name="petName" th:value="${petName}" />
+            <form th:action="@{/flow/report}" method="post">
+                <input type="hidden" name="petName" th:value="${petName}" />
 
-            <label for="location">여행 희망 지역</label>
-            <div style="position: relative;">
-                <input type="text" name="location" id="location" placeholder="지역 키워드 검색" required />
-            </div>
+                <label for="location">여행 희망 지역</label>
+                <div style="position: relative;">
+                    <input type="text" name="location" id="location" placeholder="지역 키워드 검색" required />
+                </div>
 
-            <label for="info">추가 요청 사항</label>
-            <input type="text" name="info" id="info" />
+                <label for="info">추가 요청 사항</label>
+                <input type="text" name="info" id="info" />
 
-            <input type="submit" value="여행지 추천받기" />
-        </form>
-    </div>
+                <input type="submit" value="여행지 추천받기" />
+            </form>
+        </div>
 
-    <div class="result-block" th:if="${error}">
-        <h2>오류 발생</h2>
-        <p th:text="${error}" style="color: red;"></p>
-    </div>
-</main>
+        <div class="result-block" th:if="${error}">
+            <h2>오류 발생</h2>
+            <p th:text="${error}" style="color: red;"></p>
+        </div>
+    </main>
+</th:block>
 
-<div th:replace="fragments/footer :: mainFooter"></div>
+<th:block layout:fragment="script">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script th:src="@{/js/flow.js}"></script>
 
-<script th:src="@{/js/flow.js}"></script> </body>
+    <script th:inline="javascript">
+        // 1. 서버에서 전달받은 'visionReport' 마크다운 텍스트를 JavaScript 변수에 할당
+        const visionReportMarkdown = /*[[${visionReport}]]*/ '';
+
+        // 2. marked.js 옵션 설정 (Marked.js v5.x 기준)
+        marked.setOptions({
+            gfm: true,
+            highlight: function(code, lang) {
+                const grammar = Prism.languages[lang] || Prism.languages.markup;
+                return Prism.highlight(code, grammar, lang);
+            }
+        });
+
+        // 3. 마크다운을 HTML로 변환
+        const rawHtmlOutput = marked.parse(visionReportMarkdown);
+
+        // 4. DOMPurify를 사용하여 변환된 HTML 살균(Sanitize)
+        const sanitizedHtml = DOMPurify.sanitize(rawHtmlOutput);
+
+        // 5. 살균된 HTML을 지정된 div에 삽입
+        document.getElementById('visionReportOutput').innerHTML = sanitizedHtml;
+
+        // 6. Prism.js를 실행하여 동적으로 추가된 코드 블록에 하이라이팅 적용
+        Prism.highlightAll();
+    </script>
+</th:block>
+</body>
 </html>
