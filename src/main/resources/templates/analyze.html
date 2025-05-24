@@ -4,10 +4,32 @@
     <meta charset="UTF-8" />
     <title>PETTY - 반려동물 분석</title>
     <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <!-- src\main\resources\static\css\common.css -->
     <link rel="stylesheet" th:href="@{/css/header.css}" />
     <link rel="stylesheet" th:href="@{/css/navbar.css}" />
     <style>
-        /* 이 페이지에만 특화된 CSS (필요시 추가) */
+        /* analyze.html 페이지에만 특화된 CSS */
+        .image-preview-container {
+            margin-top: 20px;
+            text-align: center;
+            border: 1px dashed var(--input-border-color);
+            border-radius: var(--border-radius-md);
+            padding: 15px;
+            display: none; /* 초기에는 숨김 */
+            background-color: var(--background-color);
+        }
+        .image-preview-container img {
+            max-width: 100%;
+            height: auto;
+            max-height: 200px; /* 프리뷰 이미지의 최대 높이 설정 */
+            border-radius: var(--border-radius-sm);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .image-preview-container p {
+            margin-top: 10px;
+            color: var(--secondary-text-color);
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body onclick="closeMenuOnClickOutside(event)">
@@ -25,6 +47,11 @@
         <label for="file">반려동물 이미지</label>
         <input type="file" name="file" id="file" accept="image/*" required />
 
+        <div class="image-preview-container" id="imagePreviewContainer">
+            <img id="imagePreview" src="" alt="미리보기 이미지" style="display:none;" />
+            <p>선택된 이미지</p>
+        </div>
+
         <input type="submit" value="내 반려동물 분석하기" />
     </form>
 
@@ -34,10 +61,33 @@
     </div>
 </main>
 
-<footer>
-    <span class="paw">🐶</span> 반려동물과 함께하는 행복한 여정, PETTY <span class="paw">🐱</span><br>
-    &copy; 2025 PETTY. All rights reserved.
-</footer>
+<div th:replace="fragments/footer :: mainFooter"></div>
 
-<script th:src="@{/js/flow.js}"></script> </body>
+<script th:src="@{/js/flow.js}"></script> <script>
+    // 이미지 프리뷰 기능
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('file');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0]; // 선택된 파일 가져오기
+
+            if (file) {
+                const reader = new FileReader(); // FileReader 객체 생성
+
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result; // 이미지 src에 데이터 URL 설정
+                    imagePreviewContainer.style.display = 'block'; // 프리뷰 컨테이너 보이기
+                };
+
+                reader.readAsDataURL(file); // 파일을 Data URL 형식으로 읽기
+            } else {
+                imagePreview.src = '#'; // 파일이 없으면 이미지 src 초기화
+                imagePreviewContainer.style.display = 'none'; // 프리뷰 컨테이너 숨기기
+            }
+        });
+    });
+</script>
+</body>
 </html>
