@@ -9,6 +9,7 @@ import io.github.petty.llm.dto.RecommendResponseDTO;
 import io.qdrant.client.grpc.Points;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +29,9 @@ public class GeminiRerankingService {
 
     private final ObjectMapper objectMapper;
 
-    public GeminiRerankResponseDTO rerankGemini(String userPrompt, List<RecommendResponseDTO.PlaceRecommend> candidates) {
+    public GeminiRerankResponseDTO rerankGemini(String userPrompt, List<Document> documents) {
         log.info("GeminiReranking 프롬프트 실행");
-        String prompt = buildRerankingPrompt(userPrompt, candidates);
+        String prompt = buildRerankingPrompt(userPrompt, documents);
         String response = null;
         try {
             response = callGemini(prompt);
@@ -40,7 +41,7 @@ public class GeminiRerankingService {
         return parseGemini(response);
     }
 
-    private String buildRerankingPrompt(String userPrompt, List<RecommendResponseDTO.PlaceRecommend> candidates) {
+    private String buildRerankingPrompt(String userPrompt, List<Document> documents) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("당신은 반려동물 동반 여행지 추천 전문가입니다. 사용자의 요청과 반려동물 정보를 바탕으로 다음 후보지들을 평가하고 순위를 매겨주세요.\n\n");
@@ -49,15 +50,17 @@ public class GeminiRerankingService {
         sb.append(userPrompt).append("\n");
 
         sb.append("후보 장소들:\n");
-        for (int i = 0; i < candidates.size(); i++) {
-            var place = candidates.get(i);
-            sb.append(String.format("%d. %s\n", i + 1, place.title()));
-            sb.append(String.format("   - 주소: %s\n", place.addr()));
-            sb.append(String.format("   - 설명: %s\n", place.description()));
-//            sb.append(String.format("   - 동반 유형: %s\n", place.acmpyTypeCd()));
-//            sb.append(String.format("   - 동반 가능: %s\n", place.acmpyPsblCpam()));
-//            sb.append(String.format("   - 준비사항: %s\n", place.acmpyNeedMtr()));
-            sb.append(String.format("   - contentId: %s\n\n", place.contentId()));
+        for (int i = 0; i < documents.size(); i++) {
+            Document doc = documents.get(i);
+            String contentId = (String) doc.getMetadata().get("contentId");
+            String title = (String) doc.getMetadata().get("title");
+            String addr = (String) doc.getMetadata().get("address");
+            String description = doc.getText();
+
+            sb.append(String.format("%d. %s\n", i + 1, title));
+            sb.append(String.format("   - 주소: %s\n", addr));
+            sb.append(String.format("   - 설명: %s\n", description));
+            sb.append(String.format("   - contentId: %s\n\n", contentId));
         }
 
         sb.append("평가 기준:\n");
@@ -75,8 +78,8 @@ public class GeminiRerankingService {
         sb.append("{\n");
         sb.append("  \"rankedPlaces\": [\n");
         sb.append("    {\n");
-        sb.append("      \"contentId\": \"장소ID\",\n");
-        sb.append("      \"recommendReason\": \"추천 이유 (50자 이내)\"\n");
+        sb.append("      \"contentId\": \"장소ID(입력 받은 placeContentId)\",\n");
+        sb.append("      \"recommendReason\": \"추천 이유 (100자 이내)\"\n");
         sb.append("    }\n");
         sb.append("  ]\n");
         sb.append("}\n\n");
