@@ -76,6 +76,10 @@ dependencies {
 	implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
 	implementation "org.springframework.ai:spring-ai-starter-model-openai"
 	implementation "org.springframework.ai:spring-ai-starter-vector-store-qdrant"
+
+	// Thymeleaf layout
+	// https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.0.0'
 }
 
 tasks.named('test') {
