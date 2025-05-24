@@ -1,52 +1,59 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8" />
-    <title>PETTY - 분석 중...</title>
-    <link rel="stylesheet" th:href="@{/css/common.css}" />
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/navbar.css}" />
-    <link rel="stylesheet" th:href="@{/css/loading.css}" /> </head>
-<body onclick="closeMenuOnClickOutside(event)">
-
-<div th:replace="fragments/header :: mainHeader"></div>
-<div th:replace="fragments/navbar :: sideMenuContent"></div>
-
-<main class="loading-container">
-    <div class="spinner"></div>
-    <div class="loading-text">반려동물 분석 결과를 생성하고 있습니다...</div>
-
-    <div class="result-block" style="margin-top: 30px;">
-        <h2>중간 분석 결과</h2>
+    <title>분석 중...</title>
+    <th:block layout:fragment="css">
+        <style>
+            /* interimText 폰트 크기 조정 */
+            #interimText {
+                white-space: pre-wrap; /* 공백 및 줄바꿈 유지 */
+                font-size: 1.15em; /* 글자 크기 키움 */
+                color: var(--text-color); /* 텍스트 색상 (common.css에서 상속받을 수도 있음) */
+                background-color: var(--background-color); /* 배경색 제거 (옵션) */
+                border: none; /* 테두리 제거 (옵션) */
+                padding: 0; /* 패딩 제거 (옵션) */
+                margin-top: 15px; /* 상단 여백 조정 */
+                font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+    <main class="loading-container">
+        <div class="spinner"></div>
+        <div class="loading-text">반려동물 분석 결과를 생성하고 있습니다...</div>
         <pre id="interimText"></pre>
-    </div>
-</main>
+    </main>
+</th:block>
 
-<div th:replace="fragments/footer :: mainFooter"></div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const interimResult = [[${interim}]]; // 서버에서 전달받은 중간 분석 결과
+        const interimElement = document.getElementById('interimText');
+        const speed = 50; // 타이핑 속도 (ms)
+        let i = 0;
 
-<script th:src="@{/js/flow.js}"></script> <script th:inline="javascript">
-    /*<![CDATA[*/
-    const interimResult = [[${interim}]]; // 서버에서 전달받은 중간 분석 결과
-    const interimElement = document.getElementById('interimText');
-    const speed = 50; // 타이핑 속도 (ms)
-    let i = 0;
-
-    function typeWriter() {
-        if (i < interimResult.length) {
-            interimElement.textContent += interimResult.charAt(i);
-            i++;
-            setTimeout(typeWriter, speed);
-        } else {
-            // 타이핑 완료 후 2초 뒤 최종 Vision 보고서 페이지로 이동 (실제로는 서버 응답 완료 시 이동)
-            setTimeout(() => {
-                window.location.href = '/flow/showVisionReport'; // 백엔드 컨트롤러 경로
-            }, 2000);
+        function typeWriter() {
+            if (i < interimResult.length) {
+                interimElement.textContent += interimResult.charAt(i);
+                i++;
+                setTimeout(typeWriter, speed);
+            } else {
+                // 타이핑 완료 후 2초 뒤 최종 Vision 보고서 페이지로 이동
+                setTimeout(() => {
+                    window.location.href = '/flow/showVisionReport'; // 백엔드 컨트롤러 경로
+                }, 2000);
+            }
         }
-    }
 
-    // 페이지 로드 시 타이핑 시작
-    window.onload = typeWriter;
-    /*]]>*/
-</script>
+        // 페이지 로드 시 타이핑 시작
+        window.onload = typeWriter;
+        /*]]>*/
+    </script>
+</th:block>
 </body>
 </html>

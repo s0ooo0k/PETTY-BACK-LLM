@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8" />
-    <title>PETTY - 반려동물 분석</title>
-    <link rel="stylesheet" th:href="@{/css/common.css}" />
-    <!-- src\main\resources\static\css\common.css -->
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/navbar.css}" />
+    <title>반려동물 분석</title> <th:block layout:fragment="css">
     <style>
         /* analyze.html 페이지에만 특화된 CSS */
         .image-preview-container {
@@ -31,63 +28,62 @@
             font-size: 0.9em;
         }
     </style>
+</th:block>
 </head>
-<body onclick="closeMenuOnClickOutside(event)">
+<body>
+<th:block layout:fragment="content">
+    <main>
+        <h1>🐾 반려동물 여행지 추천</h1>
 
-<div th:replace="fragments/header :: mainHeader"></div>
-<div th:replace="fragments/navbar :: sideMenuContent"></div>
+        <form th:action="@{/flow/analyze}" method="post" enctype="multipart/form-data">
+            <label for="petName">반려동물 이름</label>
+            <input type="text" name="petName" id="petName" required />
 
-<main>
-    <h1>🐾 반려동물 여행지 추천</h1>
+            <label for="file">반려동물 이미지</label>
+            <input type="file" name="file" id="file" accept="image/*" required />
 
-    <form th:action="@{/flow/analyze}" method="post" enctype="multipart/form-data">
-        <label for="petName">반려동물 이름</label>
-        <input type="text" name="petName" id="petName" required />
+            <div class="image-preview-container" id="imagePreviewContainer">
+                <img id="imagePreview" src="#" alt="Image Preview" />
+                <p>선택된 이미지</p>
+            </div>
 
-        <label for="file">반려동물 이미지</label>
-        <input type="file" name="file" id="file" accept="image/*" required />
+            <input type="submit" value="내 반려동물 분석하기" />
+        </form>
 
-        <div class="image-preview-container" id="imagePreviewContainer">
-            <img id="imagePreview" src="" alt="미리보기 이미지" style="display:none;" />
-            <p>선택된 이미지</p>
+        <div class="result-block" th:if="${error}">
+            <h2>오류 발생</h2>
+            <p th:text="${error}" style="color: red;"></p>
         </div>
+    </main>
+</th:block>
 
-        <input type="submit" value="내 반려동물 분석하기" />
-    </form>
+<th:block layout:fragment="script">
+    <script>
+        // 이미지 프리뷰 기능
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('file');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const imagePreview = document.getElementById('imagePreview');
 
-    <div class="result-block" th:if="${error}">
-        <h2>오류 발생</h2>
-        <p th:text="${error}" style="color: red;"></p>
-    </div>
-</main>
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0]; // 선택된 파일 가져오기
 
-<div th:replace="fragments/footer :: mainFooter"></div>
+                if (file) {
+                    const reader = new FileReader(); // FileReader 객체 생성
 
-<script th:src="@{/js/flow.js}"></script> <script>
-    // 이미지 프리뷰 기능
-    document.addEventListener('DOMContentLoaded', function() {
-        const fileInput = document.getElementById('file');
-        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        const imagePreview = document.getElementById('imagePreview');
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result; // 이미지 src에 데이터 URL 설정
+                        imagePreviewContainer.style.display = 'block'; // 프리뷰 컨테이너 보이기
+                    };
 
-        fileInput.addEventListener('change', function(event) {
-            const file = event.target.files[0]; // 선택된 파일 가져오기
-
-            if (file) {
-                const reader = new FileReader(); // FileReader 객체 생성
-
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result; // 이미지 src에 데이터 URL 설정
-                    imagePreviewContainer.style.display = 'block'; // 프리뷰 컨테이너 보이기
-                };
-
-                reader.readAsDataURL(file); // 파일을 Data URL 형식으로 읽기
-            } else {
-                imagePreview.src = '#'; // 파일이 없으면 이미지 src 초기화
-                imagePreviewContainer.style.display = 'none'; // 프리뷰 컨테이너 숨기기
-            }
+                    reader.readAsDataURL(file); // 파일을 Data URL 형식으로 읽기
+                } else {
+                    imagePreview.src = '#'; // 파일이 없으면 이미지 src 초기화
+                    imagePreviewContainer.style.display = 'none'; // 프리뷰 컨테이너 숨기기
+                }
+            });
         });
-    });
-</script>
+    </script>
+</th:block>
 </body>
 </html>
