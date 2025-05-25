@@ -78,7 +78,7 @@ public class PromptFactory {
     - 감정·행동
     - 기타 특이사항(목줄·배경 등)
     
-    보호자가 이해하기 쉬운 문장으로 요약해줘.
+    보호자가 이해하기 쉬운 문장과 사용자 친화적으로 요약해줘.
     """,
                 pet,
                 species == null || species.isBlank() ? "알 수 없음" : species
