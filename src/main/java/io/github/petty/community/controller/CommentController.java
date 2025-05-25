@@ -29,10 +29,22 @@ public class CommentController {
     public ResponseEntity<?> addComment(@PathVariable Long postId,
                                         @RequestBody CommentRequest request,
                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        String username = userDetails.getUsername();
-        Users user = usersRepository.findByUsername(username);
-        Long commentId = commentService.addComment(postId, request, user);
-        return ResponseEntity.ok().body(commentId);
+        try {
+            String username = userDetails.getUsername();
+            Users user = usersRepository.findByUsername(username);
+            
+            System.out.println("🔥 댓글 등록 시작 - postId: " + postId + ", user: " + username);
+            
+            Long commentId = commentService.addComment(postId, request, user);
+            
+            System.out.println("✅ 댓글 등록 완료 - commentId: " + commentId);
+            
+            return ResponseEntity.ok().body(commentId);
+        } catch (Exception e) {
+            System.err.println("❌ 댓글 등록 실패: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("댓글 등록에 실패했습니다: " + e.getMessage());
+        }
     }
 
     @PutMapping("/api/comments/{commentId}")
@@ -48,9 +60,21 @@ public class CommentController {
     @DeleteMapping("/api/comments/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        String username = userDetails.getUsername();
-        Users user = usersRepository.findByUsername(username);
-        commentService.deleteComment(commentId, user);
-        return ResponseEntity.noContent().build();
+        try {
+            String username = userDetails.getUsername();
+            Users user = usersRepository.findByUsername(username);
+            
+            System.out.println("🔥 댓글 삭제 시작 - commentId: " + commentId + ", user: " + username);
+            
+            commentService.deleteComment(commentId, user);
+            
+            System.out.println("✅ 댓글 삭제 완료 - commentId: " + commentId);
+            
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            System.err.println("❌ 댓글 삭제 실패: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("댓글 삭제에 실패했습니다: " + e.getMessage());
+        }
     }
 }
