@@ -1065,43 +1065,13 @@
                 likeCountElement.textContent = post.likeCount || 0;
             }
             
-            // 댓글 수 업데이트 - ID로 직접 찾기
+            // 댓글 수 업데이트
             const commentCountElement = document.getElementById("commentCount");
             if (commentCountElement) {
                 commentCountElement.textContent = post.commentCount || 0;
             }
             
             console.log(`✅ 통계 업데이트 완료: 좋아요 ${post.likeCount}, 댓글 ${post.commentCount}`);
-        } catch (err) {
-            console.error("게시글 통계 업데이트 실패:", err);
-        }
-    }
-
-    // 🔥 게시글의 좋아요 수와 댓글 수를 실시간으로 업데이트하는 함수
-    async function updatePostCounts() {
-        try {
-            const res = await fetch(`/api/posts/${postId}`);
-            if (!res.ok) return;
-
-            const post = await res.json();
-            
-            // 좋아요 수 업데이트
-            const likeCountElement = document.getElementById("likeCount");
-            if (likeCountElement) {
-                likeCountElement.textContent = post.likeCount || 0;
-            }
-            
-            // 댓글 수 업데이트 (meta 영역의 댓글 수)
-            const commentCountElements = document.querySelectorAll('.post-meta span:last-child svg + text()');
-            const metaCommentCount = document.querySelector('.post-meta span:last-child');
-            if (metaCommentCount) {
-                metaCommentCount.innerHTML = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20.9955 6.00223C21.0109 6.01746 21.0261 6.0328 21.0411 6.04825L12.8481 12L21.0411 17.9517C21.0261 17.9672 21.0109 17.9825 20.9955 17.9978C20.8955 18.0978 20.7877 18.1469 20.6739 18.1469H3.33268C3.00186 18.1469 2.73438 17.8831 2.73438 17.5565V6.44348C2.73438 6.11686 3.00186 5.85312 3.33268 5.85312H20.6739C20.7877 5.85312 20.8955 5.90224 20.9955 6.00223Z" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                    ${post.commentCount || 0}
-                `;
-            }
         } catch (err) {
             console.error("게시글 통계 업데이트 실패:", err);
         }
