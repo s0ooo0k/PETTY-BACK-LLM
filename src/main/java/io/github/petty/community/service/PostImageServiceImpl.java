@@ -64,25 +64,52 @@ public class PostImageServiceImpl implements PostImageService {
     @Override
     @Transactional
     public void updateImagesFromRequest(Post post, List<PostImageRequest> imageRequests) {
+        if (imageRequests == null || imageRequests.isEmpty()) {
+            return;
+        }
+
+        // 1️⃣ 기존 이미지들 조회
+        List<PostImage> existingImages = postImageRepository.findByPostIdOrderByOrderingAsc(post.getId());
+        
+        // 2️⃣ 삭제할 이미지들 처리
         for (PostImageRequest dto : imageRequests) {
-            if (Boolean.TRUE.equals(dto.getIsDeleted())) {
-                if (dto.getId() != null) {
-                    PostImage image = postImageRepository.findById(dto.getId())
-                            .orElseThrow(() -> new IllegalArgumentException("이미지를 찾을 수 없습니다."));
-                    postImageRepository.deleteById(dto.getId());
-                    supabaseUploader.delete(image.getImageUrl()); // ✅ Supabase에서 삭제
-                }
-            } else if (dto.getId() != null) {
-                PostImage image = postImageRepository.findById(dto.getId())
-                        .orElseThrow(() -> new IllegalArgumentException("이미지를 찾을 수 없습니다."));
-                image.setImageUrl(dto.getImageUrl());
-                image.setOrdering(dto.getOrdering());
-            } else {
-                PostImage newImage = new PostImage();
-                newImage.setImageUrl(dto.getImageUrl());
-                newImage.setOrdering(dto.getOrdering());
-                newImage.setPost(post);
+            if (Boolean.TRUE.equals(dto.getIsDeleted()) && dto.getId() != null) {
+                // 기존 이미지 삭제
+                existingImages.stream()
+                    .filter(img -> img.getId().equals(dto.getId()))
+                    .findFirst()
+                    .ifPresent(image -> {
+                        postImageRepository.delete(image);
+                        supabaseUploader.delete(image.getImageUrl());
+                    });
+            }
+        }
+        
+        // 3️⃣ flush로 삭제 작업 완료
+        postImageRepository.flush();
+        
+        // 4️⃣ 새로운 이미지들 추가 (id가 없는 것들)
+        for (PostImageRequest dto : imageRequests) {
+            if (!Boolean.TRUE.equals(dto.getIsDeleted()) && dto.getId() == null) {
+                PostImage newImage = PostImage.builder()
+                    .imageUrl(dto.getImageUrl())
+                    .ordering(dto.getOrdering() != null ? dto.getOrdering() : 0)
+                    .post(post)
+                    .build();
                 postImageRepository.save(newImage);
+            }
+        }
+        
+        // 5️⃣ 기존 이미지 순서 업데이트 (삭제되지 않은 것들만)
+        for (PostImageRequest dto : imageRequests) {
+            if (!Boolean.TRUE.equals(dto.getIsDeleted()) && dto.getId() != null) {
+                postImageRepository.findById(dto.getId())
+                    .ifPresent(image -> {
+                        if (dto.getOrdering() != null) {
+                            image.setOrdering(dto.getOrdering());
+                        }
+                        // save() 호출하지 않음 - @Transactional로 자동 저장
+                    });
             }
         }
     }

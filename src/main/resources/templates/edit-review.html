@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-    <a href="javascript:history.back()" class="back-link">
+    <a href="javascript:void(0)" onclick="goBack()" class="back-link">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -89,7 +89,7 @@
             </div>
 
             <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+                <button type="button" class="btn btn-secondary" onclick="goBack()">취소</button>
                 <button type="submit" class="btn btn-primary">수정완료</button>
             </div>
         </form>
