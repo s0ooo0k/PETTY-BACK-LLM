@@ -2,6 +2,7 @@ let directSearchCurrentPage = 0;
 const DIRECT_SEARCH_PAGE_SIZE = 10;
 let directSearchTotalPages = 0;
 let directSearchSelectedLatlng = null; // 직접 검색용 좌표 저장
+let lastManualAiRecommendResponse = null;
 
 let map;
 let geocoder;
@@ -272,16 +273,19 @@ function fetchDirectSearchResults(append = false) {
             }
             return response.json();
         })
-        .then(pageData => {
+        .then(responseData => {
             if (resultsControls) resultsControls.style.display = 'flex';
-            displayDirectSearchResults(pageData.content, append); // *** 여기가 올바른 displayDirectSearchResults 호출 ***
+            displayDirectSearchResults(responseData.content, append); // *** 여기가 올바른 displayDirectSearchResults 호출 ***
 
             const resultCountEl = document.getElementById('resultCountDirectSearch');
-            if (resultCountEl) resultCountEl.textContent = pageData.totalElements;
-            directSearchTotalPages = pageData.totalPages;
-
-            if (loadMoreContainer) {
-                if (pageData.number < pageData.totalPages - 1) {
+            if (resultCountEl && responseData.page) {
+                resultCountEl.textContent = responseData.page.totalElements; // 변경점
+            }
+            if (responseData.page) {
+                directSearchTotalPages = responseData.page.totalPages; // 변경점
+            }
+            if (loadMoreContainer && responseData.page) {
+                if (responseData.page.number < responseData.page.totalPages - 1) { // 변경점
                     loadMoreContainer.style.display = 'block';
                 } else {
                     loadMoreContainer.style.display = 'none';
@@ -577,49 +581,98 @@ document.addEventListener('DOMContentLoaded', function () {
             const currentAiLat = selectedLatlng ? selectedLatlng.getLat() : null;
             const currentAiLng = selectedLatlng ? selectedLatlng.getLng() : null;
 
-            // aiLocationInput에 값이 있지만 selectedLatlng이 없는 경우 (예: 직접 입력 후 blur 이벤트 실패 또는 미발생)
-            // 이 경우 location 문자열만 보내거나, 다시 한번 지오코딩 시도 후 좌표 포함 가능
-            // 현재는 selectedLatlng이 있으면 그 좌표를 사용
 
             const requestData = {
-                species: species,
-                weight: weight,
-                is_danger: is_danger,
-                location: location,
-                info: info,
-                mapX: currentAiLng, // AI 추천 폼 제출 시점의 selectedLatlng 사용
-                mapY: currentAiLat,  // AI 추천 폼 제출 시점의 selectedLatlng 사용
+                species: document.getElementById('petSpecies').value,
+                weight: document.querySelector('input[name="petSizeAI"]:checked')?.value || '',
+                is_danger: (document.querySelector('input[name="isPredatorAI"]:checked')?.value === '예') || false,
+                location: document.getElementById('aiLocationInput').value,
+                info: document.getElementById('petInfo').value,
             };
 
             console.log("AI Recommend Request:", requestData);
 
-            // 실제 API 호출 로직 (예시)
-            // fetch('/api/v1/ai/recommendations', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(requestData)
-            // })
-            // .then(response => {
-            //     if (!response.ok) throw new Error('AI 추천 API 호출 실패');
-            //     return response.json();
-            // })
-            // .then(data => {
-            //     if(spinner) spinner.style.display = 'none';
-            //     displayAiRecommendations(data.recommendations); // API 응답 구조에 따라 data.recommendations 등 사용
-            // })
-            // .catch(error => {
-            //     if(spinner) spinner.style.display = 'none';
-            //     resultsContainer.innerHTML = `<p class="text-danger text-center">AI 추천을 가져오는 중 오류 발생: ${error.message}</p>`;
-            //     console.error("AI 추천 오류:", error);
-            // });
-
-            // Mock response
-            setTimeout(() => {
+            setTimeout(() => { // 이 부분이 실제 fetch().then().then() 콜백이라고 가정
                 if(spinner) spinner.style.display = 'none';
-                // displayAiRecommendations([{title: "AI 추천 결과 (예시)", addr:"서울시 강남구", description: "매우 좋음", contentId: "123", imageUrl: "https://via.placeholder.com/300x200", acmpyTypeCd: "동반가능", acmpyPsblCpam: "소형견", acmpyNeedMtr: "목줄"}]);
-                resultsContainer.innerHTML = '<p class="text-info text-center">AI 추천 기능은 현재 백엔드 연동 개발 중입니다.</p>';
-            }, 1500);
+
+                // 예시 RecommendResponseDTO 구조 (실제 API 응답을 여기에 맞춰야 함)
+                const mockRecommendResponseDTO = {
+                    recommend: [
+                        { contentId: "123", title: "행복한강아지공원 (수동입력결과)", addr: "서울 강남구", description: "넓고 깨끗한 공원입니다.", imageUrl: "/assets/noimg.png", acmpyTypeCd: "모두가능", acmpyPsblCpam: "소형견, 중형견", acmpyNeedMtr: "목줄필수", recommendReason: "사용자 입력 기반 AI 추천입니다." },
+                        { contentId: "789", title: "멍멍이카페 (수동입력결과)", addr: "서울 마포구", description: "다양한 간식이 있어요.", imageUrl: null, acmpyTypeCd: "실내가능", acmpyPsblCpam: "소형견", acmpyNeedMtr: "기본 매너", recommendReason: "실내 활동을 선호하는 사용자에게 추천합니다." }
+                    ]
+                };
+
+                lastManualAiRecommendResponse = mockRecommendResponseDTO; // 전체 DTO 저장
+
+                if (resultsContainer) {
+                    // displayAiRecommendations는 이전 답변에서 recommendReason 및 링크 수정된 버전으로 가정
+                    displayAiRecommendations(mockRecommendResponseDTO.recommend);
+                    // 파이프라인 결과 페이지 이동 버튼 추가
+                    addGoToPipelineResultPageButton(resultsContainer, lastManualAiRecommendResponse);
+                } else {
+                    console.error("AI results container not found.");
+                }
+            }, 1000);
         });
+    }
+    // 새 함수: 파이프라인 결과 페이지 이동 버튼 추가
+    function addGoToPipelineResultPageButton(resultsDisplayArea, recommendationData) {
+        if (!resultsDisplayArea || !recommendationData || !recommendationData.recommend || recommendationData.recommend.length === 0) {
+            console.log("추천 데이터가 없거나 결과 표시 영역이 없어 버튼을 추가하지 않습니다.");
+            return;
+        }
+
+        // 기존 버튼 제거 (중복 방지)
+        let existingButtonContainer = resultsDisplayArea.parentElement.querySelector('.go-to-pipeline-button-container');
+        if (existingButtonContainer) {
+            existingButtonContainer.remove();
+        }
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'text-center mt-4 mb-3 go-to-pipeline-button-container';
+
+        const button = document.createElement('button');
+        button.className = 'btn btn-outline-info';
+        button.innerHTML = '<i class="bi bi-card-list me-2"></i>이 추천결과를 사진 분석 스타일 페이지에서 보기';
+        button.type = 'button';
+
+        button.addEventListener('click', async () => {
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 세션에 저장 중...';
+
+            try {
+                const response = await fetch('/api/session/recommendation', { // 새 API 엔드포인트
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(recommendationData) // 저장된 RecommendResponseDTO 전달
+                });
+
+                if (response.ok) {
+                    // 세션 저장 성공 시, 파이프라인 결과 페이지로 이동
+                    window.location.href = '/flow/showRecommendationResult';
+                } else {
+                    const errorText = await response.text();
+                    pipelineJsonStatus.innerHTML = `<div class="alert alert-danger mt-2">세션 저장 실패: ${errorText}</div>`; // 상태 표시 (pipelineJsonStatus가 있다면 활용)
+                    console.error('세션 저장 실패:', errorText);
+                    alert('세션 저장에 실패했습니다: ' + errorText);
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bi bi-card-list me-2"></i>이 추천결과를 사진 분석 스타일 페이지에서 보기';
+                }
+            } catch (error) {
+                pipelineJsonStatus.innerHTML = `<div class="alert alert-danger mt-2">요청 중 오류 발생: ${error.message}</div>`; // 상태 표시
+                console.error('세션 저장 요청 오류:', error);
+                alert('요청 중 오류가 발생했습니다: ' + error.message);
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-card-list me-2"></i>이 추천결과를 사진 분석 스타일 페이지에서 보기';
+            }
+        });
+
+        buttonContainer.appendChild(button);
+        // aiRecommendResults div 다음에 버튼 컨테이너 삽입
+        resultsDisplayArea.parentNode.insertBefore(buttonContainer, resultsDisplayArea.nextSibling);
     }
 
 
@@ -695,20 +748,19 @@ document.addEventListener('DOMContentLoaded', function () {
             directSearchCurrentPage = 0; // 새 검색이므로 첫 페이지부터
             const resultList = document.getElementById('directSearchResultList');
             if(resultList) resultList.innerHTML = ''; // 이전 결과 지우기
+
+            // 로딩 스피너 및 결과 컨트롤 초기화
+            const spinner = document.getElementById('spinnerDirectSearch');
+            const resultsControls = document.getElementById('resultControlsDirectSearch');
+            if(spinner) spinner.style.display = 'block'; // fetch 하기 전에 스피너 표시
+            if(resultsControls) resultsControls.style.display = 'none';
             fetchDirectSearchResults(false); // append = false
-            directSearchCurrentPage = 0; // API 호출 후 페이지 번호를 0으로 재설정 (fetchDirectSearchResults 내부에서 증가시키므로)
-            // fetchDirectSearchResults 함수 내부에서 API 호출 전에 current page를 사용하고, 성공 후 증가시키는게 더 명확할 수 있음.
-            // 현재 로직: 제출 시 0 -> fetch(0) -> 성공 시 directSearchCurrentPage++ (다음이 1)
-            // 이 줄은 사실상 fetchDirectSearchResults 내부 로직과 중복될 수 있으므로 주의.
-            // fetchDirectSearchResults가 성공적으로 pageData.number (현재 페이지 번호)를 반환하면,
-            // 다음 요청을 위해 directSearchCurrentPage = pageData.number + 1; 로 설정하는 것이 더 안전.
-            // 우선은 현재 로직 유지 (fetch 시작 시 0, fetch 내부에서 current page 사용)
         });
     }
 
     if(loadMoreButtonDirectSearch){
         loadMoreButtonDirectSearch.addEventListener('click', function(){
-            directSearchCurrentPage++; // 더보기 버튼 클릭 시 다음 페이지 요청
+            directSearchCurrentPage++; // 다음 페이지로 증가
             fetchDirectSearchResults(true); // append = true
         });
     }

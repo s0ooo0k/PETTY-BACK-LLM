@@ -240,17 +240,31 @@
 
 /* --- 직접 검색 결과 리스트 컨트롤 --- */
 #resultControlsDirectSearch {
-  background-color: var(--bs-light-bg-subtle);
-  padding: 1rem 1.5rem;
-  border-radius: var(--border-radius-md);
+  background-color: var(--bs-light-bg-subtle); /* 또는 var(--card-bg-color) 등 테마에 맞는 배경 */
+  padding: 1rem 1.5rem; /* 내부 여백 유지 */
+  border-radius: var(--border-radius-md); /* common.css 변수 사용 */
   margin-bottom: 1.5rem;
-  box-shadow: var(--box-shadow-light);
+  box-shadow: var(--box-shadow-light); /* common.css 변수 사용 */
+
+  /* 내부 요소 정렬을 위한 Flexbox 속성 추가 */
+  display: flex;
+  justify-content: space-between; /* 양쪽 끝으로 요소 배치 */
+  align-items: center;          /* 수직 중앙 정렬 */
+  flex-wrap: wrap;              /* 화면 작을 때 줄 바꿈 허용 */
+  gap: 0.5rem;                  /* 내부 요소들 사이의 최소 간격 (flex-wrap 시 유용) */
+}
+#resultControlsDirectSearch .fw-bold { /* "검색 결과:" 텍스트 */
+  color: var(--secondary-text-color); /* 또는 적절한 텍스트 색상 변수 */
 }
 #resultControlsDirectSearch #resultCountDirectSearch {
-  font-size: 0.95em; /* 뱃지 크기 */
+  font-size: 0.95em;
   padding: 0.5em 0.75em;
+  color: var(--text-color); /* 이전 답변에서 수정한 텍스트 색상 */
+  background-color: var(--bs-primary); /* 혹은 var(--accent-color) 등 */
 }
-
+#resultControlsDirectSearch .d-flex.gap-2 {
+  /* 이 부분은 이미 Bootstrap 클래스로 제어되고 있을 수 있음 */
+}
 
 /* --- 직접 검색 결과 리스트 아이템 --- */
 .petty-list-item {
