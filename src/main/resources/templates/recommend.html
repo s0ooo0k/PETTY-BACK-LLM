@@ -172,19 +172,16 @@
                                 <p class="loading-text">검색 조건으로 장소를 찾는 중...</p>
                             </div>
                         </div>
-                        <div id="resultControlsDirectSearch" class="mb-3 bg-light p-3 rounded shadow-sm" style="display: none;">
-                            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                                <div class="mb-2 mb-md-0">
-                                    <span class="fw-bold me-2">검색 결과:</span>
-                                    <span id="resultCountDirectSearch" class="badge bg-primary">0</span> 건
-                                </div>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <select class="form-select form-select-sm" id="sortOrderDirectSearch" style="max-width: 150px; display:none;"> <option value="modifiedTime,desc" selected>최신순</option>
-                                        <option value="title,asc">이름순</option>
-                                    </select>
-                                    <button class="btn btn-sm btn-outline-secondary" id="viewMapModeDirectSearch" style="display:none;"> <i class="bi bi-map me-1"></i><span class="d-none d-sm-inline">지도로 보기</span>
-                                    </button>
-                                </div>
+                        <div id="resultControlsDirectSearch" class="mb-3 bg-light p-3 rounded shadow-sm" style="display: flex;">
+                            <div class="mb-2 mb-md-0"> <span class="fw-bold me-2">검색 결과:</span>
+                                <span id="resultCountDirectSearch" class="badge bg-primary">0</span> 건
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <select class="form-select form-select-sm" id="sortOrderDirectSearch" style="max-width: 150px; display:none;">
+
+                                </select>
+                                <button class="btn btn-sm btn-outline-secondary" id="viewMapModeDirectSearch" style="display:none;">
+                                </button>
                             </div>
                         </div>
                         <div id="directSearchResultList" class="row g-3">
