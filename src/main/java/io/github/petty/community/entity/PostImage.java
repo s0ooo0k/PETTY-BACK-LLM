@@ -1,6 +1,10 @@
 package io.github.petty.community.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Entity
@@ -23,10 +27,14 @@ public class PostImage {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Column(name = "image_url", nullable = false)
+    @NotBlank(message = "이미지 URL은 필수입니다")
+    @Size(max = 500, message = "이미지 URL은 500자 이내여야 합니다")
+    @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
 
     // 이미지 순서 (0~4)
+    @Min(value = 0, message = "이미지 순서는 0 이상이어야 합니다")
+    @Max(value = 4, message = "이미지 순서는 4 이하여야 합니다")
     @Builder.Default
     @Column(nullable = false)
     private Integer ordering = 0;

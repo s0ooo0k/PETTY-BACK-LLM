@@ -8,10 +8,6 @@ import io.github.petty.community.repository.CommentRepository;
 import io.github.petty.community.repository.PostRepository;
 import io.github.petty.users.entity.Users;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +28,7 @@ public class CommentServiceImpl implements CommentService {
                 .map(comment -> CommentResponse.builder()
                         .id(comment.getId())
                         .writer(comment.getUser().getDisplayName())  // 안전하게 호출됨
+                        .userName(comment.getUser().getUsername())
                         .content(comment.getContent())
                         .createdAt(comment.getCreatedAt())
                         .build())
@@ -39,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public Long addComment(Long postId, CommentRequest request, Users user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
@@ -49,6 +47,9 @@ public class CommentServiceImpl implements CommentService {
         comment.setContent(request.getContent());
 
         post.setCommentCount(post.getCommentCount() + 1); // 댓글 수 증가
+        
+        // 🔥 Post의 commentCount 변경 사항을 DB에 저장
+        postRepository.save(post);
 
         return commentRepository.save(comment).getId();
     }

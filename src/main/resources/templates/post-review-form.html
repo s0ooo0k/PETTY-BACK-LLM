@@ -21,8 +21,8 @@
 
         <form id="reviewForm">
             <div class="form-group">
-                <label for="review-title">제목</label>
-                <input type="text" class="input-field" id="review-title" placeholder="후기 제목을 입력해주세요" maxlength="50">
+                <label for="review-title">제목 <span class="required">*</span></label>
+                <input type="text" class="input-field" id="review-title" placeholder="후기 제목을 입력해주세요" maxlength="50" required>
             </div>
 
             <div class="form-group">
@@ -36,10 +36,10 @@
             </div>
 
             <div class="form-group">
-                <label>반려동물 종류</label>
+                <label>반려동물 종류 <span class="required">*</span></label>
                 <div class="radio-group">
                     <div class="radio-item">
-                        <input type="radio" id="review-pet-dog" name="review-petType" value="DOG">
+                        <input type="radio" id="review-pet-dog" name="review-petType" value="DOG" checked>
                         <label for="review-pet-dog">강아지</label>
                     </div>
                     <div class="radio-item">
@@ -70,8 +70,8 @@
             </div>
 
             <div class="form-group">
-                <label for="review-content">후기 내용</label>
-                <textarea class="input-field" id="review-content" placeholder="여행 경험을 자유롭게 작성해주세요" maxlength="2000"></textarea>
+                <label for="review-content">후기 내용 <span class="required">*</span></label>
+                <textarea class="input-field" id="review-content" placeholder="여행 경험을 자유롭게 작성해주세요" maxlength="2000" required></textarea>
             </div>
 
             <div class="form-group">

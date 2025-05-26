@@ -21,15 +21,15 @@
 
         <form id="postForm">
             <div class="form-group">
-                <label for="title">제목</label>
-                <input type="text" class="input-field" id="title" placeholder="질문의 제목을 입력해주세요" maxlength="50">
+                <label for="title">제목 <span class="required">*</span></label>
+                <input type="text" class="input-field" id="title" placeholder="질문의 제목을 입력해주세요" maxlength="50" required>
             </div>
 
             <div class="form-group">
-                <label>반려동물 종류</label>
+                <label>반려동물 종류 <span class="required">*</span></label>
                 <div class="radio-group">
                     <div class="radio-item">
-                        <input type="radio" id="pet-dog" name="petType" value="DOG">
+                        <input type="radio" id="pet-dog" name="petType" value="DOG" checked>
                         <label for="pet-dog">강아지</label>
                     </div>
                     <div class="radio-item">
@@ -60,8 +60,8 @@
             </div>
 
             <div class="form-group">
-                <label for="content">질문 내용</label>
-                <textarea class="input-field" id="content" placeholder="질문 내용을 자세히 작성해주세요. 구체적인 내용을 포함하면 더 정확한 답변을 받을 수 있어요." maxlength="2000"></textarea>
+                <label for="content">질문 내용 <span class="required">*</span></label>
+                <textarea class="input-field" id="content" placeholder="질문 내용을 자세히 작성해주세요. 구체적인 내용을 포함하면 더 정확한 답변을 받을 수 있어요." maxlength="2000" required></textarea>
             </div>
 
             <div class="form-group">
