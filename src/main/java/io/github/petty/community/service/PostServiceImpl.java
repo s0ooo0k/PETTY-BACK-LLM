@@ -194,21 +194,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void updateAllPostCounts() {
-        // 🔥 모든 게시글의 댓글 수와 좋아요 수를 올바르게 업데이트
-        List<Post> allPosts = postRepository.findAll();
-        
-        for (Post post : allPosts) {
-            // 댓글 수 업데이트
-            long commentCount = commentRepository.countByPostId(post.getId());
-            post.setCommentCount((int) commentCount);
-            
-            // 좋아요 수 업데이트
-            long likeCount = postLikeRepository.countByPost(post);
-            post.setLikeCount((int) likeCount);
-            
-            postRepository.save(post);
-        }
-        
+        postRepository.updateAllPostCounts();
         System.out.println("✅ 모든 게시글의 댓글 수와 좋아요 수가 업데이트되었습니다.");
     }
 }

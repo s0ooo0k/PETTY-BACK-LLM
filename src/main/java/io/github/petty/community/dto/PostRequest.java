@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import io.github.petty.community.dto.PostImageRequest;
 

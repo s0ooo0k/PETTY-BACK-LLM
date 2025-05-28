@@ -185,48 +185,45 @@ async function handleFormSubmit(e) {
       return;
     }
 
-  // 페이지별로 요소 찾기
-  const titleElement = document.getElementById('title') ||
-                      document.getElementById('review-title') ||
-                      document.getElementById('showoff-title');
+      const form = e.target;
+      const formData = new FormData(form);
 
-  const contentElement = document.getElementById('content') ||
-                        document.getElementById('review-content') ||
-                        document.getElementById('showoff-content');
+      // 🔥 방법 1: FormData에서 직접 추출 (name 속성 활용)
+      const title = formData.get('title')?.trim();
+      const content = formData.get('content')?.trim();
+      const petType = formData.get('petType');
+      const petName = formData.get('petName')?.trim();
+      const region = formData.get('region')?.trim();
+      const isResolved = formData.has('isResolved'); // 체크박스는 has로 확인
 
-  const petNameElement = document.getElementById('petName');
-  const regionElement = document.getElementById('region');
+      // 🔐 필수 필드 검증
+      if (!title) {
+        showErrorMessage("제목을 입력해주세요.");
+        form.querySelector('[name="title"]')?.focus();
+        return;
+      }
 
-  // 🔐 필수 필드 검증
-  if (!titleElement?.value?.trim()) {
-    showErrorMessage("제목을 입력해주세요.");
-    titleElement?.focus();
-    return;
-  }
+      if (!content) {
+        showErrorMessage("내용을 입력해주세요.");
+        form.querySelector('[name="content"]')?.focus();
+        return;
+      }
 
-  if (!contentElement?.value?.trim()) {
-    showErrorMessage("내용을 입력해주세요.");
-    contentElement?.focus();
-    return;
-  }
+      if (!petType) {
+        showErrorMessage("반려동물 종류를 선택해주세요.");
+        return;
+      }
 
-  // 🔐 반려동물 종류 검증
-  const petType = getRadioValue('petType') || getRadioValue('review-petType') || getRadioValue('showoff-petType');
-  if (!petType) {
-    showErrorMessage("반려동물 종류를 선택해주세요.");
-    return;
-  }
-
-  const postData = {
-    title: titleElement.value.trim(),
-    content: contentElement.value.trim(),
-    petType: petType,
-    petName: petNameElement?.value?.trim() || null,
-    region: regionElement?.value?.trim() || null,
-    postType: detectPostType(),
-    isResolved: false,
-    images: uploadedImages
-  };
+      const postData = {
+        title,
+        content,
+        petType,
+        petName: petName || null,
+        region: region || null,
+        postType: detectPostType(),
+        isResolved: isResolved,
+        images: uploadedImages
+      };
 
   try {
     const res = await fetch('/api/posts', {

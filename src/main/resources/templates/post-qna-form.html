@@ -22,7 +22,7 @@
         <form id="postForm">
             <div class="form-group">
                 <label for="title">제목 <span class="required">*</span></label>
-                <input type="text" class="input-field" id="title" placeholder="질문의 제목을 입력해주세요" maxlength="50" required>
+                <input type="text" class="input-field" id="title" name="title" placeholder="질문의 제목을 입력해주세요" maxlength="50" required>
             </div>
 
             <div class="form-group">
@@ -61,7 +61,7 @@
 
             <div class="form-group">
                 <label for="content">질문 내용 <span class="required">*</span></label>
-                <textarea class="input-field" id="content" placeholder="질문 내용을 자세히 작성해주세요. 구체적인 내용을 포함하면 더 정확한 답변을 받을 수 있어요." maxlength="2000" required></textarea>
+                <textarea class="input-field" id="content" name="content" placeholder="질문 내용을 자세히 작성해주세요. 구체적인 내용을 포함하면 더 정확한 답변을 받을 수 있어요." maxlength="2000" required></textarea>
             </div>
 
             <div class="form-group">
@@ -71,7 +71,7 @@
                     <div class="title">이미지를 여기에 드래그하거나</div>
                     <div class="browse">파일 선택하기</div>
                     <div class="formats">PNG, JPG, GIF 최대 5MB (최대 5장)</div>
-                    <input type="file" id="imageFiles" multiple accept="image/png, image/jpeg, image/gif">
+                    <input type="file" id="imageFiles" name="imageFiles" multiple accept="image/png, image/jpeg, image/gif">
                 </label>
                 <div class="image-preview" id="imagePreview">
                     <!-- 기존 이미지와 새로 업로드한 이미지 미리보기가 여기에 표시됩니다 -->

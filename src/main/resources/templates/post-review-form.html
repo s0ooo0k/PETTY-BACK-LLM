@@ -22,48 +22,48 @@
         <form id="reviewForm">
             <div class="form-group">
                 <label for="review-title">제목 <span class="required">*</span></label>
-                <input type="text" class="input-field" id="review-title" placeholder="후기 제목을 입력해주세요" maxlength="50" required>
+                <input type="text" class="input-field" id="review-title" name="title" placeholder="후기 제목을 입력해주세요" maxlength="50" required>
             </div>
 
             <div class="form-group">
                 <label for="petName">반려동물 이름</label>
-                <input type="text" class="input-field" id="petName" placeholder="반려동물 이름을 입력해주세요">
+                <input type="text" class="input-field" id="petName" name="petName" placeholder="반려동물 이름을 입력해주세요">
             </div>
 
             <div class="form-group">
                 <label for="region">여행 장소</label>
-                <input type="text" class="input-field" id="region" placeholder="여행 장소를 입력해주세요">
+                <input type="text" class="input-field" id="region" name="region" placeholder="여행 장소를 입력해주세요">
             </div>
 
             <div class="form-group">
                 <label>반려동물 종류 <span class="required">*</span></label>
                 <div class="radio-group">
                     <div class="radio-item">
-                        <input type="radio" id="review-pet-dog" name="review-petType" value="DOG" checked>
+                        <input type="radio" id="review-pet-dog" name="petType" value="DOG" checked>
                         <label for="review-pet-dog">강아지</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="review-pet-cat" name="review-petType" value="CAT">
+                        <input type="radio" id="review-pet-cat" name="petType" value="CAT">
                         <label for="review-pet-cat">고양이</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="review-pet-rabbit" name="review-petType" value="RABBIT">
+                        <input type="radio" id="review-pet-rabbit" name="petType" value="RABBIT">
                         <label for="review-pet-rabbit">토끼</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="review-pet-hamster" name="review-petType" value="HAMSTER">
+                        <input type="radio" id="review-pet-hamster" name="petType" value="HAMSTER">
                         <label for="review-pet-hamster">햄스터</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="review-pet-bird" name="review-petType" value="PARROT">
+                        <input type="radio" id="review-pet-bird" name="petType" value="PARROT">
                         <label for="review-pet-bird">앵무새</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="review-pet-reptile" name="review-petType" value="REPTILE">
+                        <input type="radio" id="review-pet-reptile" name="petType" value="REPTILE">
                         <label for="review-pet-reptile">파충류</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="review-pet-other" name="review-petType" value="OTHER">
+                        <input type="radio" id="review-pet-other" name="petType" value="OTHER">
                         <label for="review-pet-other">기타</label>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
 
             <div class="form-group">
                 <label for="review-content">후기 내용 <span class="required">*</span></label>
-                <textarea class="input-field" id="review-content" placeholder="여행 경험을 자유롭게 작성해주세요" maxlength="2000" required></textarea>
+                <textarea class="input-field" id="review-content" name="content" placeholder="여행 경험을 자유롭게 작성해주세요" maxlength="2000" required></textarea>
             </div>
 
             <div class="form-group">
@@ -81,7 +81,7 @@
                     <div class="title">이미지를 여기에 드래그하거나</div>
                     <div class="browse">파일 선택하기</div>
                     <div class="formats">PNG, JPG, GIF 최대 5MB (최대 5장)</div>
-                    <input type="file" id="review-imageFiles" multiple accept="image/png, image/jpeg, image/gif">
+                    <input type="file" id="review-imageFiles" name="imageFiles" multiple accept="image/png, image/jpeg, image/gif">
                 </label>
                 <div class="image-preview" id="review-imagePreview">
                     <!-- 기존 이미지와 새로 업로드한 이미지 미리보기가 여기에 표시됩니다 -->
