@@ -194,7 +194,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void updateAllPostCounts() {
-        postRepository.updateAllPostCounts();
+        postRepository.updateAllPostCountsNative();
         System.out.println("✅ 모든 게시글의 댓글 수와 좋아요 수가 업데이트되었습니다.");
     }
 }

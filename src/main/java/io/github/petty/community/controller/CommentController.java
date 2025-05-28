@@ -48,7 +48,7 @@ public class CommentController {
            return ResponseEntity.badRequest().body("잘못된 요청입니다: " + e.getMessage());
        } catch (Exception e) {
            log.error("댓글 등록 실패", e);
-           return ResponseEntity.badRequest().body("댓글 등록에 실패했습니다: " + e.getMessage());
+           return ResponseEntity.badRequest().body("댓글 등록에 실패했습니다.");
         }
     }
 
@@ -78,7 +78,7 @@ public class CommentController {
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             log.error("댓글 삭제 실패 - commentId: {}, user: {}", commentId, username, e);
-            return ResponseEntity.badRequest().body("댓글 삭제에 실패했습니다.");
+            return ResponseEntity.status(500).body("댓글 삭제에 실패했습니다.");
         }
     }
 }

@@ -208,10 +208,10 @@ async function fetchPostForEdit() {
   const res = await fetch(`/api/posts/${postId}`);
   const post = await res.json();
 
-  const titleElement = document.querySelector('[name="title"]') || document.getElementById("edit-qna-title");
-  const contentElement = document.querySelector('[name="content"]') || document.getElementById("edit-qna-content");
-  const petNameElement = document.querySelector('[name="petName"]') || document.getElementById("edit-qna-petName");
-  const regionElement = document.querySelector('[name="region"]') || document.getElementById("edit-qna-region");
+  const titleElement = document.querySelector('[name="title"]') || document.getElementById("edit-review-title");
+  const contentElement = document.querySelector('[name="content"]') || document.getElementById("edit-review-content");
+  const petNameElement = document.querySelector('[name="petName"]') || document.getElementById("edit-review-petName");
+  const regionElement = document.querySelector('[name="region"]') || document.getElementById("edit-review-region");
 
   if (titleElement) titleElement.value = post.title;
   if (contentElement) contentElement.value = post.content;
