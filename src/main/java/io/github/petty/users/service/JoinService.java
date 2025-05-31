@@ -4,6 +4,7 @@ import io.github.petty.users.Role;
 import io.github.petty.users.dto.JoinDTO;
 import io.github.petty.users.entity.Users;
 import io.github.petty.users.repository.UsersRepository;
+import io.github.petty.users.util.DisplayNameGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,11 +15,12 @@ public class JoinService {
 
     private final UsersRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final DisplayNameGenerator displayNameGenerator;
 
     public boolean joinProcess(JoinDTO joinDTO) {
         String username = joinDTO.getUsername();
         String password = joinDTO.getPassword();
-        String displayName = joinDTO.getDisplayName();
+        String name = joinDTO.getName();
         String phone = joinDTO.getPhone();
         String encodedPassword = bCryptPasswordEncoder.encode(password);
 
@@ -30,10 +32,14 @@ public class JoinService {
         Users users = new Users();
         users.setUsername(username);
         users.setPassword(encodedPassword);
-        users.setDisplayName(displayName);
+        users.setName(name);
         users.setPhone(phone);
         users.setRole(Role.ROLE_USER.name());
         users.setProvider("local");
+
+        String uniqueDisplayName = displayNameGenerator.generateUniqueDisplayName();
+        users.setDisplayName(uniqueDisplayName);
+
         userRepository.save(users);
 
         return true;

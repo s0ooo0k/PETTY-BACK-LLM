@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>프로필 수정</title>
+    <title>프로필 수정 - Petty</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,52 +13,133 @@
         h2 {
             color: #f1c40f;
             text-align: center;
+            margin-bottom: 30px;
         }
         .profile-container {
-            max-width: 400px;
+            max-width: 500px;
             margin: 0 auto;
             background-color: #fff;
-            padding: 20px;
+            padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         label {
             font-weight: bold;
             color: #f39c12;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         input[type="text"] {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #f39c12;
-            border-radius: 4px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
             box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
         }
-        button {
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #f39c12;
+        }
+        input.invalid {
+            border-color: #e74c3c;
+        }
+        input.valid {
+            border-color: #27ae60;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .input-group input {
+            flex: 1;
+        }
+        .check-btn {
+            padding: 12px 20px;
+            background-color: #e67e22;  /* 주황색으로 변경 */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            transition: background-color 0.3s;
+        }
+        .check-btn:hover {
+            background-color: #d35400;  /* 호버 시 더 진한 주황색 */
+        }
+        .check-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .submit-btn {
             width: 100%;
-            padding: 10px;
+            padding: 15px;
             background-color: #f39c12;
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: 6px;
+            font-size: 18px;
             cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
         }
-        button:hover {
+        .submit-btn:hover {
             background-color: #f1c40f;
         }
-        .error {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
-            display: none;
+        .submit-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
         }
-        input.invalid {
-            border-color: red;
+        .message {
+            margin-top: 8px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+        .error {
+            color: #e74c3c;
+        }
+        .success {
+            color: #27ae60;
+        }
+        .warning {
+            color: #f39c12;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #f39c12;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        .alert {
+            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
     </style>
 </head>
@@ -66,42 +147,297 @@
 
 <h2>프로필 수정</h2>
 <div class="profile-container">
-    <form id="editProfileForm" th:action="@{/profile/update}" th:object="${userProfile}" method="post" novalidate>
+
+    <!-- 에러/성공 메시지 표시 -->
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+    <div id="loadingDiv" class="loading">
+        프로필 정보를 불러오는 중...
+    </div>
+
+    <!-- th:object를 사용하여 userProfile 객체 바인딩 -->
+    <form id="editProfileForm" th:action="@{/profile/update}" method="post" th:object="${userProfile}" style="display: none;">
+
         <div class="form-group">
-            <label for="displayName">사용자 이름</label>
-            <input type="text" id="displayName" name="displayName" th:field="*{displayName}" required>
+            <label for="name">이름</label>
+            <input type="text" id="name" name="name" th:field="*{name}" required>
+            <div class="message" id="nameMessage"></div>
         </div>
+
+        <div class="form-group">
+            <label for="displayName">닉네임</label>
+            <div class="input-group">
+                <input type="text" id="displayName" name="displayName" th:field="*{displayName}" required>
+                <button type="button" class="check-btn" id="checkDisplayNameBtn">중복 확인</button>
+            </div>
+            <div class="message" id="displayNameMessage"></div>
+        </div>
+
         <div class="form-group">
             <label for="phone">전화번호</label>
-            <input type="text" id="phone" name="phone" th:field="*{phone}" required>
-            <div class="error" id="phoneError">유효한 전화번호를 입력해주세요. (예: 01012345678)</div>
+            <input type="text" id="phone" name="phone" th:field="*{phone}" required placeholder="01012345678">
+            <div class="message" id="phoneMessage"></div>
         </div>
-        <button type="submit">수정하기</button>
+
+        <button type="submit" class="submit-btn" id="submitBtn">프로필 수정</button>
     </form>
+
+    <a href="/" class="back-link">← 메인으로 돌아가기</a>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('editProfileForm');
-        const phoneInput = document.getElementById('phone');
-        const phoneErrorElement = document.getElementById('phoneError');
+<script th:inline="javascript">
+    let isDisplayNameChecked = false;
+    let isDisplayNameValid = false;
+    let originalDisplayName = '';
 
-        form.addEventListener('submit', function(e) {
+    // Thymeleaf에서 서버 데이터를 JavaScript 변수로 주입
+    /*<![CDATA[*/
+    const userProfileData = {
+        name: /*[[${userProfile?.name}]]*/ '',
+        displayName: /*[[${userProfile?.displayName}]]*/ '',
+        phone: /*[[${userProfile?.phone}]]*/ ''
+    };
+    /*]]*/
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadUserProfile();
+        initializeFormValidation();
+    });
+
+    // 사용자 프로필 정보 로드 (토큰 갱신 로직 포함)
+    async function loadUserProfile() {
+        try {
+            const response = await fetch('/api/users/me');
+
+            if (response.ok) {
+                // 성공: 프로필 폼 표시 (Thymeleaf가 이미 데이터 주입함)
+                showProfileForm();
+            } else if (response.status === 401) {
+                // 액세스 토큰 만료: 자동 갱신 시도
+                console.log('액세스 토큰 만료, 리프레시 토큰으로 갱신 시도');
+
+                try {
+                    const refreshResponse = await fetch('/api/auth/refresh', {
+                        method: 'POST'
+                    });
+
+                    if (refreshResponse.ok) {
+                        console.log('토큰 갱신 성공! 프로필 로드 재시도');
+                        return await loadUserProfile();
+                    } else {
+                        console.log('리프레시 토큰도 만료, 로그인 필요');
+                        redirectToLogin();
+                    }
+                } catch (refreshError) {
+                    console.error('토큰 갱신 실패:', refreshError);
+                    redirectToLogin();
+                }
+            } else {
+                redirectToLogin();
+            }
+        } catch (error) {
+            console.error('프로필 정보 조회 실패:', error);
+            redirectToLogin();
+        }
+    }
+
+    function showProfileForm() {
+        document.getElementById('loadingDiv').style.display = 'none';
+        document.getElementById('editProfileForm').style.display = 'block';
+    }
+
+    function redirectToLogin() {
+        alert('로그인이 필요합니다.');
+        window.location.href = '/login';
+    }
+
+    function initializeFormValidation() {
+        const form = document.getElementById('editProfileForm');
+        const nameInput = document.getElementById('name');
+        const displayNameInput = document.getElementById('displayName');
+        const phoneInput = document.getElementById('phone');
+        const checkDisplayNameBtn = document.getElementById('checkDisplayNameBtn');
+        const submitBtn = document.getElementById('submitBtn');
+
+        const nameMessage = document.getElementById('nameMessage');
+        const displayNameMessage = document.getElementById('displayNameMessage');
+        const phoneMessage = document.getElementById('phoneMessage');
+
+        // Thymeleaf가 주입한 값 또는 서버 데이터 사용
+        originalDisplayName = displayNameInput.value || userProfileData.displayName || '';
+
+        // 이름 검증
+        nameInput.addEventListener('input', function() {
+            const name = this.value.trim();
+            if (name.length < 2) {
+                nameMessage.textContent = '이름은 2글자 이상 입력해주세요.';
+                nameMessage.className = 'message error';
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+            } else {
+                nameMessage.textContent = '';
+                this.classList.remove('invalid');
+                this.classList.add('valid');
+            }
+            updateSubmitButton();
+        });
+
+        // 닉네임 입력 시 중복확인 상태 초기화
+        displayNameInput.addEventListener('input', function() {
+            const currentDisplayName = this.value.trim();
+            if (currentDisplayName === originalDisplayName) {
+                displayNameMessage.textContent = '현재 사용 중인 닉네임입니다.';
+                displayNameMessage.className = 'message warning';
+                isDisplayNameChecked = true;
+                isDisplayNameValid = true;
+                this.classList.remove('invalid');
+                this.classList.add('valid');
+            } else {
+                isDisplayNameChecked = false;
+                isDisplayNameValid = false;
+                displayNameMessage.textContent = '닉네임 중복 확인이 필요합니다.';
+                displayNameMessage.className = 'message error';
+                this.classList.remove('valid', 'invalid');
+            }
+            updateSubmitButton();
+        });
+
+        // 닉네임 중복 확인 (토큰 갱신 로직 포함)
+        checkDisplayNameBtn.addEventListener('click', async function() {
+            const displayName = displayNameInput.value.trim();
+
+            if (!displayName) {
+                displayNameMessage.textContent = '닉네임을 입력해주세요.';
+                displayNameMessage.className = 'message error';
+                return;
+            }
+
+            if (displayName.length < 2) {
+                displayNameMessage.textContent = '닉네임은 2글자 이상 입력해주세요.';
+                displayNameMessage.className = 'message error';
+                return;
+            }
+
+            // 버튼 비활성화
+            this.disabled = true;
+            this.textContent = '확인 중...';
+            displayNameMessage.textContent = '중복 확인 중...';
+            displayNameMessage.className = 'message';
+
+            try {
+                const response = await fetch(`/api/check-displayname?displayName=${encodeURIComponent(displayName)}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    handleDisplayNameCheckResult(data);
+                } else if (response.status === 401) {
+                    // 토큰 만료 시 갱신 후 재시도
+                    const refreshResponse = await fetch('/api/auth/refresh', { method: 'POST' });
+
+                    if (refreshResponse.ok) {
+                        // 토큰 갱신 성공, 재시도
+                        const retryResponse = await fetch(`/api/check-displayname?displayName=${encodeURIComponent(displayName)}`);
+                        if (retryResponse.ok) {
+                            const data = await retryResponse.json();
+                            handleDisplayNameCheckResult(data);
+                        } else {
+                            throw new Error('재시도 실패');
+                        }
+                    } else {
+                        redirectToLogin();
+                        return;
+                    }
+                } else {
+                    throw new Error('서버 오류');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                displayNameMessage.textContent = '서버 오류가 발생했습니다. 다시 시도해주세요.';
+                displayNameMessage.className = 'message error';
+                isDisplayNameChecked = false;
+                isDisplayNameValid = false;
+            } finally {
+                // 버튼 활성화
+                this.disabled = false;
+                this.textContent = '중복 확인';
+                updateSubmitButton();
+            }
+        });
+
+        function handleDisplayNameCheckResult(data) {
+            isDisplayNameChecked = true;
+            isDisplayNameValid = data.available;
+
+            if (data.available) {
+                displayNameMessage.textContent = data.message;
+                displayNameMessage.className = 'message success';
+                displayNameInput.classList.remove('invalid');
+                displayNameInput.classList.add('valid');
+            } else {
+                displayNameMessage.textContent = data.message;
+                displayNameMessage.className = 'message error';
+                displayNameInput.classList.remove('valid');
+                displayNameInput.classList.add('invalid');
+            }
+        }
+
+        // 전화번호 검증
+        phoneInput.addEventListener('input', function() {
+            const phone = this.value.trim();
+            const phoneRegex = /^01[016789]\d{7,8}$/;
+
+            if (!phoneRegex.test(phone)) {
+                phoneMessage.textContent = '유효한 전화번호를 입력해주세요. (예: 01012345678)';
+                phoneMessage.className = 'message error';
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+            } else {
+                phoneMessage.textContent = '';
+                this.classList.remove('invalid');
+                this.classList.add('valid');
+            }
+            updateSubmitButton();
+        });
+
+        // 제출 버튼 상태 업데이트
+        function updateSubmitButton() {
+            const name = nameInput.value.trim();
             const phone = phoneInput.value.trim();
             const phoneRegex = /^01[016789]\d{7,8}$/;
 
-            // 초기화
-            phoneErrorElement.style.display = 'none';
-            phoneInput.classList.remove('invalid');
+            const isFormValid =
+                name.length >= 2 &&
+                phoneRegex.test(phone) &&
+                isDisplayNameChecked &&
+                isDisplayNameValid;
 
-            if (!phoneRegex.test(phone)) {
-                e.preventDefault(); // 폼 제출 막기
-                phoneErrorElement.style.display = 'block';
-                phoneInput.classList.add('invalid');
+            submitBtn.disabled = !isFormValid;
+        }
+
+        // 폼 제출 시 최종 검증
+        form.addEventListener('submit', function(e) {
+            if (!isDisplayNameChecked || !isDisplayNameValid) {
+                e.preventDefault();
+                displayNameMessage.textContent = '닉네임 중복 확인을 완료해주세요.';
+                displayNameMessage.className = 'message error';
             }
         });
-    });
-</script>
 
+        // 페이지 로드 시 초기 검증 수행
+        if (nameInput.value.trim()) {
+            nameInput.dispatchEvent(new Event('input'));
+        }
+        if (displayNameInput.value.trim()) {
+            displayNameInput.dispatchEvent(new Event('input'));
+        }
+        if (phoneInput.value.trim()) {
+            phoneInput.dispatchEvent(new Event('input'));
+        }
+
+        // 초기 상태 설정
+        updateSubmitButton();
+    }
+</script>
 </body>
 </html>
