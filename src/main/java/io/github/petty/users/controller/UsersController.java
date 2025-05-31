@@ -1,14 +1,9 @@
 package io.github.petty.users.controller;
 
-import io.github.petty.users.dto.CustomUserDetails;
 import io.github.petty.users.dto.JoinDTO;
 import io.github.petty.users.dto.UserProfileEditDTO;
-import io.github.petty.users.entity.Users;
 import io.github.petty.users.service.JoinService;
 import io.github.petty.users.service.UserService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -16,7 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.core.Authentication;
 

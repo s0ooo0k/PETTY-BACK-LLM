@@ -7,8 +7,6 @@ import io.github.petty.users.jwt.JWTUtil;
 import io.github.petty.users.service.EmailService;
 import io.github.petty.users.service.RefreshTokenService;
 import io.github.petty.users.util.CookieUtils;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
