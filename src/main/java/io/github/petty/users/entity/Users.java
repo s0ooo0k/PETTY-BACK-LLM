@@ -25,7 +25,10 @@ public class Users {
     private String password;
 
     @Column(nullable = false, length = 50)
-    private String displayName;
+    private String name;
+
+    @Column(nullable = false, length = 50, unique = true)
+    private String displayName; // 닉네임 (자동 생성)
 
     @Column(length = 20)
     private String phone;

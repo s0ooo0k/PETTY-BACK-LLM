@@ -22,38 +22,38 @@
         <form id="editShowoffForm">
             <div class="form-group">
                 <label for="edit-showoff-title">제목</label>
-                <input type="text" class="input-field" id="edit-showoff-title" placeholder="자랑글 제목을 입력해주세요" maxlength="50">
+                <input type="text" class="input-field" id="edit-showoff-title" name="title" placeholder="자랑글 제목을 입력해주세요" maxlength="50">
             </div>
 
             <div class="form-group">
                 <label>반려동물 종류</label>
                 <div class="radio-group">
                     <div class="radio-item">
-                        <input type="radio" id="edit-showoff-pet-dog" name="edit-showoff-petType" value="DOG">
+                        <input type="radio" id="edit-showoff-pet-dog" name="petType" value="DOG">
                         <label for="edit-showoff-pet-dog">강아지</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-showoff-pet-cat" name="edit-showoff-petType" value="CAT">
+                        <input type="radio" id="edit-showoff-pet-cat" name="petType" value="CAT">
                         <label for="edit-showoff-pet-cat">고양이</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-showoff-pet-rabbit" name="edit-showoff-petType" value="RABBIT">
+                        <input type="radio" id="edit-showoff-pet-rabbit" name="petType" value="RABBIT">
                         <label for="edit-showoff-pet-rabbit">토끼</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-showoff-pet-hamster" name="edit-showoff-petType" value="HAMSTER">
+                        <input type="radio" id="edit-showoff-pet-hamster" name="petType" value="HAMSTER">
                         <label for="edit-showoff-pet-hamster">햄스터</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-showoff-pet-bird" name="edit-showoff-petType" value="PARROT">
+                        <input type="radio" id="edit-showoff-pet-bird" name="petType" value="PARROT">
                         <label for="edit-showoff-pet-bird">앵무새</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-showoff-pet-reptile" name="edit-showoff-petType" value="REPTILE">
+                        <input type="radio" id="edit-showoff-pet-reptile" name="petType" value="REPTILE">
                         <label for="edit-showoff-pet-reptile">파충류</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-showoff-pet-other" name="edit-showoff-petType" value="OTHER">
+                        <input type="radio" id="edit-showoff-pet-other" name="petType" value="OTHER">
                         <label for="edit-showoff-pet-other">기타</label>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
 
             <div class="form-group">
                 <label for="edit-showoff-content">자랑 내용</label>
-                <textarea class="input-field" id="edit-showoff-content" placeholder="자랑하고 싶은 내용을 작성해주세요" maxlength="2000"></textarea>
+                <textarea class="input-field" id="edit-showoff-content" name="content" placeholder="자랑하고 싶은 내용을 작성해주세요" maxlength="2000"></textarea>
             </div>
 
             <div class="form-group">
@@ -71,7 +71,7 @@
                     <div class="title">이미지를 여기에 드래그하거나</div>
                     <div class="browse">파일 선택하기</div>
                     <div class="formats">PNG, JPG, GIF 최대 5MB (최대 5장)</div>
-                    <input type="file" id="edit-showoff-imageFiles" multiple accept="image/png, image/jpeg, image/gif">
+                    <input type="file" id="edit-showoff-imageFiles" name="imageFiles" multiple accept="image/png, image/jpeg, image/gif">
                 </label>
                 <div class="image-preview" id="edit-showoff-imagePreview">
                     <!-- 기존 이미지와 새로 업로드한 이미지 미리보기가 여기에 표시됩니다 -->

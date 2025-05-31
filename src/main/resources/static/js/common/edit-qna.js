@@ -37,6 +37,34 @@ async function getCurrentUser() {
     return null;
 }
 
+// 🔥 에러 메시지 표시 함수 추가
+function showErrorMessage(message) {
+  // 기존 알림 제거
+  removeExistingAlerts();
+
+  const alertDiv = document.createElement('div');
+  alertDiv.className = 'alert alert-error';
+  alertDiv.innerHTML = `
+    <span class="alert-icon">⚠️</span>
+    <span class="alert-message">${message}</span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  `;
+
+  document.body.insertBefore(alertDiv, document.body.firstChild);
+
+  // 5초 후 자동 제거
+  setTimeout(() => {
+    if (alertDiv.parentElement) {
+      alertDiv.remove();
+    }
+  }, 5000);
+}
+
+function removeExistingAlerts() {
+  const existingAlerts = document.querySelectorAll('.alert');
+  existingAlerts.forEach(alert => alert.remove());
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   // 🔐 페이지 로드 시 권한 체크
   const currentUser = await getCurrentUser();
@@ -70,14 +98,40 @@ document.addEventListener("DOMContentLoaded", async () => {
           return;
       }
 
-      const payload = {
-        title: document.getElementById("edit-qna-title").value,
-        content: document.getElementById("edit-qna-content").value,
-        petType: getRadioValue("edit-qna-petType") || "OTHER",
-        postType: postType,
-        isResolved: getIsResolvedValue(),
-        images: originalImages
-      };
+          const formData = new FormData(form);
+
+          // name 속성으로 가져오기 (권장)
+          const title = formData.get('title')?.trim();
+          const content = formData.get('content')?.trim();
+          const petType = formData.get('petType');
+          const isResolved = formData.has('isResolved');
+
+          // 🔐 필수 필드 검증
+          if (!title) {
+            showErrorMessage("제목을 입력해주세요.");
+            form.querySelector('[name="title"]')?.focus(); // name 속성 활용
+            return;
+          }
+
+          if (!content) {
+            showErrorMessage("내용을 입력해주세요.");
+            form.querySelector('[name="content"]')?.focus();
+            return;
+          }
+
+          if (!petType) {
+            showErrorMessage("반려동물 종류를 선택해주세요.");
+            return;
+          }
+
+          const payload = {
+            title,
+            content,
+            petType,
+            postType: postType,
+            isResolved,
+            images: originalImages
+          };
 
       const res = await fetch(`/api/posts/${postId}`, {
         method: "PUT",
@@ -152,10 +206,14 @@ async function fetchPostForEdit() {
   const res = await fetch(`/api/posts/${postId}`);
   const post = await res.json();
 
-  document.getElementById("edit-qna-title").value = post.title;
-  document.getElementById("edit-qna-content").value = post.content;
+  const titleElement = document.querySelector('[name="title"]') || document.getElementById("edit-qna-title");
+  const contentElement = document.querySelector('[name="content"]') || document.getElementById("edit-qna-content");
 
-  const petTypeInputs = document.querySelectorAll('input[name="edit-qna-petType"]');
+  if (titleElement) titleElement.value = post.title;
+  if (contentElement) contentElement.value = post.content;
+
+  // 🔥 수정: petType name 속성 통일 (edit-qna-petType → petType)
+  const petTypeInputs = document.querySelectorAll('input[name="petType"]');
   petTypeInputs.forEach(input => {
     if (input.value === post.petType) input.checked = true;
   });

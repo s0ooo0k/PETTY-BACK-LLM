@@ -10,7 +10,6 @@ import java.util.UUID;
 public class JoinDTO {
     private String username;
     private String password;
-    private String displayName;
+    private String name;
     private String phone;
-
 }
