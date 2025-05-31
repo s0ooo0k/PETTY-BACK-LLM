@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserProfileEditDTO {
-    private String displayName;  // 사용자 이름
+    private String name;         // 사용자 이름
+    private String displayName;  // 닉네임
     private String phone;        // 전화번호
 }
