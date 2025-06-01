@@ -156,14 +156,53 @@ jobs:
 
             # 서비스 실행
             sudo systemctl start petty-app
+            echo "서비스 시작 완료. 상태 확인 중..."
+            
+            # 더 정확한 상태 확인 (60초 대기)
             sleep 60
-
-            # 서비스 상태 확인
-            if ! sudo systemctl is-active --quiet petty-app; then
-              echo "애플리케이션이 정상적으로 시작되지 않았습니다."
+            
+            # 1. 정확한 서비스 상태 확인
+            status=$(sudo systemctl is-active petty-app)
+            echo "서비스 상태: $status"
+            
+            if [ "$status" != "active" ]; then
+              echo "❌ 서비스가 정상적으로 실행되지 않았습니다."
+              echo "=== 서비스 상태 ==="
               sudo systemctl status petty-app --no-pager
+              echo "=== 최근 로그 ==="
               sudo journalctl -u petty-app -n 20 --no-pager
               exit 1
             fi
-
+            
+            # 2. 에러 로그 확인
+            if sudo journalctl -u petty-app -n 20 | grep -i "error\|exception\|failed"; then
+              echo "❌ 애플리케이션 로그에서 에러가 발견되었습니다."
+              echo "=== 에러 로그 ==="
+              sudo journalctl -u petty-app -n 50 --no-pager
+              exit 1
+            fi
+            
+            # 3. 추가 안정성 체크 (30초 더 대기 후 재확인)
+            echo "추가 안정성 확인 중..."
+            sleep 30
+            
+            final_status=$(sudo systemctl is-active petty-app)
+            if [ "$final_status" != "active" ]; then
+              echo "❌ 서비스가 불안정합니다. 최종 상태: $final_status"
+              sudo systemctl status petty-app --no-pager
+              sudo journalctl -u petty-app -n 30 --no-pager
+              exit 1
+            fi
+            
+            # 4. 프로세스 실제 실행 확인
+            if ! pgrep -f "petty-app.jar" > /dev/null; then
+              echo "❌ petty-app.jar 프로세스가 실행되지 않았습니다."
+              ps aux | grep java
+              exit 1
+            fi
+            
             echo "✅ 배포가 성공적으로 완료되었습니다!"
+            echo "=== 최종 상태 ==="
+            sudo systemctl status petty-app --no-pager
+            echo "=== 실행 중인 Java 프로세스 ==="
+            ps aux | grep java | grep -v grep
