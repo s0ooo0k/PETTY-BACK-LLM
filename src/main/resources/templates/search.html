@@ -4,14 +4,14 @@
       layout:decorate="~{layouts/defaultLayout}"
 >
 <head>
-    <title>AI 맞춤 추천 & 직접 검색</title>
+    <title>장소 검색</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
     <script th:src="@{https://dapi.kakao.com/v2/maps/sdk.js(appkey='81225114d81c82c26d828099bb14b5c5', libraries='services')}"></script>
 
-    <link rel="stylesheet" th:href="@{/css/recommend.css}" />
+    <link rel="stylesheet" th:href="@{/css/search.css}" />
     <link rel="stylesheet" th:href="@{/css/bootstrap-overrides.css}" />
 
 </head>
@@ -21,87 +21,19 @@
     <div class="container mt-4">
         <ul class="nav nav-tabs nav-fill" id="mainTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="ai-tab" data-bs-toggle="tab" data-bs-target="#ai-recommendation-pane" type="button" role="tab" aria-controls="ai-recommendation-pane" aria-selected="true">
-                    <i class="bi bi-magic me-2"></i>AI 맞춤 추천
+                <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#manual-search-pane" type="button" role="tab" aria-controls="manual-search-pane" aria-selected="true">
+                    <i class="bi bi-search me-2"></i>직접 검색
                 </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="search-tab" data-bs-toggle="tab" data-bs-target="#manual-search-pane" type="button" role="tab" aria-controls="manual-search-pane" aria-selected="false">
-                    <i class="bi bi-search me-2"></i>직접 검색 </button>
             </li>
         </ul>
 
         <div class="tab-content mt-3" id="mainTabContent">
-            <div class="tab-pane fade show active p-3 bg-white rounded shadow-sm" id="ai-recommendation-pane" role="tabpanel" aria-labelledby="ai-tab">
-                <div class="form-wrapper w-100">
-                    <h2 class="mb-4 text-center">AI 반려동물 맞춤 장소 추천</h2>
-                    <p class="text-muted text-center mb-4">
-                        반려동물 정보를 입력하시면 최적화된 장소를 추천해 드립니다.
-                    </p>
-                    <form id="petForm">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="petName" class="form-label">이름</label>
-                                <input type="text" class="form-control" id="petName" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="petSpecies" class="form-label">종 (예: 말티즈, 진돗개)</label>
-                                <input type="text" class="form-control" id="petSpecies" required />
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">동물 크기 (몸무게)</label>
-                            <div class="btn-group w-100 btn-check-group" role="group" aria-label="Pet size selection for AI">
-                                <input type="radio" class="btn-check" name="petSizeAI" id="petSizeAI_1" value="5kg 미만" autocomplete="off" checked /><label class="btn btn-outline-primary" for="petSizeAI_1">5kg 미만</label>
-                                <input type="radio" class="btn-check" name="petSizeAI" id="petSizeAI_2" value="5~10kg" autocomplete="off" /><label class="btn btn-outline-primary" for="petSizeAI_2">5-10kg</label>
-                                <input type="radio" class="btn-check" name="petSizeAI" id="petSizeAI_3" value="10~15kg" autocomplete="off" /><label class="btn btn-outline-primary" for="petSizeAI_3">10-15kg</label>
-                                <input type="radio" class="btn-check" name="petSizeAI" id="petSizeAI_4" value="15kg 이상" autocomplete="off" /><label class="btn btn-outline-primary" for="petSizeAI_4">15kg 이상</label>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">맹견 여부</label>
-                            <div class="btn-group w-100 btn-check-group" role="group" aria-label="Is predator selection for AI">
-                                <input type="radio" class="btn-check" name="isPredatorAI" id="isPredatorAI_no" value="아니오" autocomplete="off" checked /><label class="btn btn-outline-primary" for="isPredatorAI_no">아니오</label>
-                                <input type="radio" class="btn-check" name="isPredatorAI" id="isPredatorAI_yes" value="예" autocomplete="off" /><label class="btn btn-outline-primary" for="isPredatorAI_yes">예</label>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="aiLocationInput" class="form-label">희망 지역</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="aiLocationInput" placeholder="지도에서 선택하거나 직접 입력 (예: 서울 강남구)" required> <button class="btn btn-outline-secondary" type="button" id="aiLocationMapButton" data-bs-toggle="modal" data-bs-target="#mapModal">
-                                <i class="bi bi-geo-alt-fill"></i> 지도에서 선택
-                            </button>
-                            </div>
-                        </div>
-                        <div class="mb-4">
-                            <label for="petInfo" class="form-label">추가 요청사항 또는 장소에 대한 설명</label>
-                            <textarea class="form-control" id="petInfo" rows="3" placeholder="예: 조용하고 넓은 잔디밭이 있는 곳. 강아지가 마음껏 뛰어놀 수 있도록요. 특정 시설 선호 등."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary mt-3 w-100" id="fetchAiButton">
-                            <i class="bi bi-stars me-2"></i>맞춤 추천 받기 </button>
-                    </form>
-                </div>
-                <div id="spinnerGlobalAi" class="text-center mt-4 d-none">
-                    <div class="loading-spinner">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="loading-text">AI가 맞춤 장소를 찾고 있습니다...</p>
-                    </div>
-                </div>
-                <div id="aiRecommendResults" class="mt-4"></div>
-            </div>
-
-            <div class="tab-pane fade p-md-3 p-2 bg-white rounded shadow-sm" id="manual-search-pane" role="tabpanel" aria-labelledby="search-tab">
+            <div class="tab-pane fade show active p-md-3 p-2 bg-white rounded shadow-sm" id="manual-search-pane" role="tabpanel" aria-labelledby="search-tab">
                 <div class="row">
                     <div class="col-md-4 col-lg-3 order-md-first mb-3 mb-md-0" id="manualSearchFiltersSidebar">
                         <div class="sticky-top p-3 bg-light rounded shadow-sm custom-sticky-sidebar">
                             <h2 class="mb-3 h5">조건 검색</h2>
                             <form id="directSearchForm">
-                                <div class="mb-2">
-                                    <label for="directSearchKeyword" class="form-label">키워드</label>
-                                    <input type="text" class="form-control form-control-sm" id="directSearchKeyword" placeholder="장소명, 특징 등">
-                                </div>
                                 <hr class="my-2" />
                                 <div class="form-check form-switch mb-3"> <input class="form-check-input" type="checkbox" id="useCurrentLocationSwitch" role="switch" />
                                     <label class="form-check-label small" for="useCurrentLocationSwitch">현재 위치 기반 검색</label>
@@ -172,7 +104,7 @@
                                 <p class="loading-text">검색 조건으로 장소를 찾는 중...</p>
                             </div>
                         </div>
-                        <div id="resultControlsDirectSearch" class="mb-3 bg-light p-3 rounded shadow-sm" style="display: flex;">
+                        <div id="resultControlsDirectSearch" class="mb-3 bg-light p-3 rounded shadow-sm" style="display: none;">
                             <div class="mb-2 mb-md-0"> <span class="fw-bold me-2">검색 결과:</span>
                                 <span id="resultCountDirectSearch" class="badge bg-primary">0</span> 건
                             </div>
@@ -226,7 +158,7 @@
 
 <th:block layout:fragment="script">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/js/recommend.js}"></script>
+    <script th:src="@{/js/search.js}"></script>
 </th:block>
 
 </body>
