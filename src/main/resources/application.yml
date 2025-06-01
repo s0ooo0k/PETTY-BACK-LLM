@@ -14,3 +14,6 @@ logging:
     org.springframework.web: INFO
     software.amazon.awssdk: INFO
     com.google.cloud: INFO
+
+server:
+  forward-headers-strategy: FRAMEWORK
