@@ -2,7 +2,7 @@ name: Deploy to Oracle Cloud
 
 on:
   push:
-    branches: [ main, feat/prod ]  # feat/prod 브랜치 추가
+    branches: [ main, feat/prod ]
   pull_request:
     branches: [ main ]
     types: [ closed ]
@@ -35,12 +35,22 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build -x test
+        run: |
+          set -e
+          echo "🔨 Gradle 빌드를 시작합니다..."
+          ./gradlew build -x test
+          echo "✅ Gradle 빌드 성공!"
 
       - name: Create deployment package
         run: |
           mkdir -p deploy
-          cp build/libs/*.jar deploy/petty-app.jar
+          if ls build/libs/*.jar 1> /dev/null 2>&1; then
+            cp build/libs/*.jar deploy/petty-app.jar
+            echo "✅ JAR 파일 복사 완료"
+          else
+            echo "❌ JAR 파일이 존재하지 않습니다. 배포 중단"
+            exit 1
+          fi
 
       - name: Deploy to Oracle Cloud
         uses: appleboy/ssh-action@v1.0.0
@@ -49,16 +59,11 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # 애플리케이션 중지
             sudo systemctl stop petty-app || true
-            
-            # 백업 생성
             if [ -f /home/ubuntu/petty-app/app/petty-app.jar ]; then
               cp /home/ubuntu/petty-app/app/petty-app.jar /home/ubuntu/petty-app/app/petty-app.jar.backup
             fi
-            
-            # 새 JAR 파일 대기
-            echo "Waiting for new JAR file..."
+            echo "🕒 새 JAR 파일 복사를 기다리는 중..."
 
       - name: Copy JAR file
         uses: appleboy/scp-action@v0.1.4
@@ -77,10 +82,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # 환경 변수 파일 업데이트 (prod 설정에 맞춤)
-            cat > /home/ubuntu/petty-app/.env << EOF
+            # 환경 변수 파일 업데이트
+            cat > /home/ubuntu/petty-app/.env << 'EOF'
             SPRING_PROFILES_ACTIVE=prod
-            
+
             # Database
             DB_SUPABASE_URL=${{ secrets.DB_SUPABASE_URL }}
             DB_SUPABASE_USERNAME=${{ secrets.DB_SUPABASE_USERNAME }}
@@ -88,54 +93,54 @@ jobs:
             DB_AIVEN_URL=${{ secrets.DB_AIVEN_URL }}
             DB_AIVEN_USERNAME=${{ secrets.DB_AIVEN_USERNAME }}
             DB_AIVEN_PASSWORD=${{ secrets.DB_AIVEN_PASSWORD }}
-            
+
             # JWT
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             JWT_EXPIRATION_TIME=3600000
-            
+
             # OAuth
             OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }}
             OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}
             OAUTH_KAKAO_CLIENT_ID=${{ secrets.OAUTH_KAKAO_CLIENT_ID }}
             OAUTH_KAKAO_CLIENT_SECRET=${{ secrets.OAUTH_KAKAO_CLIENT_SECRET }}
             OAUTH_KAKAO_REDIRECT_URI=${{ secrets.OAUTH_KAKAO_REDIRECT_URI }}
-            
+
             # Email
             EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
             EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
-            
+
             # AWS
             AWS_REGION=${{ secrets.AWS_REGION }}
             AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            
+
             # Supabase
             SUPABASE_URL=${{ secrets.SUPABASE_URL }}
             SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
             SUPABASE_BUCKET=${{ secrets.SUPABASE_BUCKET }}
-            
+
             # OpenAI
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-            
+
             # Qdrant
             QDRANT_HOST=${{ secrets.QDRANT_HOST }}
             QDRANT_PORT=${{ secrets.QDRANT_PORT }}
             QDRANT_COLLECTION=${{ secrets.QDRANT_COLLECTION }}
             QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
-            
+
             # Vision APIs
             GEMINI_VISION_URL=${{ secrets.GEMINI_VISION_URL }}
             GEMINI_VISION_KEY=${{ secrets.GEMINI_VISION_KEY }}
             TOGETHER_VISION_URL=${{ secrets.TOGETHER_VISION_URL }}
             TOGETHER_VISION_KEY=${{ secrets.TOGETHER_VISION_KEY }}
-            
+
             # Chat APIs
             GEMINI_CHAT_URL=${{ secrets.GEMINI_CHAT_URL }}
             GEMINI_CHAT_KEY=${{ secrets.GEMINI_CHAT_KEY }}
             TOGETHER_CHAT_MODEL=${{ secrets.TOGETHER_CHAT_MODEL }}
             TOGETHER_CHAT_URL=${{ secrets.TOGETHER_CHAT_URL }}
             TOGETHER_CHAT_KEY=${{ secrets.TOGETHER_CHAT_KEY }}
-            
+
             # Tour API
             TOUR_API_BASE_URL=${{ secrets.TOUR_API_BASE_URL }}
             TOUR_API_SERVICE_KEY=${{ secrets.TOUR_API_SERVICE_KEY }}
@@ -143,55 +148,19 @@ jobs:
             TOUR_API_MOBILE_APP=${{ secrets.TOUR_API_MOBILE_APP }}
             TOUR_API_TYPE=${{ secrets.TOUR_API_TYPE }}
             EOF
-            
-            # 권한 설정
-            chmod 600 /home/ubuntu/petty-app/.env
-            
-            # 애플리케이션 시작
-            sudo systemctl start petty-app
-            
-            # 시작 대기 (더 빠른 확인)
-            sleep 20
-            
-            # 상태 확인
-            sudo systemctl status petty-app
-            
-            # 로그 확인 (마지막 20줄)
-            sudo journalctl -u petty-app -n 20 --no-pager
 
-      - name: Health Check and Status
-        uses: appleboy/ssh-action@v1.0.0
-        continue-on-error: true
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            echo "=== 헬스체크 시작 ==="
-            
-            # 헬스체크 시도 (30초)
-            for i in {1..15}; do
-              if curl -f http://localhost:8080/health > /dev/null 2>&1; then
-                echo "Application is healthy!"
-                echo "==================배포 성공!=================="
-                exit 0
-              fi
-              echo "Attempt $i failed, waiting 5 seconds..."
-              sleep 5
-            done
-            
-            echo "==================Health check failed - 상세 정보 확인=================="
-            echo ""
-            
-            # 헬스체크 실패시 상세 정보
-            echo "1. 서비스 상태:"
-            sudo systemctl status petty-app --no-pager
-            
-            echo -e "\n2. 최근 에러 로그:"
-            sudo journalctl -u petty-app -n 20 --no-pager
-            
-            echo -e "\n3. 포트 8080 확인:"
-            sudo netstat -tlnp | grep 8080 || echo "8080 포트 사용 중이 아님"
-            
-            echo -e "\n4. 수동 확인 방법:"
-            echo "ssh로 접속 후: sudo journalctl -u petty-app -f"
+            chmod 600 /home/ubuntu/petty-app/.env
+
+            # 서비스 실행
+            sudo systemctl start petty-app
+            sleep 60
+
+            # 서비스 상태 확인
+            if ! sudo systemctl is-active --quiet petty-app; then
+              echo "❌ 애플리케이션이 정상적으로 시작되지 않았습니다."
+              sudo systemctl status petty-app --no-pager
+              sudo journalctl -u petty-app -n 20 --no-pager
+              exit 1
+            fi
+
+            echo "✅ 배포가 성공적으로 완료되었습니다!"

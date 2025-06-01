@@ -107,8 +107,6 @@ dependencies {
 	// Thymeleaf layout
 	// https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.0.0'
-
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 // 의존성 충돌 해결을 위한 설정
