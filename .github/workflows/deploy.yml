@@ -2,7 +2,7 @@ name: Deploy to Oracle Cloud
 
 on:
   push:
-    branches: [ main, feat/prod ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
     types: [ closed ]
@@ -37,18 +37,18 @@ jobs:
       - name: Build with Gradle
         run: |
           set -e
-          echo "🔨 Gradle 빌드를 시작합니다..."
+          echo "Gradle 빌드를 시작합니다..."
           ./gradlew build -x test
-          echo "✅ Gradle 빌드 성공!"
+          echo "Gradle 빌드 성공!"
 
       - name: Create deployment package
         run: |
           mkdir -p deploy
           if ls build/libs/*.jar 1> /dev/null 2>&1; then
             cp build/libs/*.jar deploy/petty-app.jar
-            echo "✅ JAR 파일 복사 완료"
+            echo "JAR 파일 복사 완료"
           else
-            echo "❌ JAR 파일이 존재하지 않습니다. 배포 중단"
+            echo "JAR 파일이 존재하지 않습니다. 배포 중단"
             exit 1
           fi
 
@@ -63,7 +63,7 @@ jobs:
             if [ -f /home/ubuntu/petty-app/app/petty-app.jar ]; then
               cp /home/ubuntu/petty-app/app/petty-app.jar /home/ubuntu/petty-app/app/petty-app.jar.backup
             fi
-            echo "🕒 새 JAR 파일 복사를 기다리는 중..."
+            echo "새 JAR 파일 복사를 기다리는 중..."
 
       - name: Copy JAR file
         uses: appleboy/scp-action@v0.1.4
@@ -157,7 +157,7 @@ jobs:
 
             # 서비스 상태 확인
             if ! sudo systemctl is-active --quiet petty-app; then
-              echo "❌ 애플리케이션이 정상적으로 시작되지 않았습니다."
+              echo "애플리케이션이 정상적으로 시작되지 않았습니다."
               sudo systemctl status petty-app --no-pager
               sudo journalctl -u petty-app -n 20 --no-pager
               exit 1
