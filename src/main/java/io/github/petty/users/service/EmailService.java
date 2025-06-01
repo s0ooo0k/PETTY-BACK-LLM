@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.Random;
 
@@ -35,7 +36,7 @@ public class EmailService {
         try {
             sendEmail(email, code);
             return true;
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             log.error("이메일 전송 실패: {}", e.getMessage());
             return false;
         }
@@ -46,19 +47,19 @@ public class EmailService {
         return String.format("%06d", random.nextInt(1000000)); // 000000 ~ 999999
     }
 
-    private void sendEmail(String toEmail, String code) throws MessagingException {
+    private void sendEmail(String toEmail, String code) throws MessagingException, UnsupportedEncodingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
 
-        helper.setFrom("krpetty54@gmail.com");  // 보내는 사람 이메일 (본인의 실제 이메일 주소로 변경)
+        helper.setFrom("krpetty54@gmail.com", "Petty Team");
         helper.setTo(toEmail);
-        helper.setSubject("[Petty] 이메일 인증 코드입니다.");
+        helper.setSubject("Petty 인증 코드");
 
         // HTML 형식의 이메일 본문
         String htmlContent = "<div style='background-color:#ffffff;padding:40px;border-radius:8px;text-align:center;max-width:400px;width:100%;margin:0 auto'>" +
-                "<a href='https://github.com/PETTY-HUB' style='display:block;margin-bottom:20px;text-decoration:none;color:#000000;width:5.5rem;font-weight:bold' target='_blank'>" +
+                "<div style='display:block;margin-bottom:20px;text-decoration:none;color:#000000;width:5.5rem;font-weight:bold' target='_blank'>" +
                 "<h2 style='color:#f39c12'>Petty</h2>" +
-                "</a>" +
+                "</div>" +
                 "<div style='text-align:center'>" +
                 "<p style='color:#212529;font-size:18px;font-weight:600'>인증 번호</p>" +
                 "</div>" +
@@ -66,19 +67,18 @@ public class EmailService {
                 "<p style='font-size:35px;font-weight:bold;line-height:1.5;color:#f39c12;margin:10px 0 0'>" + code + "</p>" +
                 "</div>" +
                 "<p style='display:inline-block;padding:15px 0;color:#888888;text-decoration:none;border-radius:8px;font-size:16px;word-break:keep-all;text-align:left'>" +
-                "Petty의 더 많은 서비스를 이용하려면 이메일 인증이 필요해요.<br>" +
-                "인증번호를 입력하고 인증을 완료해 주세요!<br>" +
-                "(스팸함에 있을 수도 있으니 한 번 확인 부탁드려요!)" +
+                "위 코드를 입력하여 이메일 인증을 완료해주세요.<br>" +
+                "이 코드는 5분간 유효합니다.<br>" +
                 "</p>" +
                 "<div style='margin-top:20px; font-size:14px; color:#888;'>" +
-                "이 메일은 5분간 유효합니다." +
+                "본 메일은 발신전용입니다." +
                 "</div>" +
                 "</div>";
 
         helper.setText(htmlContent, true);
 
         javaMailSender.send(mimeMessage);
-        log.info("이메일 ({})로 인증 코드 ({})를 성공적으로 전송했습니다.", toEmail, code);
+        log.info("이메일 ({})로 인증 코드를 성공적으로 전송했습니다.", toEmail);
     }
 
     // 인증 코드 확인

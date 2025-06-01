@@ -15,6 +15,7 @@ public class PostDetailResponse {
     private String content;               // 내용
     private String writer;                // 작성자 닉네임
     private String postType;             // 게시물 유형
+    private String userName;             // 작성자 이메일
     private String petType;              // 반려동물 종류 (한글 라벨)
     private String petName;              // 반려동물 이름 (REVIEW에서만 사용)
     private String region;               // 지역 정보 (REVIEW에서만 사용)

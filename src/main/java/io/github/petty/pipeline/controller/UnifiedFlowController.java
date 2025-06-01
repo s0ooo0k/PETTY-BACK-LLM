@@ -6,7 +6,7 @@ import io.github.petty.llm.dto.RecommendResponseDTO;
 import io.github.petty.llm.service.RecommendService;
 import io.github.petty.pipeline.support.TogetherPromptBuilder;
 import io.github.petty.vision.port.in.VisionUseCase;
-import io.github.petty.vision.service.VisionServiceImpl; // VisionServiceImpl 사용 여부 확인 필요 (VisionUseCase와 중복될 수 있음)
+import io.github.petty.vision.service.VisionServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,7 @@ import java.util.Map;
 public class UnifiedFlowController {
 
     private final VisionUseCase visionUseCase;
-    private final VisionServiceImpl visionService; // 이 서비스가 VisionUseCase의 구현체라면, 하나만 사용하거나 역할을 명확히 해야 합니다.
+    private final VisionServiceImpl visionService;
     private final TogetherPromptBuilder togetherPromptBuilder;
     private final RecommendService recommendService;
 
@@ -40,67 +40,79 @@ public class UnifiedFlowController {
     public String performAnalysis(
             @RequestParam("file") MultipartFile file,
             @RequestParam("petName") String petName,
-            RedirectAttributes redirectAttributes, // RedirectAttributes 사용
+            RedirectAttributes redirectAttributes,
             HttpSession session
     ) {
         try {
-            // interim 및 visionReport는 시간이 걸리는 작업이므로
-            // 실제 구현에서는 비동기 처리 또는 로딩 페이지에서 Ajax 호출로 처리하는 것이 일반적입니다.
-            // 여기서는 단순화를 위해 analyze POST 요청에서 미리 결과를 계산하고 전달합니다.
-
             String interim = visionUseCase.interim(file.getBytes(), petName);
-            String visionReport = visionService.analyze(file, petName); // visionService.analyze 역할 확인 필요
+            String visionReport = visionService.analyze(file, petName);
 
-            // 다음 페이지로 flash attribute로 전달 (URL에 노출되지 않음)
+            // 다음 페이지로 flash attribute로 전달
             redirectAttributes.addFlashAttribute("interim", interim);
             redirectAttributes.addFlashAttribute("petName", petName);
 
             // 최종 visionReport는 세션에 저장하여 다음 단계에서 재사용
             session.setAttribute("visionReport", visionReport);
+            session.setAttribute("petName", petName);
 
-            return "redirect:/flow/showInterimLoading"; // 중간 분석 로딩 페이지로 리다이렉트
+            // 이미지를 Base64로 인코딩하여 세션에 저장
+            try {
+                byte[] imageBytes = file.getBytes();
+                String imageBase64 = java.util.Base64.getEncoder().encodeToString(imageBytes);
+                session.setAttribute("petImageBase64", "data:image/jpeg;base64," + imageBase64);
+            } catch (Exception e) {
+                log.warn("이미지 저장 실패", e);
+            }
+
+            return "redirect:/flow/showInterimLoading";
         } catch (Exception e) {
             log.error("❌ 반려동물 분석 중 오류", e);
             redirectAttributes.addFlashAttribute("error", "반려동물 분석 중 오류 발생: " + e.getMessage());
-            return "redirect:/flow/analyze"; // 오류 발생 시 다시 분석 페이지로
+            return "redirect:/flow/analyze";
         }
     }
 
-    // 3. 중간 분석 로딩 페이지 (interim_loading.html)
+    // 3. 중간 분석 로딩 페이지
     @GetMapping("/showInterimLoading")
     public String showInterimLoading(
-            @ModelAttribute("interim") String interim, // FlashAttribute로 받은 interim
-            @ModelAttribute("petName") String petName, // FlashAttribute로 받은 petName
+            @ModelAttribute("interim") String interim,
+            @ModelAttribute("petName") String petName,
             Model model) {
 
-        // interim이 flash attribute로 전달되지 않은 경우 (예: 새로고침)
         if (interim == null || interim.isEmpty()) {
             model.addAttribute("interim", "데이터를 불러오는 중이거나, 이전 요청이 완료되지 않았습니다. 잠시만 기다려 주세요.");
         }
-        model.addAttribute("petName", petName); // petName도 전달
+        model.addAttribute("petName", petName);
 
-        return "interim_loading"; // interim_loading.html 반환
+        return "interim_loading";
     }
 
-    // 4. 최종 Vision 보고서 페이지 (vision_report.html) - interim_loading.html의 JS에서 호출됨
+    // 4. 최종 Vision 보고서 페이지 - 세션 기반으로 수정
     @GetMapping("/showVisionReport")
-    public String showVisionReport(Model model, HttpSession session,
-                                   @ModelAttribute("petName") String petName) { // petName 전달 받기
-
+    public String showVisionReport(Model model, HttpSession session) {
         String visionReport = (String) session.getAttribute("visionReport");
+        String petName = (String) session.getAttribute("petName");
+        String petImageBase64 = (String) session.getAttribute("petImageBase64");
 
         if (visionReport == null) {
+            log.warn("⚠️ 세션에 Vision 보고서가 없습니다");
             model.addAttribute("error", "세션에 Vision 보고서가 없습니다. 다시 분석을 시작해 주세요.");
-            return "analyze"; // Vision 보고서 없으면 분석 시작 페이지로
+            return "visionUpload"; // vision 업로드 페이지로 이동
         }
 
         model.addAttribute("visionReport", visionReport);
-        model.addAttribute("petName", petName); // petName 전달
+        model.addAttribute("petName", petName);
+        if (petImageBase64 != null) {
+            model.addAttribute("petImageUrl", petImageBase64);
+        }
 
-        return "vision_report"; // vision_report.html 반환
+        log.info("✅ Vision 보고서 표시 - petName: {}, reportLength: {}",
+                petName, visionReport.length());
+
+        return "vision_report";
     }
 
-    // 5. '여행지 추천 받기' 버튼 클릭 시 (vision_report.html에서 POST 요청)
+    // 5. '여행지 추천 받기' 버튼 클릭 시
     @PostMapping("/report")
     public String generateRecommendation(
             @RequestParam("petName") String petName,
@@ -110,15 +122,14 @@ public class UnifiedFlowController {
             HttpSession session
     ) {
         try {
-            // 세션에서 visionReport 가져오기
             String visionReport = (String) session.getAttribute("visionReport");
             if (visionReport == null) {
+                log.warn("⚠️ 세션에 Vision 보고서가 없습니다 - petName: {}", petName);
                 redirectAttributes.addFlashAttribute("error", "세션에 Vision 보고서가 없습니다. 다시 분석을 시작해 주세요.");
-                return "redirect:/flow/analyze"; // Vision 보고서 없으면 분석 시작 페이지로
+                return "redirect:/flow/analyze";
             }
 
-            // 프롬프트 빌딩 및 추천 서비스 호출 (시간 소요)
-            // 실제 구현에서는 비동기 처리 또는 로딩 페이지에서 Ajax 호출로 처리하는 것이 일반적입니다.
+            // 프롬프트 빌딩 및 추천 서비스 호출
             String jsonPrompt = togetherPromptBuilder.buildPrompt(visionReport, location, info);
             Map<String, String> promptMapper = new ObjectMapper().readValue(jsonPrompt, new TypeReference<>() {});
             RecommendResponseDTO recommendation = recommendService.recommend(promptMapper);
@@ -129,50 +140,52 @@ public class UnifiedFlowController {
             // 다음 페이지로 필요한 데이터 전달
             redirectAttributes.addFlashAttribute("petName", petName);
             redirectAttributes.addFlashAttribute("location", location);
-            redirectAttributes.addFlashAttribute("info", info); // info도 전달 (로깅 등 필요할 경우)
+            redirectAttributes.addFlashAttribute("info", info);
 
-            return "redirect:/flow/showRecommendLoading"; // 추천 로딩 페이지로 리다이렉트
+            log.info("✅ 추천 생성 완료 - petName: {}, location: {}", petName, location);
+
+            return "redirect:/flow/showRecommendLoading";
         } catch (Exception e) {
             log.error("❌ 추천 생성 중 오류", e);
             redirectAttributes.addFlashAttribute("error", "추천 생성 중 오류 발생: " + e.getMessage());
-            // 오류 발생 시 다시 Vision 보고서 페이지로 (데이터는 세션에서 가져와야 함)
             return "redirect:/flow/showVisionReport";
         }
     }
 
-    // 6. 여행지 추천 로딩 페이지 (recommend_loading.html)
+    // 6. 여행지 추천 로딩 페이지
     @GetMapping("/showRecommendLoading")
     public String showRecommendLoading(
             @ModelAttribute("petName") String petName,
             @ModelAttribute("location") String location,
             @ModelAttribute("info") String info,
             Model model) {
-        // 로딩 메시지만 보여주는 페이지
+
         model.addAttribute("petName", petName);
         model.addAttribute("location", location);
         model.addAttribute("info", info);
-        return "recommend_loading"; // recommend_loading.html 반환
+        return "recommend_loading";
     }
 
-    // 7. 추천 여행지 결과 페이지 (recommendation_result.html) - recommend_loading.html의 JS에서 호출됨
+    // 7. 추천 여행지 결과 페이지
     @GetMapping("/showRecommendationResult")
     public String showRecommendationResult(Model model, HttpSession session) {
-
         RecommendResponseDTO recommendation = (RecommendResponseDTO) session.getAttribute("recommendationResult");
 
         if (recommendation == null) {
+            log.warn("⚠️ 세션에 추천 여행지 결과가 없습니다");
             model.addAttribute("error", "세션에 추천 여행지 결과가 없습니다. 다시 시도해 주세요.");
-            return "analyze"; // 결과 없으면 분석 시작 페이지로
+            return "visionUpload";
         }
 
         model.addAttribute("recommendation", recommendation);
-        // 필요에 따라 petName, location 등도 세션에서 가져와 모델에 추가할 수 있습니다.
-        // model.addAttribute("petName", session.getAttribute("petName"));
+        model.addAttribute("recommendationResponse", recommendation); // 템플릿 호환성
 
-        // 사용 후 세션에서 제거 (선택 사항, 메모리 관리)
+        // 사용 후 세션에서 제거 (선택 사항)
         session.removeAttribute("recommendationResult");
         session.removeAttribute("visionReport");
 
-        return "recommendation_result"; // recommendation_result.html 반환
+        log.info("✅ 추천 결과 표시 완료");
+
+        return "recommendation_result";
     }
 }

@@ -7,11 +7,13 @@ import io.github.petty.community.service.PostService;
 import io.github.petty.users.dto.CustomUserDetails;
 import io.github.petty.users.entity.Users;
 import io.github.petty.users.repository.UsersRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,17 +28,27 @@ public class PostController {
     private final UsersRepository usersRepository;
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody PostRequest request,
+    public ResponseEntity<?> create(@RequestBody @Valid PostRequest request,
                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
-        String username = userDetails.getUsername();
-        Users user = usersRepository.findByUsername(username);
-        Long id = postService.save(request, user);
-        return ResponseEntity.ok(Map.of("id", id));
+        try {
+            String username = userDetails.getUsername();
+            Users user = usersRepository.findByUsername(username);
+            if (user == null) {
+                return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
+            }
+            
+            Long id = postService.save(request, user);
+            return ResponseEntity.ok(Map.of("id", id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("게시글 작성에 실패했습니다.");
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
-                                    @RequestBody PostRequest request,
+                                    @RequestBody @Valid PostRequest request,
                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
         String username = userDetails.getUsername();
         Users user = usersRepository.findByUsername(username);
@@ -50,8 +62,8 @@ public class PostController {
                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
         String username = userDetails.getUsername();
         Users user = usersRepository.findByUsername(username);
-        postService.delete(id, user);
-        return ResponseEntity.ok().build();
+        String postType = postService.delete(id, user); // 🔥 삭제된 게시글의 타입 반환
+        return ResponseEntity.ok(Map.of("postType", postType));
     }
 
     @GetMapping
@@ -70,9 +82,32 @@ public class PostController {
     @PostMapping("/{id}/like")
     public ResponseEntity<?> likePost(@PathVariable Long id,
                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
-        String username = userDetails.getUsername();
-        Users user = usersRepository.findByUsername(username);
-        int newCount = postService.toggleLike(id, user); // 좋아요 또는 취소
-        return ResponseEntity.ok(Map.of("likeCount", newCount));
+        try {
+            String username = userDetails.getUsername();
+            Users user = usersRepository.findByUsername(username);
+            if (user == null) {
+                return ResponseEntity.status(401).body("사용자를 찾을 수 없습니다.");
+            }
+            
+            int newCount = postService.toggleLike(id, user);
+            return ResponseEntity.ok(Map.of("likeCount", newCount));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("좋아요 처리에 실패했습니다.");
+        }
+    }
+    
+    // 🔥 기존 데이터 업데이트를 위한 임시 엔드포인트 (관리자용)
+    @PostMapping("/update-counts")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateAllPostCounts(@AuthenticationPrincipal CustomUserDetails userDetails) {
+            // 관리자 권한 확인
+            if (!userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                return ResponseEntity.status(403).body("관리자 권한이 필요합니다.");
+                }
+        postService.updateAllPostCounts();
+        return ResponseEntity.ok(Map.of("message", "모든 게시글의 댓글 수와 좋아요 수가 업데이트되었습니다."));
     }
 }

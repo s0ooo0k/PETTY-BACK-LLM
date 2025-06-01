@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-    <a href="javascript:history.back()" class="back-link">
+    <a href="javascript:void(0)" onclick="goBack()" class="back-link">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -22,38 +22,38 @@
         <form id="editQnaForm">
             <div class="form-group">
                 <label for="edit-qna-title">제목</label>
-                <input type="text" class="input-field" id="edit-qna-title" placeholder="질문의 제목을 입력해주세요" maxlength="50">
+                <input type="text" class="input-field" id="edit-qna-title" name="title" placeholder="질문의 제목을 입력해주세요" maxlength="50">
             </div>
 
             <div class="form-group">
                 <label>반려동물 종류</label>
                 <div class="radio-group">
                     <div class="radio-item">
-                        <input type="radio" id="edit-qna-pet-dog" name="edit-qna-petType" value="DOG">
+                        <input type="radio" id="edit-qna-pet-dog" name="petType" value="DOG">
                         <label for="edit-qna-pet-dog">강아지</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-qna-pet-cat" name="edit-qna-petType" value="CAT">
+                        <input type="radio" id="edit-qna-pet-cat" name="petType" value="CAT">
                         <label for="edit-qna-pet-cat">고양이</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-qna-pet-rabbit" name="edit-qna-petType" value="RABBIT">
+                        <input type="radio" id="edit-qna-pet-rabbit" name="petType" value="RABBIT">
                         <label for="edit-qna-pet-rabbit">토끼</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-qna-pet-hamster" name="edit-qna-petType" value="HAMSTER">
+                        <input type="radio" id="edit-qna-pet-hamster" name="petType" value="HAMSTER">
                         <label for="edit-qna-pet-hamster">햄스터</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-qna-pet-bird" name="edit-qna-petType" value="PARROT">
+                        <input type="radio" id="edit-qna-pet-bird" name="petType" value="PARROT">
                         <label for="edit-qna-pet-bird">앵무새</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-qna-pet-reptile" name="edit-qna-petType" value="REPTILE">
+                        <input type="radio" id="edit-qna-pet-reptile" name="petType" value="REPTILE">
                         <label for="edit-qna-pet-reptile">파충류</label>
                     </div>
                     <div class="radio-item">
-                        <input type="radio" id="edit-qna-pet-other" name="edit-qna-petType" value="OTHER">
+                        <input type="radio" id="edit-qna-pet-other" name="petType" value="OTHER">
                         <label for="edit-qna-pet-other">기타</label>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                 <label for="isResolved">질문 상태</label>
                 <div class="status-group">
                     <label class="toggle-switch">
-                        <input type="checkbox" id="isResolved">
+                        <input type="checkbox" id="isResolved" name="isResolved">
                         <span class="toggle-slider"></span>
                     </label>
                     <span class="toggle-label" id="resolvedLabel">미해결</span>
@@ -72,7 +72,7 @@
 
             <div class="form-group">
                 <label for="edit-qna-content">질문 내용</label>
-                <textarea class="input-field" id="edit-qna-content" placeholder="질문 내용을 자세히 작성해주세요" maxlength="2000"></textarea>
+                <textarea class="input-field" id="edit-qna-content" name="content" placeholder="질문 내용을 자세히 작성해주세요" maxlength="2000"></textarea>
             </div>
 
             <div class="form-group">
@@ -82,7 +82,7 @@
                     <div class="title">이미지를 여기에 드래그하거나</div>
                     <div class="browse">파일 선택하기</div>
                     <div class="formats">PNG, JPG, GIF 최대 5MB (최대 5장)</div>
-                    <input type="file" id="edit-qna-imageFiles" multiple accept="image/png, image/jpeg, image/gif">
+                    <input type="file" id="edit-qna-imageFiles" name="imageFiles" multiple accept="image/png, image/jpeg, image/gif">
                 </label>
                 <div class="image-preview" id="edit-qna-imagePreview">
                     <!-- 기존 이미지와 새로 업로드한 이미지 미리보기가 여기에 표시됩니다 -->
@@ -90,7 +90,7 @@
             </div>
 
             <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+                <button type="button" class="btn btn-secondary" onclick="goBack()">취소</button>
                 <button type="submit" class="btn btn-primary">수정완료</button>
             </div>
         </form>

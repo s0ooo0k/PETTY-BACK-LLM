@@ -1,250 +1,233 @@
-<!-- src/main/resources/templates/index.html -->
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}"
+>
 <head>
-    <meta charset="UTF-8">
-    <title>🐶 PETTY </title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #fdf7e4;
-            color: #333;
-            padding: 20px;
-        }
-        .nav {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .nav a {
-            color: #f39c12;
-            text-decoration: none;
-            margin-right: 15px;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-        .nav a:hover {
-            background-color: #f1c40f;
-            color: white;
-        }
-        .auth-menu {
-            float: right;
-        }
-        .user-info {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-        .user-info h2 {
-            color: #f39c12;
-            margin: 10px 0;
-        }
-        #resultBox {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .recommend-card {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-        }
-        .recommend-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .recommend-card h2 {
-            font-size: 1.2em;
-            margin: 10px 0 5px;
-        }
-        .recommend-card p {
-            font-size: 0.9em;
-            margin: 3px 0;
-        }
-        #recommendForm {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            max-width: 600px;
-        }
-        #recommendForm label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        #recommendForm input, #recommendForm select {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-        #recommendForm button {
-            margin-top: 15px;
-            background-color: #f39c12;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 1em;
-        }
-        #recommendForm button:hover {
-            background-color: #f1c40f;
-        }
-    </style>
+    <title>AI 맞춤 추천 & 직접 검색</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <script th:src="@{https://dapi.kakao.com/v2/maps/sdk.js(appkey='81225114d81c82c26d828099bb14b5c5', libraries='services')}"></script>
+
+    <link rel="stylesheet" th:href="@{/css/recommend.css}" />
+    <link rel="stylesheet" th:href="@{/css/bootstrap-overrides.css}" />
+
 </head>
-
 <body>
-<h1 th:text="${message}">여행지 추천</h1>
+<div layout:fragment="content">
 
+    <div class="container mt-4">
+        <ul class="nav nav-tabs nav-fill" id="mainTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="ai-tab" data-bs-toggle="tab" data-bs-target="#ai-recommendation-pane" type="button" role="tab" aria-controls="ai-recommendation-pane" aria-selected="true">
+                    <i class="bi bi-magic me-2"></i>AI 맞춤 추천
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="search-tab" data-bs-toggle="tab" data-bs-target="#manual-search-pane" type="button" role="tab" aria-controls="manual-search-pane" aria-selected="false">
+                    <i class="bi bi-search me-2"></i>직접 검색 </button>
+            </li>
+        </ul>
 
-<div class="nav">
-    <a href="/">홈</a>
-    <div class="auth-menu">
-        <span id="loginMenu" style="display: none;">
-            <a href="/login">로그인</a>
-            <a href="/join">회원가입</a>
-        </span>
-        <span id="userMenu" style="display: none;">
-            <a href="#" onclick="logout()">로그아웃</a>
-        </span>
+        <div class="tab-content mt-3" id="mainTabContent">
+            <div class="tab-pane fade show active p-3 bg-white rounded shadow-sm" id="ai-recommendation-pane" role="tabpanel" aria-labelledby="ai-tab">
+                <div class="form-wrapper w-100">
+                    <h2 class="mb-4 text-center">AI 반려동물 맞춤 장소 추천</h2>
+                    <p class="text-muted text-center mb-4">
+                        반려동물 정보를 입력하시면 최적화된 장소를 추천해 드립니다.
+                    </p>
+                    <form id="petForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="petName" class="form-label">이름</label>
+                                <input type="text" class="form-control" id="petName" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="petSpecies" class="form-label">종 (예: 말티즈, 진돗개)</label>
+                                <input type="text" class="form-control" id="petSpecies" required />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">동물 크기 (몸무게)</label>
+                            <div class="btn-group w-100 btn-check-group" role="group" aria-label="Pet size selection for AI">
+                                <input type="radio" class="btn-check" name="petSizeAI" id="petSizeAI_1" value="5kg 미만" autocomplete="off" checked /><label class="btn btn-outline-primary" for="petSizeAI_1">5kg 미만</label>
+                                <input type="radio" class="btn-check" name="petSizeAI" id="petSizeAI_2" value="5~10kg" autocomplete="off" /><label class="btn btn-outline-primary" for="petSizeAI_2">5-10kg</label>
+                                <input type="radio" class="btn-check" name="petSizeAI" id="petSizeAI_3" value="10~15kg" autocomplete="off" /><label class="btn btn-outline-primary" for="petSizeAI_3">10-15kg</label>
+                                <input type="radio" class="btn-check" name="petSizeAI" id="petSizeAI_4" value="15kg 이상" autocomplete="off" /><label class="btn btn-outline-primary" for="petSizeAI_4">15kg 이상</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">맹견 여부</label>
+                            <div class="btn-group w-100 btn-check-group" role="group" aria-label="Is predator selection for AI">
+                                <input type="radio" class="btn-check" name="isPredatorAI" id="isPredatorAI_no" value="아니오" autocomplete="off" checked /><label class="btn btn-outline-primary" for="isPredatorAI_no">아니오</label>
+                                <input type="radio" class="btn-check" name="isPredatorAI" id="isPredatorAI_yes" value="예" autocomplete="off" /><label class="btn btn-outline-primary" for="isPredatorAI_yes">예</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="aiLocationInput" class="form-label">희망 지역</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="aiLocationInput" placeholder="지도에서 선택하거나 직접 입력 (예: 서울 강남구)" required> <button class="btn btn-outline-secondary" type="button" id="aiLocationMapButton" data-bs-toggle="modal" data-bs-target="#mapModal">
+                                <i class="bi bi-geo-alt-fill"></i> 지도에서 선택
+                            </button>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="petInfo" class="form-label">추가 요청사항 또는 장소에 대한 설명</label>
+                            <textarea class="form-control" id="petInfo" rows="3" placeholder="예: 조용하고 넓은 잔디밭이 있는 곳. 강아지가 마음껏 뛰어놀 수 있도록요. 특정 시설 선호 등."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3 w-100" id="fetchAiButton">
+                            <i class="bi bi-stars me-2"></i>맞춤 추천 받기 </button>
+                    </form>
+                </div>
+                <div id="spinnerGlobalAi" class="text-center mt-4 d-none">
+                    <div class="loading-spinner">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="loading-text">AI가 맞춤 장소를 찾고 있습니다...</p>
+                    </div>
+                </div>
+                <div id="aiRecommendResults" class="mt-4"></div>
+            </div>
+
+            <div class="tab-pane fade p-md-3 p-2 bg-white rounded shadow-sm" id="manual-search-pane" role="tabpanel" aria-labelledby="search-tab">
+                <div class="row">
+                    <div class="col-md-4 col-lg-3 order-md-first mb-3 mb-md-0" id="manualSearchFiltersSidebar">
+                        <div class="sticky-top p-3 bg-light rounded shadow-sm custom-sticky-sidebar">
+                            <h2 class="mb-3 h5">조건 검색</h2>
+                            <form id="directSearchForm">
+                                <div class="mb-2">
+                                    <label for="directSearchKeyword" class="form-label">키워드</label>
+                                    <input type="text" class="form-control form-control-sm" id="directSearchKeyword" placeholder="장소명, 특징 등">
+                                </div>
+                                <hr class="my-2" />
+                                <div class="form-check form-switch mb-3"> <input class="form-check-input" type="checkbox" id="useCurrentLocationSwitch" role="switch" />
+                                    <label class="form-check-label small" for="useCurrentLocationSwitch">현재 위치 기반 검색</label>
+                                </div>
+                                <div id="locationFilterContainer">
+                                    <div id="areaSigunguFilters"> <div class="mb-2">
+                                        <label for="directSearchAreaCode" class="form-label">시/도</label>
+                                        <select class="form-select form-select-sm" id="directSearchAreaCode">
+                                            <option value="" selected>전체</option>
+                                        </select>
+                                    </div>
+                                        <div class="mb-2">
+                                            <label for="directSearchSigunguCode" class="form-label">시/군/구</label>
+                                            <select class="form-select form-select-sm" id="directSearchSigunguCode" disabled>
+                                                <option value="" selected>전체</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div id="currentLocationFilters" class="d-none">
+                                        <div class="mb-2">
+                                            <label for="manualLocationInput" class="form-label visually-hidden">선택된 위치</label>
+                                            <input type="text" class="form-control form-control-sm" id="manualLocationInput" placeholder="지도에서 위치 선택" readonly />
+                                        </div>
+                                        <div class="mb-2">
+                                            <label for="directSearchRadius" class="form-label">검색 반경</label> <select class="form-select form-select-sm" id="directSearchRadius">
+                                            <option value="1000">1km 이내</option>
+                                            <option value="3000">3km 이내</option>
+                                            <option value="5000" selected>5km 이내</option>
+                                            <option value="10000">10km 이내</option>
+                                            <option value="20000">20km 이내</option>
+                                        </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="my-2" />
+                                <div class="mb-2">
+                                    <label class="form-label">카테고리</label>
+                                    <div class="selectable-tag-group">
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="" id="catAll" autocomplete="off" checked /><label class="btn btn-sm btn-outline-secondary" for="catAll">전체</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="12" id="cat12" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat12">관광지</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="14" id="cat14" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat14">문화시설</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="15" id="cat15" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat15">축제</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="28" id="cat28" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat28">레포츠</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="32" id="cat32" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat32">숙박</label>
+                                        <input class="btn-check" type="radio" name="directSearchContentTypeId" value="39" id="cat39" autocomplete="off" /><label class="btn btn-sm btn-outline-secondary" for="cat39">음식점</label>
+                                    </div>
+                                </div>
+                                <div class="mb-2" style="display:none;"> <label for="directSearchPetSize" class="form-label">펫 크기 (참고용)</label>
+                                    <select class="form-select form-select-sm" id="directSearchPetSize">
+                                        <option value="" selected>모든 크기</option>
+                                        <option value="small">소형</option>
+                                        <option value="medium">중형</option>
+                                        <option value="large">대형</option>
+                                    </select>
+                                </div>
+                                <hr class="my-3" />
+                                <button type="submit" class="btn btn-primary btn-sm w-100" id="directSearchButton">
+                                    <i class="bi bi-search me-1"></i>검색하기
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-8 col-lg-9 order-md-last" id="manualSearchResultsArea">
+                        <div id="spinnerDirectSearch" class="text-center" style="display: none;">
+                            <div class="loading-spinner">
+                                <div class="spinner-border text-info" role="status"><span class="visually-hidden">Loading...</span></div>
+                                <p class="loading-text">검색 조건으로 장소를 찾는 중...</p>
+                            </div>
+                        </div>
+                        <div id="resultControlsDirectSearch" class="mb-3 bg-light p-3 rounded shadow-sm" style="display: flex;">
+                            <div class="mb-2 mb-md-0"> <span class="fw-bold me-2">검색 결과:</span>
+                                <span id="resultCountDirectSearch" class="badge bg-primary">0</span> 건
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <select class="form-select form-select-sm" id="sortOrderDirectSearch" style="max-width: 150px; display:none;">
+
+                                </select>
+                                <button class="btn btn-sm btn-outline-secondary" id="viewMapModeDirectSearch" style="display:none;">
+                                </button>
+                            </div>
+                        </div>
+                        <div id="directSearchResultList" class="row g-3">
+                        </div>
+                        <div id="directSearchMapResultsView" class="col-12 d-none"> <div id="resultsMapDirectSearch" style="width: 100%; height: 600px; border-radius: 0.375rem"></div>
+                        </div>
+                        <div class="text-center mt-4" id="loadMoreContainerDirectSearch" style="display: none;">
+                            <button class="btn btn-outline-primary" id="loadMoreButtonDirectSearch">
+                                <i class="bi bi-plus-circle me-2"></i>더 불러오기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
+
+    <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mapModalLabel">위치 선택</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex mb-3">
+                        <input type="text" class="form-control me-2" id="keywordMapInput" placeholder="장소, 주소 검색" />
+                        <button type="button" class="btn btn-secondary text-nowrap" id="searchMapButton">
+                            <i class="bi bi-search me-1"></i>검색 </button>
+                    </div>
+                    <div id="map" class="map-container rounded" style="height: 400px"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="confirmLocationButton">선택 완료</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<div class="user-info" id="userInfo" style="display: none;">
-    <h2>사용자 정보</h2>
-    <p>이름: <span id="username"></span></p>
-    <p>권한: <span id="role"></span></p>
-</div>
+<th:block layout:fragment="script">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/recommend.js}"></script>
+</th:block>
 
-<form id="recommendForm" th:action="@{/api/recommend}" method="post">
-    <label>이름
-        <input type="text" name="name" required />
-    </label>
-    <label>종
-        <input type="text" name="species" required />
-    </label>
-    <label>위치
-        <input type="text" name="location" required />
-    </label>
-    <label>무게/크기
-        <input type="text" name="weight" required />
-    </label>
-    <label>맹견 여부
-        <select name="is_danger">
-            <option value="false">소형견/중형견</option>
-            <option value="true">맹견</option>
-        </select>
-    </label>
-    <label>여행 관련 정보
-        <input type="text" name="info" />
-    </label>
-    <button type="submit">추천 받기</button>
-</form>
-
-
-<div id="resultBox" style="margin-top: 20px;"></div>
-
-<script>
-    const form = document.getElementById("recommendForm");
-    const resultBox = document.getElementById("resultBox");
-
-    form.addEventListener("submit", async function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(form);
-        const json = Object.fromEntries(formData.entries());
-
-        const res = await fetch("/api/recommend", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(json)
-        });
-
-        const data = await res.json();
-        const recommendations = data.recommend;
-
-        resultBox.innerHTML = '';
-
-        recommendations.forEach(place => {
-            const card = document.createElement('div');
-            card.className = 'recommend-card';
-            card.innerHTML = `
-                <img src="${place.imageUrl}" alt="${place.title}" />
-                <h2>${place.title}</h2>
-                <p><strong>주소:</strong>${place.addr}</p>
-                <p><strong>설명:</strong> ${place.description}</p>
-                <p><strong>동반 유형:</strong> ${place.acmpyTypeCd || '정보 없음'}</p>
-                <p><strong>가능 동물:</strong> ${place.acmpyPsblCpam || '정보 없음'}</p>
-                <p><strong>준비물:</strong> ${place.acmpyNeedMtr || '정보 없음'}</p>
-            `;
-            resultBox.appendChild(card);
-        });
-    });
-
-
-    document.addEventListener('DOMContentLoaded', async function() {
-        const token = localStorage.getItem('jwt');
-        if (!token) {
-            showLoginMenu();
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/users/me', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                document.getElementById('userMenu').style.display = 'inline';
-                document.getElementById('loginMenu').style.display = 'none';
-                document.getElementById('userInfo').style.display = 'block';
-                document.getElementById('username').textContent = data.username;
-                document.getElementById('role').textContent = data.role;
-            } else {
-                showLoginMenu();
-                if (response.status === 401) {
-                    localStorage.removeItem('jwt');
-                }
-            }
-        } catch (error) {
-            console.error('사용자 정보 조회 실패:', error);
-            showLoginMenu();
-            localStorage.removeItem('jwt');
-        }
-    });
-
-    function showLoginMenu() {
-        document.getElementById('userMenu').style.display = 'none';
-        document.getElementById('loginMenu').style.display = 'inline';
-        document.getElementById('userInfo').style.display = 'none';
-    }
-
-    function logout() {
-        localStorage.removeItem('jwt');
-        window.location.href = '/';
-    }
-</script>
 </body>
 </html>

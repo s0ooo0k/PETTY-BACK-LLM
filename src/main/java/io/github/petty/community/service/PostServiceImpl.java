@@ -4,6 +4,8 @@ import io.github.petty.community.dto.*;
 import io.github.petty.community.entity.Post;
 import io.github.petty.community.entity.PostLike;
 import io.github.petty.community.enums.PetType;
+import io.github.petty.community.repository.CommentRepository;
+import io.github.petty.community.repository.PostImageRepository;
 import io.github.petty.community.repository.PostLikeRepository;
 import io.github.petty.community.repository.PostRepository;
 import io.github.petty.users.entity.Users;
@@ -22,7 +24,9 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final PostImageService postImageService;
+    private final PostImageRepository postImageRepository;
     private final PostLikeRepository postLikeRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public Long save(PostRequest request, Users user) {
@@ -57,22 +61,27 @@ public class PostServiceImpl implements PostService {
             throw new IllegalArgumentException("수정 권한이 없습니다.");
         }
 
+        // 1️⃣ 먼저 Post 기본 정보 업데이트
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
         post.setPetName(request.getPetName());
         if (request.getPetType() != null && !request.getPetType().isBlank()) {
             post.setPetType(PetType.valueOf(request.getPetType()));
         } else {
-            post.setPetType(null); // 또는 PetType.OTHER 로 기본값 지정도 가능
+            post.setPetType(null);
         }
         post.setRegion(request.getRegion());
         post.setIsResolved(request.getIsResolved());
 
+        // 2️⃣ Post 먼저 저장 (이미지 업데이트 전에)
+        post = postRepository.save(post);
+
+        // 3️⃣ 이미지 업데이트는 별도로 처리
         if (request.getImages() != null) {
             postImageService.updateImagesFromRequest(post, request.getImages());
         }
+        
         System.out.println("🔧 수정 후 Post: " + post);
-        postRepository.save(post);
     }
 
     @Override
@@ -91,19 +100,31 @@ public class PostServiceImpl implements PostService {
             post.setLikeCount(post.getLikeCount() + 1);
         }
 
+        // 🔥 Post의 likeCount 변경 사항을 DB에 저장
+        postRepository.save(post);
+
         return post.getLikeCount();
     }
 
     @Override
-    public void delete(Long id, Users user) {
+    @Transactional
+    public String delete(Long id, Users user) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
         if (!post.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("삭제 권한이 없습니다.");
         }
-        postLikeRepository.deleteAllByPost(post);
-        postRepository.delete(post);
+        
+        // 🔥 삭제하기 전에 postType 저장
+        String postType = post.getPostType().name();
+
+        commentRepository.deleteByPostId(id);       // ✅ Native Query
+        postLikeRepository.deleteByPostId(id);      // ✅ Native Query
+        postImageRepository.deleteByPostId(id);     // ✅ Native Query
+        postRepository.deleteById(id);              // ✅ 단순 ID 기반
+        
+        return postType; // 🔥 삭제된 게시글의 타입 반환
     }
 
     @Override
@@ -161,6 +182,7 @@ public class PostServiceImpl implements PostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .writer(post.getUser().getDisplayName())
+                .userName(post.getUser().getUsername())
                 .petType(post.getPetType() != null ? post.getPetType().getLabel() : null)
                 .petName(post.getPetName())
                 .region(post.getRegion())
@@ -171,5 +193,12 @@ public class PostServiceImpl implements PostService {
                 .images(imageResponses)
                 .createdAt(post.getCreatedAt())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void updateAllPostCounts() {
+        postRepository.updateAllPostCountsNative();
+        System.out.println("✅ 모든 게시글의 댓글 수와 좋아요 수가 업데이트되었습니다.");
     }
 }

@@ -3,6 +3,7 @@ package io.github.petty.users.oauth2;
 import io.github.petty.users.Role;
 import io.github.petty.users.entity.Users;
 import io.github.petty.users.repository.UsersRepository;
+import io.github.petty.users.util.DisplayNameGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final UsersRepository usersRepository;
+    private final DisplayNameGenerator displayNameGenerator;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -87,27 +89,30 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             user.setPassword(UUID.randomUUID().toString()); // 임의의 패스워드 설정
             user.setRole(Role.ROLE_USER.name());
 
-            // Provider 사용자명을 displayName으로 사용
+            // DisplayNameGenerator 유니크 displayName 생성
+            String uniqueDisplayName = displayNameGenerator.generateUniqueDisplayName();
+            user.setDisplayName(uniqueDisplayName);
+
+            // Provider 사용자명을 name으로 사용
             if ("github".equals(provider)) {
                 if (attributes.containsKey("name") && attributes.get("name") != null) {
-                    user.setDisplayName((String) attributes.get("name"));
+                    user.setName((String) attributes.get("name"));
                 } else if (attributes.containsKey("login")) {
-                    user.setDisplayName((String) attributes.get("login"));
+                    user.setName((String) attributes.get("login"));
                 } else {
-                    user.setDisplayName(email.split("@")[0]);
+                    user.setName(email.split("@")[0]);
                 }
             } else if ("kakao".equals(provider)) {
                 Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
                 if (properties != null && properties.containsKey("nickname")) {
-                    user.setDisplayName((String) properties.get("nickname"));
+                    user.setName((String) properties.get("nickname"));
                 } else {
-                    user.setDisplayName(email.split("@")[0]);
+                    user.setName(email.split("@")[0]);
                 }
             }
             return usersRepository.save(user);
         }
 
-        // 기존 사용자 업데이트 로직 (필요한 경우)
         return user;
     }
 }

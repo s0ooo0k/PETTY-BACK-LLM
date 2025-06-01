@@ -3,7 +3,80 @@ let postType = "QNA";
 
 const postId = new URLSearchParams(location.search).get("id");
 
-document.addEventListener("DOMContentLoaded", () => {
+// 🔄 안전한 뒤로가기 함수
+function goBack() {
+  // 현재 페이지가 수정 페이지라면 상세 페이지로
+  if (postId) {
+    window.location.replace(`/posts/detail?id=${postId}`);
+  } else {
+    // 아니면 히스토리 back
+    window.history.back();
+  }
+}
+
+// 🔐 로그인 체크 함수 (쿠키 기반)
+function isLoggedIn() {
+  return true; // 실제 체크는 getCurrentUser()에서
+}
+
+// 🔐 현재 로그인 사용자 정보 가져오기 (쿠키 기반)
+async function getCurrentUser() {
+    try {
+        const res = await fetch('/api/users/me', {
+            credentials: 'include' // 쿠키를 포함해서 요청
+        });
+
+        if (res.ok) {
+            return await res.json();
+        } else if (res.status === 401) {
+            return null; // 로그인 안됨
+        }
+    } catch (err) {
+        console.error('사용자 정보 조회 실패:', err);
+    }
+    return null;
+}
+
+// 🔥 에러 메시지 표시 함수 추가
+function showErrorMessage(message) {
+  // 기존 알림 제거
+  removeExistingAlerts();
+
+  const alertDiv = document.createElement('div');
+  alertDiv.className = 'alert alert-error';
+  alertDiv.innerHTML = `
+    <span class="alert-icon">⚠️</span>
+    <span class="alert-message">${message}</span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  `;
+
+  document.body.insertBefore(alertDiv, document.body.firstChild);
+
+  // 5초 후 자동 제거
+  setTimeout(() => {
+    if (alertDiv.parentElement) {
+      alertDiv.remove();
+    }
+  }, 5000);
+}
+
+function removeExistingAlerts() {
+  const existingAlerts = document.querySelectorAll('.alert');
+  existingAlerts.forEach(alert => alert.remove());
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // 🔐 페이지 로드 시 권한 체크
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+      alert("로그인이 필요한 페이지입니다.");
+      window.location.replace("/login");
+      return;
+  }
+
+  // 🔐 게시글 작성자 본인인지 확인
+  await checkPostOwnership();
+
   fetchPostForEdit();
 
   // HTML의 실제 ID와 맞춤
@@ -16,31 +89,66 @@ document.addEventListener("DOMContentLoaded", () => {
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const token = localStorage.getItem("jwt");
 
-      const payload = {
-        title: document.getElementById("edit-qna-title").value,
-        content: document.getElementById("edit-qna-content").value,
-        petType: getRadioValue("edit-qna-petType") || "OTHER",
-        postType: postType,
-        isResolved: getIsResolvedValue(),
-        images: originalImages
-      };
+      // 🔐 폼 제출 시에도 권한 체크
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+          alert("로그인이 필요합니다.");
+          location.href = "/login";
+          return;
+      }
+
+          const formData = new FormData(form);
+
+          // name 속성으로 가져오기 (권장)
+          const title = formData.get('title')?.trim();
+          const content = formData.get('content')?.trim();
+          const petType = formData.get('petType');
+          const isResolved = formData.has('isResolved');
+
+          // 🔐 필수 필드 검증
+          if (!title) {
+            showErrorMessage("제목을 입력해주세요.");
+            form.querySelector('[name="title"]')?.focus(); // name 속성 활용
+            return;
+          }
+
+          if (!content) {
+            showErrorMessage("내용을 입력해주세요.");
+            form.querySelector('[name="content"]')?.focus();
+            return;
+          }
+
+          if (!petType) {
+            showErrorMessage("반려동물 종류를 선택해주세요.");
+            return;
+          }
+
+          const payload = {
+            title,
+            content,
+            petType,
+            postType: postType,
+            isResolved,
+            images: originalImages
+          };
 
       const res = await fetch(`/api/posts/${postId}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          "Content-Type": "application/json"
         },
+        credentials: 'include', // 쿠키 포함
         body: JSON.stringify(payload)
       });
 
       if (res.ok) {
         alert("수정 완료!");
-        location.href = `/posts/detail?id=${postId}`;
+        // 🔥 수정 완료 후 qna 리스트로 이동
+        window.location.replace("/posts/qna");
       } else {
-        alert("수정 실패");
+            const error = await res.text();
+            alert("수정 실패: " + error);
       }
     });
   }
@@ -56,14 +164,56 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// 🔐 게시글 작성자 본인인지 확인
+async function checkPostOwnership() {
+    try {
+        const [postRes, userRes] = await Promise.all([
+            fetch(`/api/posts/${postId}`),
+            getCurrentUser()
+        ]);
+
+        if (!postRes.ok) {
+            alert("게시글을 찾을 수 없습니다.");
+            location.href = "/";
+            return;
+        }
+
+        const post = await postRes.json();
+        const currentUser = userRes;
+
+        if (!currentUser) {
+            alert("로그인이 필요합니다.");
+            location.href = "/login";
+            return;
+        }
+
+        // 🔐 작성자 본인이 아니면 접근 차단
+        const isOwner = currentUser.username === post.userName;
+        if (!isOwner) {
+            alert("본인이 작성한 게시글만 수정할 수 있습니다.");
+            window.location.replace(`/posts/detail?id=${postId}`);
+            return;
+        }
+
+    } catch (err) {
+        console.error('권한 확인 실패:', err);
+        alert("권한 확인에 실패했습니다.");
+        location.href = "/";
+    }
+}
+
 async function fetchPostForEdit() {
   const res = await fetch(`/api/posts/${postId}`);
   const post = await res.json();
 
-  document.getElementById("edit-qna-title").value = post.title;
-  document.getElementById("edit-qna-content").value = post.content;
+  const titleElement = document.querySelector('[name="title"]') || document.getElementById("edit-qna-title");
+  const contentElement = document.querySelector('[name="content"]') || document.getElementById("edit-qna-content");
 
-  const petTypeInputs = document.querySelectorAll('input[name="edit-qna-petType"]');
+  if (titleElement) titleElement.value = post.title;
+  if (contentElement) contentElement.value = post.content;
+
+  // 🔥 수정: petType name 속성 통일 (edit-qna-petType → petType)
+  const petTypeInputs = document.querySelectorAll('input[name="petType"]');
   petTypeInputs.forEach(input => {
     if (input.value === post.petType) input.checked = true;
   });
@@ -111,6 +261,13 @@ function getIsResolvedValue() {
 }
 
 async function handleImageUpload(e) {
+    // 🔐 이미지 업로드 시 로그인 체크
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+        alert("로그인이 필요합니다.");
+        location.href = "/login";
+        return;
+    }
   const files = Array.from(e.target.files);
   if (!files.length) return;
 
@@ -129,12 +286,9 @@ async function handleImageUpload(e) {
     formData.append("files", file);
   }
 
-  const token = localStorage.getItem("jwt");
   const res = await fetch('/api/images/upload/multi', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    },
+    credentials: 'include', // 쿠키 포함
     body: formData
   });
 

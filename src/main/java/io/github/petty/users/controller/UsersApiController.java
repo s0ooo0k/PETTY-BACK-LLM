@@ -6,9 +6,8 @@ import io.github.petty.users.dto.VerifyCodeRequest;
 import io.github.petty.users.jwt.JWTUtil;
 import io.github.petty.users.service.EmailService;
 import io.github.petty.users.service.RefreshTokenService;
+import io.github.petty.users.service.UserService;
 import io.github.petty.users.util.CookieUtils;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +25,14 @@ import java.util.UUID;
 public class UsersApiController {
 
     private final JWTUtil jwtUtil;
+    private final UserService userService;
     private final EmailService emailService;
     private final RefreshTokenService refreshTokenService;
 
 
-    public UsersApiController(JWTUtil jwtUtil, EmailService emailService, RefreshTokenService refreshTokenService) {
+    public UsersApiController(JWTUtil jwtUtil, EmailService emailService, RefreshTokenService refreshTokenService, UserService userService) {
         this.jwtUtil = jwtUtil;
+        this.userService = userService;
         this.emailService = emailService;
         this.refreshTokenService = refreshTokenService;
     }
@@ -101,5 +102,28 @@ public class UsersApiController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", e.getMessage()));
         }
+    }
+
+    // 닉네임 중복 검사 API 추가
+    @GetMapping("/check-displayname")
+    public ResponseEntity<Map<String, Object>> checkDisplayName(
+            @RequestParam String displayName) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // 현재 사용자 ID 가져오기
+        UUID currentUserId = userService.getCurrentUserId(auth.getPrincipal());
+
+        // 한 번의 서비스 호출로 모든 정보 가져오기
+        Map<String, Object> result = userService.checkDisplayName(currentUserId, displayName);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("available", result.get("available"));
+        response.put("message", result.get("message"));
+
+        return ResponseEntity.ok(response);
     }
 }
