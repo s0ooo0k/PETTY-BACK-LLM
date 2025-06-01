@@ -5,6 +5,7 @@ import io.github.petty.community.entity.Post;
 import io.github.petty.community.entity.PostLike;
 import io.github.petty.community.enums.PetType;
 import io.github.petty.community.repository.CommentRepository;
+import io.github.petty.community.repository.PostImageRepository;
 import io.github.petty.community.repository.PostLikeRepository;
 import io.github.petty.community.repository.PostRepository;
 import io.github.petty.users.entity.Users;
@@ -23,6 +24,7 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final PostImageService postImageService;
+    private final PostImageRepository postImageRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
 
@@ -116,9 +118,11 @@ public class PostServiceImpl implements PostService {
         
         // 🔥 삭제하기 전에 postType 저장
         String postType = post.getPostType().name();
-        
-        postLikeRepository.deleteAllByPost(post);
-        postRepository.delete(post);
+
+        commentRepository.deleteByPostId(id);       // ✅ Native Query
+        postLikeRepository.deleteByPostId(id);      // ✅ Native Query
+        postImageRepository.deleteByPostId(id);     // ✅ Native Query
+        postRepository.deleteById(id);              // ✅ 단순 ID 기반
         
         return postType; // 🔥 삭제된 게시글의 타입 반환
     }

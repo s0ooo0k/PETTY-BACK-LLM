@@ -18,6 +18,6 @@ public interface PostImageRepository extends JpaRepository<PostImage, Long> {
     // ✅ 게시글 ID로 한 번에 삭제하고 싶을 때 (예: 게시글 삭제 시)
     @Modifying
     @Transactional
-    @Query("DELETE FROM PostImage p WHERE p.post.id = :postId")
+    @Query(value = "DELETE FROM post_images WHERE post_id = ?1", nativeQuery = true)
     void deleteByPostId(Long postId);
 }
