@@ -23,10 +23,9 @@
 
 
     /* --- KEY FIX FOR FONT --- */
-    --bs-body-font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif;
-
-    --bs-body-color: var(--text-color);
-    --bs-body-bg: var(--card-bg-color); /* Affects Bootstrap component backgrounds, not necessarily the global page body background if common.css handles that. */
+    --bs-body-bg: var(--background-color); /* common.css의 베이지색 배경 */
+    --bs-body-font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif; /* common.css의 기본 폰트 */
+    --bs-body-color: var(--text-color); /* common.css의 기본 텍스트 색상 */
     --bs-border-color: var(--input-border-color);
     --bs-border-color-translucent: rgba(var(--text-color-rgb), 0.175);
 
@@ -174,9 +173,11 @@
     color: var(--secondary-text-color);
     font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif; /* 탭 링크에도 폰트 적용 */
 }
+
 .nav-link:hover, .nav-link:focus {
     color: var(--point-color);
 }
+
 .nav-tabs .nav-link.active {
     color: var(--accent-color); /* 활성 탭 텍스트 색상 명확히 */
     font-weight: bold;
@@ -205,6 +206,7 @@
     border-top-left-radius: var(--border-radius-lg);
     border-top-right-radius: var(--border-radius-lg);
 }
+
 .modal-header .modal-title {
     color: var(--accent-color); /* 모달 타이틀 색상 */
     font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif;
