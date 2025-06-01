@@ -42,6 +42,7 @@ jobs:
           echo "Gradle 빌드 성공!"
 
       - name: Create deployment package
+        if: github.event_name == 'push'
         run: |
           mkdir -p deploy
           if ls build/libs/*.jar 1> /dev/null 2>&1; then
@@ -53,6 +54,7 @@ jobs:
           fi
 
       - name: Deploy to Oracle Cloud
+        if: github.event_name == 'push'
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -66,6 +68,7 @@ jobs:
             echo "새 JAR 파일 복사를 기다리는 중..."
 
       - name: Copy JAR file
+        if: github.event_name == 'push'
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -76,6 +79,7 @@ jobs:
           strip_components: 1
 
       - name: Start application
+        if: github.event_name == 'push'
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
