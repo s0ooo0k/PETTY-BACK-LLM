@@ -87,7 +87,7 @@ public class CommentController {
 
         } catch (Exception e) {
             // 서버 내부 오류
-            log.error("댓글 삭제 실패 - commentId: {}, user: {}", commentId, e);
+            log.error("댓글 삭제 실패 - commentId: {}", commentId, e);
             return ResponseEntity.status(500).body("댓글 삭제에 실패했습니다.");
         }
     }
