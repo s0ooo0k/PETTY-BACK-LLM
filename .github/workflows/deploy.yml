@@ -159,7 +159,7 @@ jobs:
             # 로그 확인 (마지막 20줄)
             sudo journalctl -u petty-app -n 20 --no-pager
 
-      - name: Check Application Status
+      - name: Health Check and Status
         uses: appleboy/ssh-action@v1.0.0
         continue-on-error: true
         with:
@@ -167,22 +167,31 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            echo "=== 배포 완료 - 애플리케이션 상태 확인 ==="
+            echo "=== 헬스체크 시작 ==="
             
-            # 서비스 상태 확인
+            # 헬스체크 시도 (30초)
+            for i in {1..15}; do
+              if curl -f http://localhost:8080/health > /dev/null 2>&1; then
+                echo "Application is healthy!"
+                echo "==================배포 성공!=================="
+                exit 0
+              fi
+              echo "Attempt $i failed, waiting 5 seconds..."
+              sleep 5
+            done
+            
+            echo "==================Health check failed - 상세 정보 확인=================="
+            echo ""
+            
+            # 헬스체크 실패시 상세 정보
             echo "1. 서비스 상태:"
             sudo systemctl status petty-app --no-pager
             
-            # 최근 로그 확인 (에러 위주)
-            echo -e "\n2. 최근 로그 (마지막 30줄):"
-            sudo journalctl -u petty-app -n 30 --no-pager
+            echo -e "\n2. 최근 에러 로그:"
+            sudo journalctl -u petty-app -n 20 --no-pager
             
-            # 포트 사용 확인
-            echo -e "\n3. 포트 8080 사용 상황:"
+            echo -e "\n3. 포트 8080 확인:"
             sudo netstat -tlnp | grep 8080 || echo "8080 포트 사용 중이 아님"
             
-            # 프로세스 확인
-            echo -e "\n4. petty 관련 프로세스:"
-            ps aux | grep petty | grep -v grep || echo "petty 프로세스 없음"
-            
-            echo -e "\n=== 상태 확인 완료 ==="
+            echo -e "\n4. 수동 확인 방법:"
+            echo "ssh로 접속 후: sudo journalctl -u petty-app -f"
