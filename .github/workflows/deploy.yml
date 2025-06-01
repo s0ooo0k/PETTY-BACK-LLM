@@ -151,7 +151,7 @@ jobs:
             sudo systemctl start petty-app
             
             # 상태 확인
-            sleep 30
+            sleep 10
             sudo systemctl status petty-app
             
             # 로그 확인 (마지막 20줄)
@@ -164,8 +164,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # 30초 동안 헬스체크 시도
-            for i in {1..6}; do
+            # 60초 동안 헬스체크 시도
+            for i in {1..12}; do
               if curl -f http://localhost:8080/health > /dev/null 2>&1; then
                 echo "Application is healthy!"
                 exit 0
