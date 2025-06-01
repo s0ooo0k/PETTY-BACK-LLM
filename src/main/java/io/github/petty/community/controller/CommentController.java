@@ -65,19 +65,29 @@ public class CommentController {
     @DeleteMapping("/api/comments/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        String username = null;
         try {
-            username = userDetails.getUsername();
+            String username = userDetails.getUsername();
             Users user = usersRepository.findByUsername(username);
 
             log.info("댓글 삭제 시작 - commentId: {}, user: {}", commentId, username);
             commentService.deleteComment(commentId, user);
 
             log.info("댓글 삭제 완료 - commentId: {}", commentId);
-
             return ResponseEntity.noContent().build();
+
+        } catch (IllegalArgumentException e) {
+            // 클라이언트 요청 오류 (존재하지 않는 댓글 등)
+            log.warn("댓글 삭제 실패 - 잘못된 요청: {}", e.getMessage());
+            return ResponseEntity.badRequest().body("잘못된 요청입니다: " + e.getMessage());
+
+        } catch (SecurityException e) {
+            // 권한 없음
+            log.warn("댓글 삭제 실패 - 권한 없음: {}", e.getMessage());
+            return ResponseEntity.status(403).body("삭제 권한이 없습니다.");
+
         } catch (Exception e) {
-            log.error("댓글 삭제 실패 - commentId: {}, user: {}", commentId, username, e);
+            // 서버 내부 오류
+            log.error("댓글 삭제 실패 - commentId: {}", commentId, e);
             return ResponseEntity.status(500).body("댓글 삭제에 실패했습니다.");
         }
     }

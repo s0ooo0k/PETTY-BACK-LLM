@@ -37,34 +37,6 @@ public class PostImageServiceImpl implements PostImageService {
     }
 
     @Override
-    public void deleteImagesByPostId(Long postId) {
-        postImageRepository.deleteByPostId(postId);
-    }
-
-    @Override
-    public void deleteImage(Long imageId) {
-        postImageRepository.deleteById(imageId);
-    }
-
-    @Override
-    public List<PostImageResponse> findImageResponsesByPostId(Long postId) {
-        return postImageRepository.findByPostIdOrderByOrderingAsc(postId).stream()
-                .map(img -> new PostImageResponse(img.getId(), img.getImageUrl(), img.getOrdering()))
-                .toList();
-    }
-
-    @Override
-    @Transactional
-    public void reorderImages(List<Long> orderedImageIds) {
-        for (int i = 0; i < orderedImageIds.size(); i++) {
-            Long imageId = orderedImageIds.get(i);
-            PostImage image = postImageRepository.findById(imageId)
-                    .orElseThrow(() -> new IllegalArgumentException("이미지 ID가 잘못되었습니다."));
-            image.setOrdering(i);  // 새로운 순서로 업데이트
-        }
-    }
-
-    @Override
     @Transactional
     public void updateImagesFromRequest(Post post, List<PostImageRequest> imageRequests) {
         if (imageRequests == null || imageRequests.isEmpty()) {
