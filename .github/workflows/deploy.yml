@@ -87,8 +87,6 @@ jobs:
           script: |
             # 환경 변수 파일 업데이트
             cat > /home/ubuntu/petty-app/.env << 'EOF'
-            SPRING_PROFILES_ACTIVE=prod
-
             # Database
             DB_SUPABASE_URL=${{ secrets.DB_SUPABASE_URL }}
             DB_SUPABASE_USERNAME=${{ secrets.DB_SUPABASE_USERNAME }}
