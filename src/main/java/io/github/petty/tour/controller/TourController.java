@@ -30,14 +30,14 @@ public class TourController {
     private final TourService tourService; // 관광 정보 서비스 의존성 주입
 
     /**
-     * 관광지 추천 입력 폼을 보여주는 페이지로 이동합니다.
+     * 관광지 검색 폼을 보여주는 페이지로 이동합니다.
      *
-     * @return "recommend" 뷰 템플릿 이름
+     * @return "search" 뷰 템플릿 이름
      */
-    @GetMapping("/recommend")
+    @GetMapping("/search")
     public String recommendForm() {
-        log.info("GET /recommend - 관광지 추천 폼 페이지 요청");
-        return "recommend";
+        log.info("GET /search - 관광지 검색 폼 페이지 요청");
+        return "search";
     }
 
     /**
@@ -102,7 +102,6 @@ public class TourController {
      *
      * @param areaCode      검색할 지역(시/도) 코드 (필수, Integer)
      * @param sigunguCode   검색할 시/군/구 코드 (선택 사항, Integer)
-     * @param keyword       검색어 (선택 사항, String, 현재 서비스 로직에서는 미반영 상태)
      * @param contentTypeId 검색할 콘텐츠 타입 ID (선택 사항, Integer)
      * @param pageable      페이징 및 정렬 정보 ({@link PageableDefault}로 기본값 설정: 페이지당 10개, 수정 시간 역순 정렬)
      * @return HTTP 200 OK 상태와 함께 {@link TourSummaryDto}의 {@link Page} 객체를 {@link ResponseEntity}로 감싸 반환합니다.
@@ -113,12 +112,11 @@ public class TourController {
     public ResponseEntity<Page<TourSummaryDto>> searchByArea(
             @RequestParam Integer areaCode,
             @RequestParam(name = "sigunguCode", required = false) Integer sigunguCode,
-            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer contentTypeId,
             @PageableDefault(size = 10, sort = "modifiedTime", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        log.info("API GET /api/tour/search/area - 지역 기반 검색 요청: areaCode={}, sigunguCode={}, keyword='{}', contentTypeId={}, pageable={}",
-                areaCode, sigunguCode, keyword, contentTypeId, pageable);
+        log.info("API GET /api/tour/search/area - 지역 기반 검색 요청: areaCode={}, sigunguCode={}, contentTypeId={}, pageable={}",
+                areaCode, sigunguCode, contentTypeId, pageable);
 
         Page<TourSummaryDto> results = tourService.searchByArea(areaCode, sigunguCode, contentTypeId, pageable);
 
@@ -134,7 +132,6 @@ public class TourController {
      * @param mapX          검색 중심의 X좌표 (경도, 필수, BigDecimal)
      * @param mapY          검색 중심의 Y좌표 (위도, 필수, BigDecimal)
      * @param radius        검색 반경 (미터 단위, 필수, Integer)
-     * @param keyword       검색어 (선택 사항, String, 현재 서비스 로직에서는 미반영 상태)
      * @param contentTypeId 검색할 콘텐츠 타입 ID (선택 사항, Integer)
      * @param pageable      페이징 정보 ({@link PageableDefault}로 기본값 설정: 페이지당 10개)
      * @return HTTP 200 OK 상태와 함께 {@link TourSummaryDto}의 {@link Page} 객체를 {@link ResponseEntity}로 감싸 반환합니다.
@@ -150,8 +147,8 @@ public class TourController {
             @RequestParam(required = false) Integer contentTypeId,
             @PageableDefault(size = 10) Pageable pageable) {
 
-        log.info("API GET /api/tour/search/location - 위치 기반 검색 요청: mapX={}, mapY={}, radius={}, keyword='{}', contentTypeId={}, pageable={}",
-                mapX, mapY, radius, keyword, contentTypeId, pageable);
+        log.info("API GET /api/tour/search/location - 위치 기반 검색 요청: mapX={}, mapY={}, radius={}, contentTypeId={}, pageable={}",
+                mapX, mapY, radius, contentTypeId, pageable);
 
         Page<TourSummaryDto> results = tourService.searchByLocation(mapX, mapY, radius, contentTypeId, pageable);
 
