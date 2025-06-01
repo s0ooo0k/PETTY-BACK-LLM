@@ -1,7 +1,7 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: none # none or valid
+      ddl-auto: update # none or valid
     show-sql: true
     properties:
       hibernate:
