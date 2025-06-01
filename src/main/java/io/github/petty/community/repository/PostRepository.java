@@ -24,16 +24,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @EntityGraph(attributePaths = {"user", "images"})
     Optional<Post> findWithUserAndImagesById(Long id);
 
-    @Query("""
-    UPDATE Post p 
-    SET p.commentCount = (SELECT COUNT(c) FROM Comment c WHERE c.post = p),
-        p.likeCount = (SELECT COUNT(l) FROM PostLike l WHERE l.post = p)
-    """)
-    @Modifying
-    @Transactional
-    void updateAllPostCounts();
-
-    // 또는 더 나은 성능을 위한 네이티브 쿼리
     @Query(value = """
     UPDATE posts p 
     SET comment_count = (

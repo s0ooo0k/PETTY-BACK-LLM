@@ -1,3 +1,4 @@
+/*LimPark996 특화 버전 build.gradle*/
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.4'
@@ -38,7 +39,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -73,15 +73,27 @@ dependencies {
 	// ✅ Oauth2
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
-	// SpringAI API
-	implementation 'io.grpc:grpc-xds:1.62.2'
+	// SpringAI API - XDS 모듈 제외하여 호환성 문제 해결
 	implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
 	implementation "org.springframework.ai:spring-ai-starter-model-openai"
-	implementation "org.springframework.ai:spring-ai-starter-vector-store-qdrant"
+	implementation("org.springframework.ai:spring-ai-starter-vector-store-qdrant") {
+		exclude group: 'io.grpc', module: 'grpc-xds'
+	}
 
-	// Thymeleaf layout
-	// https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect
-	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.0.0'
+	// Google Cloud Vision에서도 XDS 제거
+	implementation('com.google.cloud:google-cloud-vision:3.33.0') {
+		exclude group: 'io.grpc', module: 'grpc-xds'
+	}
+
+	// Protobuf 의존성 명시적 추가 (XDS 제거로 인한 누락 보완)
+	implementation 'com.google.protobuf:protobuf-java:3.25.3'
+	implementation 'com.google.protobuf:protobuf-java-util:3.25.3'
+
+	// 전역적으로 XDS 제거 (강력한 방법)
+	configurations.all {
+		exclude group: 'io.grpc', module: 'grpc-xds'
+	}
+
 }
 
 tasks.named('test') {
