@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active: prod
-
   jpa:
     hibernate:
       ddl-auto: none
@@ -130,5 +127,5 @@ tour-api:
 
 security:
   cookie:
-    secure: true   # 배포환경
+    secure: true
     same-site: Lax
