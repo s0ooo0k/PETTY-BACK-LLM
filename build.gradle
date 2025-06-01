@@ -62,14 +62,12 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	// ✅ Google Cloud Vision
-	implementation 'com.google.cloud:google-cloud-vision:3.33.0'
-	// ✅ AWS SDK v2 - Rekognition
+	//  AWS SDK v2 - Rekognition
 	implementation platform('software.amazon.awssdk:bom:2.25.19')
 	implementation 'software.amazon.awssdk:rekognition'
-	// ✅ SMTP
+	//  SMTP
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	// ✅ Oauth2
+	//  Oauth2
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 	// SpringAI API
