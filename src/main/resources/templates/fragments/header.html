@@ -9,12 +9,110 @@
     </div>
     <div class="logo-container">
         <img src="/assets/logo.png" alt="PETTY Logo">
-        <h1>PETTY</h1>
+        <h1><a th:href="@{/}">PETTY</a></h1>
     </div>
-    <div style="display: flex; gap: 15px;">
-        <a th:href="@{/login}">로그인</a>
-        <a th:href="@{/signup}">회원가입</a>
+
+    <div class="account-btn-div" style="display: flex; gap: 15px;">
+
+        <div id="loginMenu" style="display: none;">
+            <a th:href="@{/login}">로그인</a>
+            <a th:href="@{/join}">회원가입</a>
+        </div>
+
+        <div id="userMenu" style="display: none;">
+            <span id="userInfo" style="display: none;">
+                <span id="username"></span>님 <span id="role" style="display: none;"></span>
+            </span>
+            <a onclick="goToProfileEdit()">프로필</a>
+            <a href="#" onclick="logout(event)">로그아웃</a>
+        </div>
     </div>
+
+    <script th:inline="javascript">
+        // 페이지 로드 시 로그인 상태 확인 함수 호출
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkLoginStatus();
+        });
+
+        // 사용자 로그인 상태 확인 및 UI 업데이트 함수
+        async function checkLoginStatus() {
+            try {
+                // 현재 사용자 정보 조회 API 호출. 이 요청에는 HttpOnly 쿠키(jwt)가 자동으로 포함됨.
+                const response = await fetch('/api/users/me');
+
+                if (response.ok) {
+                    // 성공: 로그인 상태 표시
+                    const data = await response.json(); // 사용자 정보를 JSON으로 파싱
+                    document.getElementById('userMenu').style.display = 'inline'; // 사용자 메뉴 보이기
+                    document.getElementById('loginMenu').style.display = 'none'; // 로그인/회원가입 메뉴 숨기기
+                    document.getElementById('userInfo').style.display = 'block'; // 사용자 정보 영역 보이기
+                    document.getElementById('username').textContent = data.username; // 사용자 이름 표시
+                    document.getElementById('role').textContent = data.role; // 사용자 역할 표시
+                } else if (response.status === 401) {
+                    // 액세스 토큰 만료 (401 Unauthorized): 리프레시 토큰으로 갱신 시도
+                    console.log('액세스 토큰 만료, 리프레시 토큰으로 갱신 시도');
+                    try {
+                        // 토큰 갱신 API 호출. 이 요청에도 HttpOnly 쿠키(refresh_token)가 자동으로 포함됨.
+                        const refreshResponse = await fetch('/api/auth/refresh', {
+                            method: 'POST' // POST 요청
+                        });
+
+                        if (refreshResponse.ok) {
+                            console.log('토큰 갱신 성공! 원래 요청 재시도');
+                            // 토큰 갱신 성공 → checkLoginStatus()를 다시 호출하여 UI 업데이트
+                            return await checkLoginStatus();
+                        } else {
+                            console.log('리프레시 토큰도 만료, 로그인 필요');
+                            showLoginMenu(); // 로그인/회원가입 메뉴 표시
+                        }
+                    } catch (refreshError) {
+                        console.error('토큰 갱신 실패:', refreshError);
+                        showLoginMenu(); // 오류 발생 시 로그인/회원가입 메뉴 표시
+                    }
+                } else {
+                    // 401 이외의 다른 에러 발생 시
+                    showLoginMenu(); // 로그인/회원가입 메뉴 표시
+                }
+            } catch (error) {
+                // 네트워크 에러 등 요청 자체 실패 시
+                console.error('사용자 정보 조회 실패:', error);
+                showLoginMenu(); // 로그인/회원가입 메뉴 표시
+            }
+        }
+
+        // 로그인/회원가입 메뉴를 표시하고 사용자 메뉴를 숨기는 함수
+        function showLoginMenu() {
+            document.getElementById('userMenu').style.display = 'none';
+            document.getElementById('loginMenu').style.display = 'inline';
+            document.getElementById('userInfo').style.display = 'none';
+        }
+
+        // 프로필 편집 페이지로 이동하는 함수
+        function goToProfileEdit() {
+            window.location.href = '/profile/edit'; // 브라우저가 HttpOnly 쿠키를 자동으로 담아서 GET 요청을 보냄
+        }
+
+        // 로그아웃 함수
+        async function logout(event) {
+            event.preventDefault(); // <a> 태그의 기본 동작(페이지 이동) 방지
+            try {
+                // 서버에 로그아웃 요청. 이 요청에도 HttpOnly 쿠키가 자동으로 포함됨.
+                const response = await fetch('/logout', {
+                    method: 'POST' // POST 요청
+                });
+                if (response.ok) {
+                    alert('로그아웃 성공');
+                    window.location.href = '/'; // 로그아웃 성공 시 메인 페이지로 이동
+                } else {
+                    alert('로그아웃 실패');
+                    // 필요하다면 에러 메시지 상세화
+                }
+            } catch (error) {
+                console.error('로그아웃 에러:', error);
+                alert('로그아웃 중 오류가 발생했습니다.');
+            }
+        }
+    </script>
 </header>
 </body>
 </html>
