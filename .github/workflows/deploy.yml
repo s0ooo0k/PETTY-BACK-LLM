@@ -182,7 +182,7 @@ jobs:
             
             # 3. 추가 안정성 체크 (30초 더 대기 후 재확인)
             echo "추가 안정성 확인 중..."
-            sleep 30
+            sleep 35
             
             final_status=$(sudo systemctl is-active petty-app)
             if [ "$final_status" != "active" ]; then
