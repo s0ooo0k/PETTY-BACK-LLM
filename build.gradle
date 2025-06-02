@@ -72,25 +72,25 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// ✅ Google Cloud Vision
+	// Google Cloud Vision
 	implementation 'com.google.cloud:google-cloud-vision:3.33.0'
 
-	// ✅ AWS SDK v2 - Rekognition
+	// AWS SDK v2 - Rekognition
 	implementation platform('software.amazon.awssdk:bom:2.25.19')
 	implementation 'software.amazon.awssdk:rekognition'
 
-	// ✅ SMTP
+	// SMTP
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-	// ✅ Oauth2
+	// Oauth2
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
-	// ✅ SpringAI API - BOM으로 버전 관리
+	// SpringAI API - BOM으로 버전 관리
 	implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
 	implementation "org.springframework.ai:spring-ai-starter-model-openai"
 	implementation "org.springframework.ai:spring-ai-starter-vector-store-qdrant"
 
-	// ✅ gRPC 의존성 충돌 해결 - exclude로 충돌하는 버전 제외
+	// gRPC 의존성 충돌 해결 - exclude로 충돌하는 버전 제외
 	implementation('io.grpc:grpc-xds:1.62.2') {
 		exclude group: 'io.grpc', module: 'grpc-netty-shaded'
 		exclude group: 'io.grpc', module: 'grpc-core'
@@ -98,7 +98,7 @@ dependencies {
 		exclude group: 'io.grpc', module: 'grpc-protobuf'
 	}
 
-	// ✅ gRPC 버전 명시적 관리
+	// gRPC 버전 명시적 관리
 	implementation platform('io.grpc:grpc-bom:1.62.2')
 	implementation 'io.grpc:grpc-netty-shaded'
 	implementation 'io.grpc:grpc-protobuf'
@@ -107,8 +107,6 @@ dependencies {
 	// Thymeleaf layout
 	// https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.0.0'
-
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 // 의존성 충돌 해결을 위한 설정
