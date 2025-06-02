@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PETTY - 궁금해요! 질문답변</title>
+</head>
 
-    <!-- 폰트 로드 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<!-- 페이지별 CSS 추가 -->
+<th:block layout:fragment="css">
     <style>
         /* 폰트 정의 */
         @font-face {
@@ -395,26 +393,8 @@
             }
         }
     </style>
-</head>
-<body>
-<!-- 헤더 -->
-<header>
-    <div class="menu-icon">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-    <div class="logo-container">
-        <h1><a href="/">PETTY</a></h1>
-    </div>
-    <div class="account-links">
-        <a href="/login">로그인</a>
-        <a href="/join">회원가입</a>
-    </div>
-</header>
-
-<!-- 메인 컨텐츠 -->
-<main>
+</th:block>
+<div layout:fragment="content">
     <div class="board-header">
         <h1>궁금해요! 질문답변</h1>
         <a href="/posts/qna/new" class="write-btn">
@@ -452,15 +432,11 @@
             </div>
         </div>
     </div>
-</main>
+</div>
 
-<!-- 푸터 -->
-<footer>
-    <span class="paw">🐶</span> 반려동물과 함께하는 행복한 여정, PETTY <span class="paw">🐱</span>
-    <br>&copy; 2025 PETTY. All rights reserved.
-</footer>
-
-<script>
+<!-- 페이지별 JavaScript 추가 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
     let currentPage = 0;
     const pageSize = 9;
 
@@ -588,5 +564,5 @@
     // 페이지 로드시 데이터 가져오기
     document.addEventListener('DOMContentLoaded', fetchQnaPosts);
 </script>
-</body>
+</th:block>
 </html>

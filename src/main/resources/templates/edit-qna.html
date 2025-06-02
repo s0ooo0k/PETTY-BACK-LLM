@@ -1,135 +1,14 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PETTY - 질문 수정하기</title>
+</head>
 
-    <!-- 폰트 로드 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<!-- 페이지별 CSS 추가 -->
+<th:block layout:fragment="css">
     <style>
-        /* 폰트 정의 */
-        @font-face {
-            font-family: 'HakgyoansimDunggeunmisoTTF-B';
-            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimDunggeunmisoTTF-B.woff2') format('woff2');
-            font-weight: 700;
-            font-style: normal;
-        }
-
-        /* CSS 변수 */
-        :root {
-            --background-color: #FFF0DC;
-            --text-color: #4B352A;
-            --point-color: #9EBC8A;
-            --accent-color: #D76C82;
-            --secondary-text-color: #7A5B4C;
-            --card-bg-color: #FFFFFF;
-            --input-border-color: #D3B8AE;
-            --button-hover-color: #c45b73;
-            --border-radius-lg: 20px;
-            --border-radius-md: 12px;
-            --border-radius-sm: 8px;
-            --box-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08);
-            --box-shadow-cute: 0 8px 20px rgba(215, 108, 130, 0.2);
-        }
-
-        body {
-            font-family: 'HakgyoansimDunggeunmisoTTF-B', 'Noto Sans KR', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 헤더 스타일 */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 25px;
-            background-color: var(--card-bg-color);
-            box-shadow: var(--box-shadow-light);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom-left-radius: var(--border-radius-lg);
-            border-bottom-right-radius: var(--border-radius-lg);
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .logo-container h1 {
-            color: var(--accent-color);
-            font-size: 1.8em;
-            margin: 0;
-        }
-
-        .logo-container a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .menu-icon {
-            width: 30px;
-            height: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            cursor: pointer;
-        }
-
-        .menu-icon span {
-            display: block;
-            width: 100%;
-            height: 3px;
-            background-color: var(--text-color);
-            border-radius: 2px;
-        }
-
-        .account-links {
-            display: flex;
-            gap: 15px;
-        }
-
-        .account-links a {
-            text-decoration: none;
-            color: var(--secondary-text-color);
-            font-weight: bold;
-            padding: 8px 12px;
-            border-radius: var(--border-radius-md);
-            transition: all 0.3s ease;
-        }
-
-        .account-links a:hover {
-            background-color: var(--point-color);
-            color: white;
-        }
-
-        /* 메인 컨텐츠 */
-        main {
-            flex-grow: 1;
-            padding: 40px 25px;
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
         /* 폼 컨테이너 스타일 */
         .container {
             max-width: 700px;
@@ -476,26 +355,6 @@
             transform: translateY(-2px);
         }
 
-        /* 푸터 */
-        footer {
-            background-color: var(--point-color);
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: auto;
-            border-top-left-radius: var(--border-radius-lg);
-            border-top-right-radius: var(--border-radius-lg);
-            font-size: 1.1em;
-            line-height: 1.8;
-            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
-        }
-
-        .paw {
-            font-size: 1.3em;
-            color: var(--accent-color);
-            margin: 0 5px;
-        }
-
         /* 반응형 */
         @media (max-width: 768px) {
             .form-card {
@@ -510,32 +369,12 @@
                 padding: 8px 16px;
                 font-size: 0.8em;
             }
-
-            .account-links {
-                display: none;
-            }
         }
     </style>
-</head>
-<body>
-<!-- 헤더 -->
-<header>
-    <div class="menu-icon">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-    <div class="logo-container">
-        <h1><a href="/">PETTY</a></h1>
-    </div>
-    <div class="account-links">
-        <a href="/login">로그인</a>
-        <a href="/join">회원가입</a>
-    </div>
-</header>
+</th:block>
 
 <!-- 메인 컨텐츠 -->
-<main>
+<div layout:fragment="content">
     <div class="container">
         <a href="javascript:void(0)" onclick="goBack()" class="back-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -625,14 +464,12 @@
             </form>
         </div>
     </div>
-</main>
+</div>
 
-<!-- 푸터 -->
-<footer>
-    <span class="paw">🐶</span> 반려동물과 함께하는 행복한 여정, PETTY <span class="paw">🐱</span>
-    <br>&copy; 2025 PETTY. All rights reserved.
-</footer>
+<!-- 페이지별 JavaScript 추가 -->
+<th:block layout:fragment="script">
+    <script src="/js/common/edit-qna.js"></script>
+</th:block>
 
-<script src="/js/common/edit-qna.js"></script>
-</body>
+</html>
 </html>

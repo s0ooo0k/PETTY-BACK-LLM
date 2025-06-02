@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/defaultLayout}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PETTY 게시글 상세</title>
+</head>
 
-    <!-- 폰트 로드 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<!-- 페이지별 CSS 추가 -->
+<th:block layout:fragment="css">
     <style>
         /* 폰트 정의 */
         @font-face {
@@ -300,7 +298,6 @@
             font-size: 1.1em;
             line-height: 1.7;
             color: var(--text-color);
-            white-space: pre-wrap;
         }
 
         .post-images {
@@ -567,7 +564,6 @@
             font-size: 1em;
             line-height: 1.5;
             margin-bottom: 10px;
-            white-space: pre-wrap;
         }
 
         .comment-actions {
@@ -684,44 +680,8 @@
             }
         }
     </style>
-</head>
-<body onclick="closeMenuOnClickOutside(event)">
-<!-- 헤더 -->
-<header>
-    <div class="menu-icon" onclick="toggleMenu(event)">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-
-    <div class="account-btn-div" style="display: flex; gap: 15px;">
-        <div id="loginMenu" style="display: none;">
-            <a href="/login">로그인</a>
-            <a href="/join">회원가입</a>
-        </div>
-
-        <div id="userMenu" style="display: none;">
-                <span id="userInfo" style="display: none;">
-                    <span id="username"></span>님 <span id="role" style="display: none;"></span>
-                </span>
-            <a onclick="goToProfileEdit()">프로필</a>
-            <a href="#" onclick="logout(event)">로그아웃</a>
-        </div>
-    </div>
-</header>
-
-<!-- 사이드 메뉴 -->
-<div id="sideMenu" class="side-menu">
-    <nav>
-        <a href="/">홈</a>
-        <a href="/seach">검색하기</a>
-        <a href="/vision/upload">추천받기</a>
-        <a href="/posts/review">커뮤니티</a>
-    </nav>
-</div>
-
-<!-- 메인 컨텐츠 -->
-<main>
+</th:block>
+<div layout:fragment="content">
     <div class="container">
         <a href="javascript:history.back()" class="back-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -836,16 +796,12 @@
             </div>
         </div>
     </div>
-</main>
+</div>
 
-<!-- 푸터 -->
-<footer>
-    <span class="paw">🐶</span> 반려동물과 함께하는 행복한 여정, PETTY <span class="paw">🐱</span>
-    <br>&copy; 2025 PETTY. All rights reserved.
-</footer>
-
-<script>
-    const postId = new URLSearchParams(location.search).get("id");
+<!-- 페이지별 JavaScript 추가 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const postId = new URLSearchParams(location.search).get("id");
 
     // 🔐 로그인 체크 함수 (쿠키 기반)
     function isLoggedIn() {
@@ -1360,6 +1316,6 @@
     document.addEventListener("DOMContentLoaded", async () => {
         await fetchPostDetail();
     });
-</script>
-</body>
+    </script>
+</th:block>
 </html>
