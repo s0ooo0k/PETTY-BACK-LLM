@@ -12,8 +12,6 @@ import io.github.petty.community.dto.PostImageRequest;
 
 @Getter
 @Setter
-@NotNull
-@NotBlank
 public class PostRequest {
     @Size(max=100)
     private String title;

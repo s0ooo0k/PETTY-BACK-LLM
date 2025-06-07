@@ -1,0 +1,299 @@
+/* search.css */
+
+/* 로딩 스피너 (search.html 내의 Bootstrap 스피너 구조 대상) */
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--secondary-text-color); /* common.css 변수 사용 */
+}
+.loading-spinner .spinner-border { /* HTML에서 text-info 등으로 색상 지정됨 */
+  width: 3rem;
+  height: 3rem;
+}
+.loading-spinner .loading-text {
+  margin-top: 15px;
+  font-size: 1.1em;
+  color: var(--secondary-text-color); /* common.css 변수 사용 */
+}
+
+/* ==========================================================================
+   탭 UI (직접 검색)
+   ========================================================================== */
+.nav-tabs {
+  border-bottom-color: var(--input-border-color); /* common.css 변수 */
+}
+.nav-tabs .nav-link {
+  font-weight: bold;
+  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0; /* common.css 변수 */
+  padding: 0.75rem 1.25rem;
+  background-color: transparent;
+  /* bootstrap-overrides.css 에서 :root 및 .nav-link 로 색상 관리 */
+  /* border-color 는 bootstrap-overrides.css 의 --bs-nav-tabs-link-active-border-color 등 변수 설정 따름 */
+}
+/* .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus handled by bootstrap-overrides.css */
+/* .nav-tabs .nav-link.active handled by bootstrap-overrides.css */
+
+.tab-content > .tab-pane {
+  background-color: var(--card-bg-color); /* common.css 변수 */
+  border: 1px solid var(--input-border-color); /* common.css 변수 */
+  border-top: none;
+  padding: 1.5rem;
+  border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); /* common.css 변수 */
+  box-shadow: var(--box-shadow-light); /* common.css 변수 */
+}
+
+/* ==========================================================================
+   직접 검색 필터 (폼 요소 공통 스타일)
+   ========================================================================== */
+/* .form-label 스타일은 common.css 의 label 스타일을 따르거나,
+   더 구체적인 스타일이 필요하면 여기에 정의합니다.
+   Bootstrap .form-label 클래스가 이미 적용되어 있을 수 있습니다.
+   여기서는 common.css 의 label 이 충분히 스타일링한다고 가정합니다.
+   만약 .form-label 클래스에만 특정 스타일을 주고 싶다면 아래처럼 추가:
+*/
+/*
+#manualSearchFiltersSidebar .form-label {
+  color: var(--secondary-text-color);
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+*/
+
+/* .form-control, .form-select 은 bootstrap-overrides.css 에서 기본 테마 적용.
+   search.html 내부의 폼 요소에 HakgyoansimDunggeunmisoTTF-B 폰트를 명시적으로 적용하고 싶다면 아래 사용.
+   (common.css 에서 body에 이미 적용했지만, Bootstrap 기본 폰트를 확실히 오버라이드하기 위함)
+*/
+#manualSearchFiltersSidebar .form-control,
+#manualSearchFiltersSidebar .form-select {
+  font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif;
+  padding: 0.6rem 0.8rem; /* Bootstrap 기본 패딩과 다를 수 있음 */
+  border-radius: var(--border-radius-sm); /* common.css 변수 */
+  /* 기타 border, color, background-color 등은 bootstrap-overrides.css 따름 */
+}
+#manualSearchFiltersSidebar .form-control:focus,
+#manualSearchFiltersSidebar .form-select:focus {
+  /* 포커스 스타일은 bootstrap-overrides.css 따름 */
+}
+
+/* 버튼 그룹 (카테고리 선택 등) */
+.btn-check-group .btn {
+  font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif; /* 폰트 명시 */
+  /* 나머지 스타일(테두리, 색상)은 bootstrap-overrides.css 의 .btn-outline-secondary 등 따름 */
+}
+/* .btn-check-group 레이아웃은 search.html의 Bootstrap 클래스 btn-group으로 처리 */
+
+
+/* 직접 검색 필터 사이드바 */
+#manualSearchFiltersSidebar .custom-sticky-sidebar {
+  top: 85px; /* 헤더 높이에 따라 조정 필요할 수 있음, header.css 와 연관 */
+  max-height: calc(100vh - 100px); /* 상단 offset 및 하단 여유 공간 고려 */
+  overflow-y: auto;
+  background-color: var(--bs-light-bg-subtle, var(--background-color)); /* Bootstrap 변수 또는 common.css 변수 fallback */
+  padding: 1rem;
+  border-radius: var(--border-radius-md); /* common.css 변수 */
+  box-shadow: var(--box-shadow-light); /* common.css 변수 */
+}
+
+/* 사이드바 내의 폼 요소들 간격 조정 */
+#manualSearchFiltersSidebar .form-check,
+#manualSearchFiltersSidebar .input-group,
+#manualSearchFiltersSidebar .form-select,
+#manualSearchFiltersSidebar .form-control,
+#manualSearchFiltersSidebar #areaSigunguFilters > div,
+#manualSearchFiltersSidebar #currentLocationFilters > div,
+#manualSearchFiltersSidebar .selectable-tag-group {
+  margin-bottom: 1rem;
+}
+
+#manualSearchFiltersSidebar .form-label { /* 사이드바 내 라벨은 더 작게 */
+  font-size: 0.9em;
+  color: var(--secondary-text-color);
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+#manualSearchFiltersSidebar hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-top-color: rgba(var(--text-color-rgb, 75, 53, 42), 0.1); /* common.css --text-color 기반으로 변경 */
+}
+
+/* 직접 검색용 선택 가능 태그 그룹 (카테고리) */
+#manualSearchFiltersSidebar .selectable-tag-group .btn {
+  font-size: 0.85em;
+  border-radius: var(--border-radius-lg); /* 알약 형태 */
+  margin-right: 0.4rem;
+  margin-bottom: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  /* .btn-outline-secondary 스타일은 bootstrap-overrides.css 에서 테마 적용됨 */
+}
+/* 체크된 카테고리 버튼(.btn-check:checked + .btn)은 bootstrap-overrides.css 에서 테마 적용됨 */
+
+
+/* ==========================================================================
+   결과 표시 영역 (직접 검색)
+   ========================================================================== */
+
+/* --- 직접 검색 결과 리스트 컨트롤 --- */
+#resultControlsDirectSearch {
+  background-color: var(--bs-light-bg-subtle, var(--background-color)); /* common.css 변수 fallback */
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius-md); /* common.css 변수 */
+  margin-bottom: 1.5rem;
+  box-shadow: var(--box-shadow-light); /* common.css 변수 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+#resultControlsDirectSearch .fw-bold {
+  color: var(--secondary-text-color); /* common.css 변수 */
+}
+#resultControlsDirectSearch #resultCountDirectSearch {
+  font-size: 0.95em;
+  padding: 0.5em 0.75em;
+  color: var(--text-color); /* primary 버튼 텍스트 색상 */
+  background-color: var(--accent-color); /* common.css 변수, Bootstrap primary 대신 테마색 사용 */
+  /* bootstrap-overrides.css의 --bs-primary 가 이미 --accent-color로 설정되어 있다면, badge bg-primary로도 충분 */
+}
+
+/* --- 직접 검색 결과 리스트 아이템 --- */
+.petty-list-item {
+  background-color: var(--card-bg-color); /* common.css 변수 */
+  border-radius: var(--border-radius-md); /* common.css 변수 */
+  border: 1px solid var(--input-border-color); /* common.css 변수 */
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+  display: flex; /* HTML에서 d-flex로 이미 적용됨 */
+  margin-bottom: 1.5rem; /* HTML에서 mb-3 보다 더 큰 간격 원하면 여기서 조정 */
+  box-shadow: var(--box-shadow-light); /* common.css 변수 */
+}
+.petty-list-item:hover {
+  box-shadow: var(--box-shadow-cute); /* common.css 변수 */
+  transform: translateY(-3px);
+}
+.petty-list-item-img-wrapper {
+  flex: 0 0 180px;
+  max-height: 150px;
+  overflow: hidden;
+  border-top-left-radius: var(--border-radius-md); /* 컨테이너 radius 와 일치 */
+  border-bottom-left-radius: var(--border-radius-md);
+}
+.petty-list-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.petty-list-item-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  flex-grow: 1;
+  overflow: hidden;
+}
+.petty-list-item-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: var(--accent-color); /* common.css 변수 */
+  margin-bottom: 0.3rem;
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  transition: color 0.2s;
+}
+.petty-list-item-title a { /* 링크 색상 및 밑줄 제거 */
+  color: inherit; /* 부모 .petty-list-item-title 의 색상 상속 */
+  text-decoration: none;
+}
+.petty-list-item-title a:hover {
+  color: var(--button-hover-color); /* common.css 변수 */
+}
+.petty-list-item-addr {
+  font-size: 0.9em;
+  color: var(--secondary-text-color); /* common.css 변수 */
+  margin-bottom: 0.5rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.petty-list-item-addr i { /* 아이콘 스타일 (필요시) */
+  margin-right: 0.4em;
+  color: var(--point-color); /* common.css 변수 */
+}
+.petty-list-item-tags .badge {
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-right: 0.4rem;
+  margin-bottom: 0.4rem;
+  padding: 0.4em 0.7em;
+  border-radius: var(--border-radius-sm); /* common.css 변수 */
+  /* Bootstrap .badge, .bg-info, .text-dark, .border 클래스들이 기본 스타일 제공 */
+}
+.petty-list-item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* 버튼들이 같은 너비를 갖도록 */
+  justify-content: center;
+  padding: 1rem;
+  border-left: 1px solid var(--input-border-color); /* common.css 변수 */
+  min-width: 120px; /* 버튼 영역 최소 너비 */
+}
+.petty-list-item-actions .btn {
+  font-size: 0.9em;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+  border-radius: var(--border-radius-sm); /* common.css 변수 */
+  /* .btn-sm, .btn-outline-primary 스타일은 bootstrap 및 bootstrap-overrides.css 따름 */
+}
+.petty-list-item-actions .btn:first-child { margin-top: 0; }
+.petty-list-item-actions .btn:last-child { margin-bottom: 0; }
+
+
+/* ==========================================================================
+   모달 (Map Modal)
+   - Modal 스타일은 bootstrap-overrides.css 에서 테마에 맞게 커스터마이징됩니다.
+   - 이 파일에서는 modal 관련 스타일을 중복 정의하지 않습니다.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   지도 관련
+   ========================================================================== */
+.map-container {
+  width: 100%;
+  /* height: 400px; HTML 인라인 스타일에서 제어 */
+  border: 1px solid var(--input-border-color); /* common.css 변수 */
+  border-radius: var(--border-radius-md); /* common.css 변수 */
+  background-color: #E0E0E0; /* 지도 타일 로드 전 배경색 */
+}
+
+/* Kakao 지도 정보창(infowindow) 스타일 */
+.petty-map-infowindow {
+  padding: 10px 12px !important;
+  font-family: 'HakgyoansimDunggeunmisoTTF-B', sans-serif;
+  font-size: 0.9rem;
+  border-radius: var(--border-radius-sm); /* common.css 변수 */
+  box-shadow: var(--box-shadow-light); /* common.css 변수 */
+  background-color: var(--card-bg-color); /* common.css 변수 */
+  border: none !important;
+  min-width: 180px;
+}
+.petty-map-infowindow .info-title {
+  font-weight: bold;
+  display: block;
+  color: var(--accent-color); /* common.css 변수 */
+  font-size: 1em;
+  margin-bottom: 5px;
+}
+.petty-map-infowindow .info-address {
+  color: var(--secondary-text-color); /* common.css 변수 */
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
+/* 지도에서 위치 선택 입력 필드 (읽기 전용일 때 커서 변경) */
+#manualLocationInput[readonly] {
+  cursor: pointer;
+  background-color: var(--card-bg-color); /* 일반 입력필드와 동일한 배경색 유지 */
+}
